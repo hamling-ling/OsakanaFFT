@@ -4,6 +4,8 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
 
 #if _USE_Q7_8_FIXEDPOINT
 #define FPSHFT		8
@@ -23,7 +25,37 @@ typedef int64_t		FpBigFp_t;
 #define FLOAT2FP(x) ((int)((x) * (1 << FPSHFT)))
 #define FP2INT(x) ((x) >> FPSHFT)
 
-static const Fp_t kMsb = (Fp_t)(1 << (((sizeof(Fp_t) * 8)) - 1));
+#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
+
+void strncpy_s(char *strDest,
+	size_t numberOfElements,
+	const char *strSource,
+	size_t count) {
+	strncpy(strDest, count, numberOfElements);
+}
+
+void strncat_s(
+	char *strDest,
+	size_t numberOfElements,
+	const char *strSource,
+	size_t count
+	) {
+	strncat(strDest, strSource, count);
+}
+
+void _itoa_s(
+	int value,
+	char *buffer,
+	size_t sizeInCharacters,
+	int radix
+	)
+{
+	itoa(value, buffer, radix);
+}
+
+#endif
+
+static const Fp_t kMsb = (Fp_t)(1 << ((sizeof(Fp_t) * 8) -1));
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,7 +123,7 @@ static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 		// Fp ‚Å‚Í¬”•”•ª‚Í2‚Ì•â”•\Œ»‚È‚Ì‚ÅŒ³‚É–ß‚·
 		fractParts = (-a) & FRACT_MASK;
 	}
-	int mainPart = (int)fabsf(af);
+	int mainPart = (int)fabs(af);
 
 	char itoaBuf[33] = { 0 };
 	_itoa_s(mainPart, itoaBuf, sizeof(itoaBuf), 10);
