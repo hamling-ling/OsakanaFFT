@@ -22,7 +22,7 @@ struct _OsakanaFpFftContext_t {
 				// twiddle factor table
 	fp_complex_t** twiddles;
 	// bit reverse index table
-	int* bitReverseIndexTable;
+	uint16_t* bitReverseIndexTable;
 };
 
 // W^n_N = exp(-i2pin/N)
@@ -52,19 +52,19 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 #if defined(USE_HARDCORD_TABLE)
 	ctx->twiddles = s_twiddlesFp;
 #else
-	ctx->twiddles = (fp_complex_t**)malloc(sizeof(fp_complex_t*) * N);
+	ctx->twiddles = (fp_complex_t**)malloc(sizeof(fp_complex_t*) * log2N);
 	if (ctx->twiddles == NULL) {
 		return -2;
-	}
+	}	printf("malloc twiddles %d\n", sizeof(fp_complex_t) * log2N);// debug
 
 	int numAllocated = 0;
 	int itemNum = 1; // 1,2,4,...
-	for (int i = 0; i <= log2N; i++) {
+	for (int i = 0; i < log2N; i++) {
 		ctx->twiddles[i] = (fp_complex_t*)malloc(sizeof(fp_complex_t) * itemNum);
 		if (ctx->twiddles[i] == NULL) {
 			ret = -3;
 			goto exit_error;
-		}
+		}	printf("malloc items %d\n", sizeof(fp_complex_t) * itemNum);// debug
 		numAllocated = i;
 		for (int j = 0; j < itemNum; j++) {
 			ctx->twiddles[i][j] = twiddle(j, 2 << i);
@@ -74,12 +74,12 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	}
 #endif
 
-	ctx->bitReverseIndexTable = (int*)malloc(sizeof(fp_complex_t) * N);
+	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {
 		ret = -4;
-	}
+	}printf("malloc reverse %d\n", sizeof(fp_complex_t) * N);// debug
 	for (int i = 0; i < N; i++) {
-		ctx->bitReverseIndexTable[i] = bitReverse(log2N, i);
+		ctx->bitReverseIndexTable[i] = (uint16_t)bitReverse(log2N, i);
 	}
 	*pctx = ctx;
 
@@ -101,7 +101,7 @@ exit_error:
 
 void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 {
-	for (int i = 0; i < ctx->log2N + 1; i++) {
+	for (int i = 0; i < ctx->log2N; i++) {
 		free(ctx->twiddles[i]);
 		ctx->twiddles[i] = NULL;
 	}
@@ -110,6 +110,8 @@ void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 
 	free(ctx->bitReverseIndexTable);
 	ctx->bitReverseIndexTable = NULL;
+
+	free(ctx);
 }
 
 static inline void fp_butterfly(fp_complex_t* r, const fp_complex_t* tf, int idx_a, int idx_b)
