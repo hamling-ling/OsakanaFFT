@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <memory.h>
 #include <math.h>
 #include <assert.h>
 #include "OsakanaFft.h"
@@ -8,11 +7,12 @@
 // mbed has memset() in mbed.h
 #ifdef __MBED__
 #include <mbed.h>
-#endif
-
 // mbed doesn't have M_PI
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
+#endif
+#else
+#include <memory.h>
 #endif
 
 struct _OsakanaFftContext_t {
@@ -34,15 +34,28 @@ static inline complex_t twiddle(int n, int Nin)
 
 int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 {
+	int ret = 0;
 	OsakanaFftContext_t* ctx = (OsakanaFftContext_t*)malloc(sizeof(OsakanaFftContext_t));
+	if (ctx == NULL) {
+		return -1;
+	}
 
 	memset(ctx, 0, sizeof(OsakanaFftContext_t));
 	ctx->N = N;
 	ctx->log2N = log2N;
 	ctx->twiddles = (complex_t**)malloc(sizeof(complex_t*) * N);
+	if (ctx->twiddles == NULL) {
+		return -2;
+	}
+
+	int numAllocated = 0;
 	int itemNum = 1; // 1,2,4,...
 	for (int i = 0; i <= log2N; i++) {
 		ctx->twiddles[i] = (complex_t*)malloc(sizeof(complex_t) * itemNum);
+		if (ctx->twiddles[i] == NULL) {
+			ret = -3;
+			goto exit_error;
+		}
 		for (int j = 0; j < itemNum; j++) {
 			ctx->twiddles[i][j] = twiddle(j, 2 << i);
 		}
@@ -51,12 +64,28 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	}
 
 	ctx->bitReverseIndexTable = (int*)malloc(sizeof(complex_t) * N);
+	if (ctx->bitReverseIndexTable == NULL) {
+		ret = -4;
+	}
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = bitReverse(log2N, i);
 	}
 	*pctx = ctx;
 
 	return 0;
+
+exit_error:
+#if !defined(USE_HARDCORD_TABLE)
+	for (int i = 0; i < numAllocated; i++) {
+		free(ctx->twiddles[i]);
+		ctx->twiddles[i] = NULL;
+	}
+	free(ctx->twiddles);
+#endif
+	ctx->twiddles = NULL;
+
+	free(ctx->bitReverseIndexTable);
+	return ret;
 }
 
 void CleanOsakanaFft(OsakanaFftContext_t* ctx)
@@ -67,6 +96,7 @@ void CleanOsakanaFft(OsakanaFftContext_t* ctx)
 	}
 	free(ctx->twiddles);
 	ctx->twiddles = NULL;
+
 	free(ctx->bitReverseIndexTable);
 	ctx->bitReverseIndexTable = NULL;
 }

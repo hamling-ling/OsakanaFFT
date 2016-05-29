@@ -1,7 +1,6 @@
 #ifndef _OSAKANAFFTUTIL_H_
 #define _OSAKANAFFTUTIL_H_
 
-//#include <stdint.h>
 #include <inttypes.h>
 
 #ifdef __cplusplus
