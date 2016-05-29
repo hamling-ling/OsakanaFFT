@@ -79,14 +79,15 @@ static inline fp_complex_t fp_complex_l_shift(const fp_complex_t* a, int n)
 static inline char* fp_complex_str(const fp_complex_t* a, char* buf, size_t buf_size)
 {
 	char buf_sub[32] = { '\0' };
-	buf[0] = '\0';
+	memset(buf, 0, buf_size);
 
 	Fp2CStr(a->re, buf_sub, sizeof(buf_sub));
-	strncat_s(buf, buf_size, buf_sub, strlen(buf_sub));
+	StrNCat_S(buf, buf_size, buf_sub, strlen(buf_sub));
 	char* sep = ", ";
-	strncat_s(buf, buf_size, sep, strlen(sep));
+	StrNCat_S(buf, buf_size, sep, strlen(sep));
+
 	Fp2CStr(a->im, buf_sub, sizeof(buf_sub));
-	strncat_s(buf, buf_size, buf_sub, strlen(buf_sub));
+	StrNCat_S(buf, buf_size, buf_sub, strlen(buf_sub));
 
 	return buf;
 }

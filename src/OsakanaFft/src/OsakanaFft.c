@@ -5,6 +5,15 @@
 #include "OsakanaFft.h"
 #include "OsakanaFftUtil.h"
 
+// mbed has memset() in mbed.h
+#ifdef __MBED__
+#include <mbed.h>
+#endif
+
+// mbed doesn't have M_PI
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
 
 struct _OsakanaFftContext_t {
 	int N;

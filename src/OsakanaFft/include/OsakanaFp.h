@@ -25,37 +25,31 @@ typedef int64_t		FpBigFp_t;
 #define FLOAT2FP(x) ((int)((x) * (1 << FPSHFT)))
 #define FP2INT(x) ((x) >> FPSHFT)
 
-#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
-
-void strncpy_s(char *strDest,
-	size_t numberOfElements,
-	const char *strSource,
-	size_t count) {
-	strncpy(strDest, count, numberOfElements);
-}
-
-void strncat_s(
-	char *strDest,
-	size_t numberOfElements,
-	const char *strSource,
-	size_t count
-	) {
-	strncat(strDest, strSource, count);
-}
-
-void _itoa_s(
-	int value,
-	char *buffer,
-	size_t sizeInCharacters,
-	int radix
-	)
+static inline void StrNCpy_S(	char *strDest,
+								size_t numberOfElements,
+								const char *strSource,
+								int count)
 {
-	itoa(value, buffer, radix);
+#if !defined(_MSC_VER )
+	strncpy(strDest, strSource, count);
+#else
+	strncpy_s(strDest, numberOfElements, strSource, count);
+#endif
 }
 
+static inline void StrNCat_S(	char *strDest,
+								size_t numberOfElements,
+								const char *strSource,
+								uint32_t count
+)
+{
+#if !defined(_MSC_VER )
+	strncat(strDest, strSource, count);
+#else
+	strncat_s(strDest, numberOfElements, strSource, count);
 #endif
+}
 
-static const Fp_t kMsb = (Fp_t)(1 << ((sizeof(Fp_t) * 8) -1));
 
 #ifdef __cplusplus
 extern "C" {
@@ -115,29 +109,29 @@ static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 	float af = Fp2Float(a);
 	Fp_t fractParts = a & FRACT_MASK;
 
-	buf[0] = '\0';
-	if (a&kMsb) {
+	memset(buf, 0, buf_size);
+	if (a < 0) {
 		char* cat = "-";
-		strncpy_s(buf, buf_size, cat, strlen(cat));
+		StrNCpy_S(buf, buf_size, cat, strlen(cat));
 
 		// Fp ‚Å‚Í¬”•”•ª‚Í2‚Ì•â”•\Œ»‚È‚Ì‚ÅŒ³‚É–ß‚·
 		fractParts = (-a) & FRACT_MASK;
 	}
 	int mainPart = (int)fabs(af);
 
-	char itoaBuf[33] = { 0 };
-	_itoa_s(mainPart, itoaBuf, sizeof(itoaBuf), 10);
-	strncat_s(buf, buf_size, itoaBuf, strlen(itoaBuf));
+	char itoaBuf[8] = { 0 };
+	snprintf(itoaBuf, sizeof(itoaBuf), "%d", mainPart);
+	StrNCat_S(buf, buf_size, itoaBuf, strlen(itoaBuf));
 
 	char* cat = ".";
-	strncat_s(buf, buf_size, cat, strlen(cat));
+	StrNCat_S(buf, buf_size, cat, strlen(cat));
 
 	while (fractParts > 0) {
 		fractParts *= 10;
 		int num = (fractParts >> FPSHFT);
 		
-		_itoa_s(num, itoaBuf, sizeof(itoaBuf), 10);
-		strncat_s(buf, buf_size, itoaBuf, strlen(itoaBuf));
+		snprintf(itoaBuf, sizeof(itoaBuf), "%d", num);
+		StrNCat_S(buf, buf_size, itoaBuf, strlen(itoaBuf));
 
 		fractParts &= FRACT_MASK;
 	}

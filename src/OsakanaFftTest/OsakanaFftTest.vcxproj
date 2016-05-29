@@ -93,6 +93,7 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;$(SolutionDir)OsakanaFft\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,6 +127,7 @@
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;$(SolutionDir)OsakanaFft\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
