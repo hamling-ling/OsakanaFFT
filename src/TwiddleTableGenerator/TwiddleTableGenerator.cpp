@@ -39,7 +39,7 @@ void PrintTable1()
 	std::cout.precision(16);
 	std::cout.setf(std::ios::fixed, std::ios::floatfield);
 	for (int N = 2; N <= N_MAX; N = N << 1) {
-		cout << "static fp_complex_t W";
+		cout << "static const fp_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {

@@ -1,9 +1,9 @@
 #include <assert.h>
 #include "OsakanaFpFft.h"
 #include "OsakanaFftUtil.h"
-#define USE_HARDCORD_TABLE
 #if defined(USE_HARDCORD_TABLE)
 #include "twiddletable.h"
+#include "bitreversetable.h"
 #else
 #include "OsakanaFftUtil.h"
 #endif
@@ -20,10 +20,17 @@
 struct _OsakanaFpFftContext_t {
 	int N;		// num of samples
 	int log2N;	// log2(N)
+
+#if defined(USE_HARDCORD_TABLE)
 	// twiddle factor table
 	const fp_complex_t* twiddles;
 	// bit reverse index table
+	const uint16_t* bitReverseIndexTable;
+#else
+	fp_complex_t* twiddles;
 	uint16_t* bitReverseIndexTable;
+#endif
+
 };
 
 // W^n_N = exp(-i2pin/N)
@@ -52,6 +59,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 
 #if defined(USE_HARDCORD_TABLE)
 	ctx->twiddles = s_twiddlesFp;
+	ctx->bitReverseIndexTable = s_bitReverse1024;
 #else
 	ctx->twiddles = (fp_complex_t*)malloc(sizeof(fp_complex_t) * N/2);
 	if (ctx->twiddles == NULL) {
@@ -61,7 +69,6 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	for (int j = 0; j < N/2; j++) {
 		ctx->twiddles[j] = twiddle(j, N);
 	}
-#endif
 
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {
@@ -71,6 +78,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = (uint16_t)bitReverse(log2N, i);
 	}
+#endif
 	*pctx = ctx;
 
 	return 0;
@@ -87,10 +95,9 @@ void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 {
 #if !defined(USE_HARDCORD_TABLE)
 	free(ctx->twiddles);
+	free(ctx->bitReverseIndexTable);
 #endif
 	ctx->twiddles = NULL;
-
-	free(ctx->bitReverseIndexTable);
 	ctx->bitReverseIndexTable = NULL;
 
 	free(ctx);
@@ -124,6 +131,11 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_
 			int idx_a = j;
 			int idx_b = j + bnum;
 			for (int k = 0; k < bnum; k++) {
+
+				// shift to avoid overflow
+				//F[idx_a] = fp_complex_r_shift(&F[idx_a], 1);
+				//F[idx_b] = fp_complex_r_shift(&F[idx_b], 1);
+
 				int tw_idx = k << tw_idx_shift;
 				fp_complex_t tf = ctx->twiddles[tw_idx];
 				fp_butterfly(&F[0], &tf, idx_a++, idx_b++);

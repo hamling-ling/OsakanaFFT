@@ -3,6 +3,9 @@
 #include <assert.h>
 #include "OsakanaFft.h"
 #include "OsakanaFftUtil.h"
+#if defined(USE_HARDCORD_TABLE)
+#include "bitreversetable.h"
+#endif
 
 // mbed has memset() in mbed.h
 #ifdef __MBED__
@@ -20,8 +23,12 @@ struct _OsakanaFftContext_t {
 	int log2N;
 	// twiddle factor table
 	complex_t* twiddles;
+#if defined(USE_HARDCORD_TABLE)
 	// bit reverse index table
+	const uint16_t* bitReverseIndexTable;
+#else
 	uint16_t* bitReverseIndexTable;
+#endif
 };
 
 // W^n_N = exp(-i2pin/N)
@@ -52,6 +59,9 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 		ctx->twiddles[j] = twiddle(j, N);
 	}
 
+#if defined(USE_HARDCORD_TABLE)
+	ctx->bitReverseIndexTable = s_bitReverse1024;
+#else
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {
 		ret = -3;
@@ -60,6 +70,7 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = bitReverse(log2N, i);
 	}
+#endif
 	*pctx = ctx;
 
 	return 0;
@@ -77,7 +88,9 @@ void CleanOsakanaFft(OsakanaFftContext_t* ctx)
 	free(ctx->twiddles);
 	ctx->twiddles = NULL;
 
+#if !defined(USE_HARDCORD_TABLE)
 	free(ctx->bitReverseIndexTable);
+#endif
 	ctx->bitReverseIndexTable = NULL;
 
 	free(ctx);

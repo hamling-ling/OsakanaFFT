@@ -9,8 +9,8 @@
 #define N		1024	// num of samples
 #define log2N	10	// log2(N)
 #else
-#define N		256	// num of samples, 8, 16, 32, 64, 128, 256, 512...
-#define log2N	8	// log2(N)         3,  4,  5,  6,   7,   8,   9
+#define N		32	// num of samples, 8, 16, 32, 64, 128, 256, 512...
+#define log2N	5	// log2(N)         3,  4,  5,  6,   7,   8,   9
 #endif
 
 using namespace std;
