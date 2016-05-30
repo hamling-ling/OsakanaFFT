@@ -26,7 +26,7 @@ static inline complex_t twiddle(int n, int Nin)
 	return MakeComplex(cos(theta), -sin(theta));
 }
 
-int main()
+void PrintTable1()
 {
 	int N_MAX = 1024;
 
@@ -42,8 +42,8 @@ int main()
 		cout << "static fp_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
-		for (int i = 0; i < N/2; i++) {
-			
+		for (int i = 0; i < N / 2; i++) {
+
 			complex_t tf = twiddle(i, N);
 			cout << "\t{ ";
 			cout << "FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
@@ -67,6 +67,38 @@ int main()
 	cout << "};" << endl << endl;
 
 	cout << "#endif" << endl;
+}
+
+void PrintTable2()
+{
+	int N = 1024;
+
+	cout << "#ifndef _TWIDLLETABLE_H" << endl;
+	cout << "#define _TWIDLLETABLE_H" << endl;
+	cout << endl;
+	cout << "#include \"OsakanaFp.h\"" << endl;
+	cout << "#include \"OsakanaFpComplex.h\"" << endl << endl;
+
+	std::cout.precision(16);
+	std::cout.setf(std::ios::fixed, std::ios::floatfield);
+	cout << "static const fp_complex_t s_twiddlesFp[] = {" << endl;
+	for (int i = 0; i < N / 2; i++) {
+
+		complex_t tf = twiddle(i, N);
+		cout << "\t{ FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
+		if (i + 1 < N / 2) {
+			cout << ",";
+		}
+		cout << endl;
+	}
+	cout << "};" << endl << endl;
+
+	cout << "#endif" << endl;
+}
+
+int main()
+{
+	PrintTable2();
 
 	return 0;
 }

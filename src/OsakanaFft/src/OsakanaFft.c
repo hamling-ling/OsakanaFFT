@@ -19,7 +19,7 @@ struct _OsakanaFftContext_t {
 	int N;
 	int log2N;
 	// twiddle factor table
-	complex_t** twiddles;
+	complex_t* twiddles;
 	// bit reverse index table
 	uint16_t* bitReverseIndexTable;
 };
@@ -43,24 +43,12 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	memset(ctx, 0, sizeof(OsakanaFftContext_t));
 	ctx->N = N;
 	ctx->log2N = log2N;
-	ctx->twiddles = (complex_t**)malloc(sizeof(complex_t*) * log2N);
+	ctx->twiddles = (complex_t*)malloc(sizeof(complex_t*) * N/2);
 	if (ctx->twiddles == NULL) {
 		return -2;
 	}
-
-	int numAllocated = 0;
-	int itemNum = 1; // 1,2,4,...
-	for (int i = 0; i <= log2N; i++) {
-		ctx->twiddles[i] = (complex_t*)malloc(sizeof(complex_t) * itemNum);
-		if (ctx->twiddles[i] == NULL) {
-			ret = -3;
-			goto exit_error;
-		}
-		for (int j = 0; j < itemNum; j++) {
-			ctx->twiddles[i][j] = twiddle(j, 2 << i);
-		}
-
-		itemNum = itemNum << 1;
+	for (int j = 0; j < N / 2; j++) {
+		ctx->twiddles[j] = twiddle(j, N);
 	}
 
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
@@ -75,25 +63,16 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	return 0;
 
 exit_error:
-#if !defined(USE_HARDCORD_TABLE)
-	for (int i = 0; i < numAllocated; i++) {
-		free(ctx->twiddles[i]);
-		ctx->twiddles[i] = NULL;
-	}
 	free(ctx->twiddles);
-#endif
 	ctx->twiddles = NULL;
 
 	free(ctx->bitReverseIndexTable);
+	ctx->bitReverseIndexTable = NULL;
 	return ret;
 }
 
 void CleanOsakanaFft(OsakanaFftContext_t* ctx)
 {
-	for (int i = 0; i < ctx->log2N; i++) {
-		free(ctx->twiddles[i]);
-		ctx->twiddles[i] = NULL;
-	}
 	free(ctx->twiddles);
 	ctx->twiddles = NULL;
 
@@ -124,6 +103,7 @@ void OsakanaFft(const OsakanaFftContext_t* ctx, complex_t* f, complex_t* F)
 
 	int dj = 2;
 	int bnum = 1; // number of butterfly in 2nd loop
+	int tw_idx_shift = ctx->log2N - 1;
 
 	for (int i = 0; i < ctx->log2N; i++) {
 		// j = 0,2,4,6
@@ -137,12 +117,14 @@ void OsakanaFft(const OsakanaFftContext_t* ctx, complex_t* f, complex_t* F)
 				//complex_t tf = twiddle(k, dj);
 				//butterfly(&f[0], &tf, idx_a++, idx_b++);
 
-				complex_t tf = ctx->twiddles[i][k];
+				int tw_idx = k << tw_idx_shift;
+				complex_t tf = ctx->twiddles[tw_idx];
 				butterfly(&F[0], &tf, idx_a++, idx_b++);
 			}
 		}
 		dj = dj << 1;
 		bnum = bnum << 1;
+		tw_idx_shift--;
 	}
 }
 
@@ -155,6 +137,7 @@ void OsakanaIfft(const OsakanaFftContext_t* ctx, complex_t* F, complex_t* f)
 
 	int dj = 2;
 	int bnum = 1;
+	int tw_idx_shift = ctx->log2N - 1;
 
 	for (int i = 0; i < ctx->log2N; i++) {
 		for (int j = 0; j < ctx->N; j += dj) {
@@ -166,13 +149,15 @@ void OsakanaIfft(const OsakanaFftContext_t* ctx, complex_t* F, complex_t* f)
 				tf.im = -tf.im;
 				butterfly(&f[0], &tf, idx_a++, idx_b++);*/
 
-				complex_t tf = ctx->twiddles[i][k];
+				int tw_idx = k << tw_idx_shift;
+				complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 				butterfly(&f[0], &tf, idx_a++, idx_b++);
 			}
 		}
 		dj = dj << 1;
 		bnum = bnum << 1;
+		tw_idx_shift--;
 	}
 
 	for (int i = 0; i < ctx->N; i++) {
