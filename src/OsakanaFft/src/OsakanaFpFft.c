@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "OsakanaFpFft.h"
 #include "OsakanaFftUtil.h"
+#define USE_HARDCORD_TABLE
 #if defined(USE_HARDCORD_TABLE)
 #include "twiddletable.h"
 #else
@@ -12,7 +13,7 @@
 #include <mbed.h>
 // mbed doesn't have M_PI
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI           3.14159265358979323846f
 #endif
 #endif
 
@@ -20,7 +21,7 @@ struct _OsakanaFpFftContext_t {
 	int N;		// num of samples
 	int log2N;	// log2(N)
 	// twiddle factor table
-	fp_complex_t* twiddles;
+	const fp_complex_t* twiddles;
 	// bit reverse index table
 	uint16_t* bitReverseIndexTable;
 };
@@ -29,10 +30,10 @@ struct _OsakanaFpFftContext_t {
 // = cos(2 pi n/N) - isin(2 pi n/N)
 static inline fp_complex_t twiddle(int n, int Nin)
 {
-	float theta = 2.0f*M_PI*n / Nin;
+	float theta = (float)(2.0f*M_PI*n / Nin);
 	fp_complex_t ret;
-	ret.re = Float2Fp(cos(theta));
-	ret.im = Float2Fp(-sin(theta));
+	ret.re = Float2Fp((float)cos(theta));
+	ret.im = Float2Fp((float)-sin(theta));
 
 	return ret;
 }
@@ -65,6 +66,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {
 		ret = -4;
+		goto exit_error;
 	}printf("malloc reverse %d\n", sizeof(fp_complex_t) * N);// debug
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = (uint16_t)bitReverse(log2N, i);
@@ -74,19 +76,18 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	return 0;
 
 exit_error:
-#if !defined(USE_HARDCORD_TABLE)
-	free(ctx->twiddles);
-#endif
-	ctx->twiddles = NULL;
+	CleanOsakanaFpFft(ctx);
+	ctx = NULL;
+	*pctx = NULL;
 
-	free(ctx->bitReverseIndexTable);
-	ctx->bitReverseIndexTable = NULL;
 	return ret;
 }
 
 void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 {
+#if !defined(USE_HARDCORD_TABLE)
 	free(ctx->twiddles);
+#endif
 	ctx->twiddles = NULL;
 
 	free(ctx->bitReverseIndexTable);

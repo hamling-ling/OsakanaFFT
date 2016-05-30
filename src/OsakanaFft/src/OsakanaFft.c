@@ -9,7 +9,7 @@
 #include <mbed.h>
 // mbed doesn't have M_PI
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI           3.14159265358979323846f
 #endif
 #else
 #include <memory.h>
@@ -28,8 +28,8 @@ struct _OsakanaFftContext_t {
 // = cos(2 pi n/N) - isin(2 pi n/N)
 static inline complex_t twiddle(int n, int Nin)
 {
-	float theta = 2.0f*M_PI*n / Nin;
-	return MakeComplex(cos(theta), -sin(theta));
+	float theta = (float)(2.0f*M_PI*n / Nin);
+	return MakeComplex((float)cos(theta), (float)-sin(theta));
 }
 
 int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
@@ -45,7 +45,8 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	ctx->log2N = log2N;
 	ctx->twiddles = (complex_t*)malloc(sizeof(complex_t*) * N/2);
 	if (ctx->twiddles == NULL) {
-		return -2;
+		ret = -2;
+		goto exit_error;
 	}
 	for (int j = 0; j < N / 2; j++) {
 		ctx->twiddles[j] = twiddle(j, N);
@@ -53,7 +54,8 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {
-		ret = -4;
+		ret = -3;
+		goto exit_error;
 	}
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = bitReverse(log2N, i);
@@ -63,11 +65,10 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	return 0;
 
 exit_error:
-	free(ctx->twiddles);
-	ctx->twiddles = NULL;
+	CleanOsakanaFft(ctx);
+	ctx = NULL;
+	*pctx = NULL;
 
-	free(ctx->bitReverseIndexTable);
-	ctx->bitReverseIndexTable = NULL;
 	return ret;
 }
 

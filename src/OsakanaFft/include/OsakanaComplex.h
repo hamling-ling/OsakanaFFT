@@ -3,6 +3,8 @@
 
 #ifdef __MBED__
 #include <mbed.h>
+#else
+#include <stdio.h>
 #endif
 
 #ifdef __cplusplus
