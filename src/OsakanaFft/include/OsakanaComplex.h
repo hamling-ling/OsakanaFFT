@@ -14,49 +14,49 @@ extern "C" {
 typedef struct {
 	float re;
 	float im;
-} complex_t;
+} osk_complex_t;
 
-static inline complex_t MakeComplex(float re, float im)
+static inline osk_complex_t MakeComplex(float re, float im)
 {
-	complex_t complex;
+	osk_complex_t complex;
 	complex.re = re;
 	complex.im = im;
 	return complex;
 }
 
-static inline complex_t complex_add(const complex_t* a, const complex_t* b)
+static inline osk_complex_t complex_add(const osk_complex_t* a, const osk_complex_t* b)
 {
-	complex_t x;
+	osk_complex_t x;
 	x.re = a->re + b->re;
 	x.im = a->im + b->im;
 	return x;
 }
 
-static inline complex_t complex_sub(const complex_t* a, const complex_t* b)
+static inline osk_complex_t complex_sub(const osk_complex_t* a, const osk_complex_t* b)
 {
-	complex_t x;
+	osk_complex_t x;
 	x.re = a->re - b->re;
 	x.im = a->im - b->im;
 	return x;
 }
 
-static inline complex_t complex_mult(const complex_t* a, const complex_t* b)
+static inline osk_complex_t complex_mult(const osk_complex_t* a, const osk_complex_t* b)
 {
-	complex_t x;
+	osk_complex_t x;
 	x.re = a->re * b->re - a->im * b->im;
 	x.im = a->re * b->im + a->im * b->re;
 	return x;
 }
 
-static inline void complex_swap(complex_t* a, complex_t* b)
+static inline void complex_swap(osk_complex_t* a, osk_complex_t* b)
 {
-	complex_t temp = *a;
+	osk_complex_t temp = *a;
 	a->re = b->re;
 	a->im = b->im;
 	*b = temp;
 }
 
-static inline char* complex_str(const complex_t* a, char* buf, size_t buf_size)
+static inline char* complex_str(const osk_complex_t* a, char* buf, size_t buf_size)
 {
 	snprintf(buf, buf_size, "%f, %f", a->re, a->im);
 

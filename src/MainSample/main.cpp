@@ -17,9 +17,9 @@ using namespace std;
 
 void testIfft()
 {
-	complex_t f[N]  = { { 0.0f, 0.0f } };
-	complex_t F[N]  = { { 0.0f, 0.0f } };
-	complex_t f2[N] = { { 0.0f, 0.0f } };
+	osk_complex_t f[N]  = { { 0.0f, 0.0f } };
+	osk_complex_t F[N]  = { { 0.0f, 0.0f } };
+	osk_complex_t f2[N] = { { 0.0f, 0.0f } };
 
 	for (int i = 0; i < N; i++) {
 		f[i].re = (float)sin(0.3 * i * 2.0 * M_PI / N);
@@ -51,9 +51,9 @@ void testIfft()
 
 void testFpIfft()
 {
-	fp_complex_t x[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t x[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
 	char buf[128] = { 0 };// debug
 
@@ -92,9 +92,9 @@ void benchFft()
 {
 	StopWatch<std::chrono::milliseconds> sw;
 
-	fp_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
 	for (int i = 0; i < N; i++) {
 		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
@@ -118,9 +118,9 @@ void benchFpFft()
 {
 	StopWatch<std::chrono::milliseconds> sw;
 
-	fp_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	osk_fp_osk_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
 	for (int i = 0; i < N; i++) {
 		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
@@ -146,9 +146,9 @@ int main()
 	//char buf[64] = { 0 };
 	//cout << Fp2CStr(FLOAT2FP(0.0), buf, sizeof(buf));
 	//testFft();
-	testIfft();
+	//testIfft();
 	//testFpFft();
-	//testFpIfft();
+	testFpIfft();
 	//benchFft();
 	//benchFpFft();
 

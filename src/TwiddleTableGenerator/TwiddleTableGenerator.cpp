@@ -10,17 +10,17 @@ using namespace std;
 typedef struct {
 	double re;
 	double im;
-} complex_t;
+} osk_complex_t;
 
-static inline complex_t MakeComplex(double re, double im)
+static inline osk_complex_t MakeComplex(double re, double im)
 {
-	complex_t complex;
+	osk_complex_t complex;
 	complex.re = re;
 	complex.im = im;
 	return complex;
 }
 
-static inline complex_t twiddle(int n, int Nin)
+static inline osk_complex_t twiddle(int n, int Nin)
 {
 	double theta = 2.0f*M_PI*n / Nin;
 	return MakeComplex(cos(theta), -sin(theta));
@@ -39,12 +39,12 @@ void PrintTable1()
 	std::cout.precision(16);
 	std::cout.setf(std::ios::fixed, std::ios::floatfield);
 	for (int N = 2; N <= N_MAX; N = N << 1) {
-		cout << "static const fp_complex_t W";
+		cout << "static const osk_fp_osk_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {
 
-			complex_t tf = twiddle(i, N);
+			osk_complex_t tf = twiddle(i, N);
 			cout << "\t{ ";
 			cout << "FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
 			if (i + 1 < N / 2) {
@@ -55,7 +55,7 @@ void PrintTable1()
 		cout << "};" << endl << endl;
 	}
 
-	cout << "static const fp_complex_t* s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_osk_complex_t* s_twiddlesFp[] = {" << endl;
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "\tW";
 		cout << setw(4) << std::setfill('0') << N;
@@ -81,10 +81,10 @@ void PrintTable2()
 
 	std::cout.precision(16);
 	std::cout.setf(std::ios::fixed, std::ios::floatfield);
-	cout << "static const fp_complex_t s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_osk_complex_t s_twiddlesFp[] = {" << endl;
 	for (int i = 0; i < N / 2; i++) {
 
-		complex_t tf = twiddle(i, N);
+		osk_complex_t tf = twiddle(i, N);
 		cout << "\t{ FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
 		if (i + 1 < N / 2) {
 			cout << ",";
@@ -123,12 +123,12 @@ void PrintTable3()
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		
-		cout << "static const fp_complex_t W";
+		cout << "static const osk_fp_osk_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {
 
-			complex_t tf = twiddle(i, N);
+			osk_complex_t tf = twiddle(i, N);
 			cout << "\t{ ";
 			cout << "FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
 			if (i + 1 < N / 2) {
@@ -140,7 +140,7 @@ void PrintTable3()
 		cout << "#endif" << endl << endl;
 	}
 
-	cout << "static const fp_complex_t* s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_osk_complex_t* s_twiddlesFp[] = {" << endl;
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		cout << "\tW";
