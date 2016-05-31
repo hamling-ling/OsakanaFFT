@@ -3,5 +3,5 @@
 
 #define USE_HARDCORD_TABLE
 #define _USE_Q7_8_FIXEDPOINT
-
+//#define _USE_Q1_14_FIXEDPOINT
 #endif

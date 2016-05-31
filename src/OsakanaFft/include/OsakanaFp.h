@@ -12,11 +12,16 @@
 typedef int16_t		Fp_t;
 typedef uint8_t		FpFract_t;
 typedef int32_t		FpBigFp_t;
+#elif defined(_USE_Q1_14_FIXEDPOINT)
+#define FPSHFT		14
+typedef int16_t		Fp_t;
+typedef uint16_t	FpFract_t;
+typedef int32_t		FpBigFp_t;
 #else // otherwise Q15.16
 #define FPSHFT		16
 typedef int32_t		Fp_t;
 typedef uint16_t	FpFract_t;
-typedef int64_t		FpBigFp_t;
+typedef int64_t		FpBigFp_t;2000
 #endif
 
 #define FPONE	(1 << FPSHFT)
@@ -107,7 +112,8 @@ static inline Fp_t FpLShift(Fp_t a, int n)
 static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 {
 	float af = Fp2Float(a);
-	Fp_t fractParts = a & FRACT_MASK;
+	uint16_t mask = FRACT_MASK;
+	FpBigFp_t fractParts = a & FRACT_MASK;
 
 	memset(buf, 0, buf_size);
 	if (a < 0) {
@@ -141,7 +147,7 @@ static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 static inline char* Fp2HexCStr(Fp_t a, char* buf, const size_t buf_size)
 {
 	if (sizeof(Fp_t) <= 16) {
-		snprintf(buf, buf_size, "0x%0*hu", 2 * sizeof(Fp_t) / 8, a);
+		snprintf(buf, buf_size, "0x%04x", a);
 	}
 	else {
 		snprintf(buf, buf_size, "0x%0*x", 2 * sizeof(Fp_t) / 8, a);

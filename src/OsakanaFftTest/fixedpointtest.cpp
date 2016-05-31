@@ -54,7 +54,7 @@ namespace OsakanaFftTest
 			// +float to fp
 			f = x;
 			c = Float2Fp(f);
-			ss << "float " << f << " = aFp " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
+			ss << "float " << f << " = Fp " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
 			outputLog(ss);
 
 			// +float to fp
