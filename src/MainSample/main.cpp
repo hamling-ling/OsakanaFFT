@@ -49,11 +49,10 @@ void testIfft()
 	CleanOsakanaFft(ctx);
 }
 
-
-void testWhatTheHell()
+void testFpIfft()
 {
 	fp_complex_t x[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	fp_complex_t f1[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
+	fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 	fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
 	char buf[128] = { 0 };// debug
@@ -65,9 +64,6 @@ void testWhatTheHell()
 		x[i].im = Float2Fp(im);
 	}
 
-	memcpy(f1, x, sizeof(f1));
-	memcpy(f2, x, sizeof(f2));
-
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
 		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
@@ -76,56 +72,16 @@ void testWhatTheHell()
 	OsakanaFpFftContext_t* ctx = NULL;
 	InitOsakanaFpFft(&ctx, N, log2N);
 
-	OsakanaFpFft(ctx, &f1[0], 1);
+	OsakanaFpFft(ctx, &x[0], &F[0], 1);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&f1[i], buf, sizeof(buf)) << endl;
+		cout << fp_complex_str(&F[i], buf, sizeof(buf)) << endl;
 	}
 
-	OsakanaFpFftOld(ctx, &x[0], &f2[0], 1);
+	OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
 		cout << fp_complex_str(&f2[i], buf, sizeof(buf)) << endl;
-	}
-
-	CleanOsakanaFpFft(ctx);
-}
-
-void testFpIfft()
-{
-	fp_complex_t x[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	//fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	//fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	//fp_complex_t* F = f;
-	//fp_complex_t* f2 = f;
-
-	char buf[128] = { 0 };// debug
-
-	for (int i = 0; i < N; i++) {
-		float re = (float)sin(3.5 * i * 2.0 * M_PI / N);
-		float im = 0.0f;
-		x[i].re = Float2Fp(re);
-		x[i].im = Float2Fp(im);
-	}
-
-	cout << "--" << endl;
-	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
-	}
-
-	OsakanaFpFftContext_t* ctx = NULL;
-	InitOsakanaFpFft(&ctx, N, log2N);
-
-	OsakanaFpFft(ctx, &x[0], 1);
-	cout << "--" << endl;
-	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
-	}
-
-	OsakanaFpIfft(ctx, &x[0], 1);
-	cout << "--" << endl;
-	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
 
 	CleanOsakanaFpFft(ctx);
@@ -190,12 +146,11 @@ int main()
 	//char buf[64] = { 0 };
 	//cout << Fp2CStr(FLOAT2FP(0.0), buf, sizeof(buf));
 	//testFft();
-	//testIfft();
+	testIfft();
 	//testFpFft();
 	//testFpIfft();
 	//benchFft();
 	//benchFpFft();
-	testWhatTheHell();
 
 	return 0;
 }

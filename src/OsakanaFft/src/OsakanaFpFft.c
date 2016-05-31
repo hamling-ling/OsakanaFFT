@@ -132,47 +132,10 @@ static inline void fp_butterfly(fp_complex_t* r, const fp_complex_t* tf, int idx
 	//printf("r[idx_b]=%s\n", buf);
 }
 
-void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* x, int scale)
-{
-	for (int i = 0; i < ctx->N/2; i++) {
-		int ridx = ctx->bitReverseIndexTable[i];
-		fp_complex_swap(&x[i], &x[ridx]);
-	}
-
-	int dj = 2;
-	int bnum = 1;
-	int tw_idx_shift = ctx->log2N - 1;
-
-	for (int i = 0; i < ctx->log2N; i++) {
-		for (int j = 0; j < ctx->N; j += dj) {
-			int idx_a = j;
-			int idx_b = j + bnum;
-			for (int k = 0; k < bnum; k++) {
-
-				int tw_idx = k << tw_idx_shift;
-				fp_complex_t tf = ctx->twiddles[tw_idx];
-
-				fp_butterfly(&x[0], &tf, idx_a, idx_b);
-
-				// shift to avoid overflow
-				x[idx_a] = fp_complex_r_shift(&x[idx_a], scale);
-				x[idx_b] = fp_complex_r_shift(&x[idx_b], scale);
-
-				idx_a++;
-				idx_b++;
-			}
-		}
-		dj = dj << 1;
-		bnum = bnum << 1;
-		tw_idx_shift--;
-	}
-}
-
-// old one
-void OsakanaFpFftOld(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_t* F, int scale)
+void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_t* F, int scale)
 {
 	for (int i = 0; i < ctx->N; i++) {
-	int ridx = ctx->bitReverseIndexTable[i];
+		int ridx = ctx->bitReverseIndexTable[i];
 		F[i] = f[ridx];
 	}
 
@@ -204,16 +167,13 @@ void OsakanaFpFftOld(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_compl
 	}
 }
 
-void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, fp_complex_t* x, int scale)
+void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, fp_complex_t* F, fp_complex_t* f, int scale)
 {
-	/*for (int i = 0; i < ctx->N; i++) {
+	for (int i = 0; i < ctx->N; i++) {
 		int ridx = ctx->bitReverseIndexTable[i];
 		f[i] = F[ridx];
-	}*/
-	for (int i = 0; i < ctx->N/2; i++) {
-		int ridx = ctx->bitReverseIndexTable[i];
-		fp_complex_swap(&x[i], &x[ridx]);
 	}
+
 	int dj = 2;
 	int bnum = 1;
 	int tw_idx_shift = ctx->log2N - 1;
@@ -229,11 +189,11 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, fp_complex_t* x, int scale)
 				fp_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 
-				fp_butterfly(&x[0], &tf, idx_a, idx_b);
+				fp_butterfly(&f[0], &tf, idx_a, idx_b);
 
 				// div f[idx_a] by 2 instead of div by N end of func
-				x[idx_a] = fp_complex_l_shift(&x[idx_a], 1 - scale);
-				x[idx_b] = fp_complex_l_shift(&x[idx_b], 1 - scale);
+				f[idx_a] = fp_complex_l_shift(&f[idx_a], 1 - scale);
+				f[idx_b] = fp_complex_l_shift(&f[idx_b], 1 - scale);
 
 				idx_a++;
 				idx_b++;
