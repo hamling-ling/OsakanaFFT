@@ -96,9 +96,75 @@ void PrintTable2()
 	cout << "#endif" << endl;
 }
 
+void PrintTable3()
+{
+	int N_MAX = 1024;
+
+	cout << "#ifndef _TWIDLLETABLE_H" << endl;
+	cout << "#define _TWIDLLETABLE_H" << endl;
+	cout << endl;
+	cout << "#include \"OsakanaFp.h\"" << endl;
+	cout << "#include \"OsakanaFpComplex.h\"" << endl << endl;
+
+	cout << "#define USE_TWIDDLE_TABLE_N2" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N4" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N8" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N16" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N32" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N64" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N128" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N256" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N512" << endl;
+	cout << "#define USE_TWIDDLE_TABLE_N1024" << endl;
+	cout << endl;
+
+	std::cout.precision(16);
+	std::cout.setf(std::ios::fixed, std::ios::floatfield);
+	for (int N = 2; N <= N_MAX; N = N << 1) {
+		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
+		
+		cout << "static const fp_complex_t W";
+		cout << setw(4) << std::setfill('0') << N;
+		cout << "[] = {" << endl;
+		for (int i = 0; i < N / 2; i++) {
+
+			complex_t tf = twiddle(i, N);
+			cout << "\t{ ";
+			cout << "FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
+			if (i + 1 < N / 2) {
+				cout << ",";
+			}
+			cout << endl;
+		}
+		cout << "};" << endl;
+		cout << "#endif" << endl << endl;
+	}
+
+	cout << "static const fp_complex_t* s_twiddlesFp[] = {" << endl;
+	for (int N = 2; N <= N_MAX; N = N << 1) {
+		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
+		cout << "\tW";
+		cout << setw(4) << std::setfill('0') << N;
+		if (N << 1 <= N_MAX) {
+			cout << ",";
+		}
+		cout << endl;
+		cout << "#else" << endl;
+		cout << "\tNULL";
+		if (N << 1 <= N_MAX) {
+			cout << ",";
+		}
+		cout << endl;
+		cout << "#endif" << endl;
+	}
+	cout << "};" << endl << endl;
+
+	cout << "#endif" << endl;
+}
+
 int main()
 {
-	PrintTable2();
+	PrintTable3();
 
 	return 0;
 }

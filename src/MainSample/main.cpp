@@ -95,7 +95,7 @@ void testFpIfft()
 	fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 	fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
-	char buf[64] = { 0 };// debug
+	char buf[128] = { 0 };// debug
 
 	for (int i = 0; i < N; i++) {
 		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
@@ -183,9 +183,9 @@ int main()
 	//char buf[64] = { 0 };
 	//cout << Fp2CStr(FLOAT2FP(0.0), buf, sizeof(buf));
 	//testFft();
-	testIfft();
+	//testIfft();
 	//testFpFft();
-	//testFpIfft();
+	testFpIfft();
 	//benchFft();
 	//benchFpFft();
 

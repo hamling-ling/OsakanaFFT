@@ -128,6 +128,12 @@ void OsakanaFft(const OsakanaFftContext_t* ctx, complex_t* f, complex_t* F)
 			int idx_b = j + bnum;
 			for (int k = 0; k < bnum; k++) {
 
+				/*F[idx_a].re /= 2.0;
+				F[idx_a].im /= 2.0;
+				F[idx_b].re /= 2.0;
+				F[idx_b].im /= 2.0;
+				*/
+
 				//complex_t tf = twiddle(k, dj);
 				//butterfly(&f[0], &tf, idx_a++, idx_b++);
 

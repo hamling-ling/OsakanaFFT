@@ -58,7 +58,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	ctx->log2N = log2N;
 
 #if defined(USE_HARDCORD_TABLE)
-	ctx->twiddles = s_twiddlesFp;
+	ctx->twiddles = s_twiddlesFp[log2N-1];
 	ctx->bitReverseIndexTable = s_bitReverseTable[log2N-1];
 #else
 	ctx->twiddles = (fp_complex_t*)malloc(sizeof(fp_complex_t) * N/2);
@@ -108,11 +108,28 @@ static inline void fp_butterfly(fp_complex_t* r, const fp_complex_t* tf, int idx
 	fp_complex_t up = r[idx_a];
 	fp_complex_t dn = r[idx_b];
 
+	//char buf[128] = { 0 };
+
 	//r[idx_a] = up + tf * dn;
 	//r[idx_b] = up - tf * dn;
+	
+	//fp_complex_str(&up, buf, sizeof(buf));
+	//printf("up=%s\n", buf);
+
+	//fp_complex_str(&dn, buf, sizeof(buf));
+	//printf("dn=%s\n", buf);
+
 	fp_complex_t dntf = fp_complex_mult(&dn, tf);
+	//fp_complex_str(&dntf, buf, sizeof(buf));
+	//printf("dntf=%s\n", buf);
+
 	r[idx_a] = fp_complex_add(&up, &dntf);
+	//fp_complex_str(&r[idx_a], buf, sizeof(buf));
+	//printf("r[idx_a]=%s\n", buf);
+
 	r[idx_b] = fp_complex_sub(&up, &dntf);
+	//fp_complex_str(&r[idx_b], buf, sizeof(buf));
+	//printf("r[idx_b]=%s\n", buf);
 }
 
 void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_t* F)
@@ -124,6 +141,7 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_
 
 	int dj = 2;
 	int bnum = 1;
+	//int tw_idx_shift = 9;// log2(N_MAX)-1
 	int tw_idx_shift = ctx->log2N - 1;
 
 	for (int i = 0; i < ctx->log2N; i++) {
@@ -138,6 +156,11 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, fp_complex_t* f, fp_complex_
 
 				int tw_idx = k << tw_idx_shift;
 				fp_complex_t tf = ctx->twiddles[tw_idx];
+
+				//char buf[128] = { 0 };
+				//fp_complex_str(&tf, buf, sizeof(buf));
+				//printf("tf=%s, tw_idx=%d\n", buf, tw_idx);
+
 				fp_butterfly(&F[0], &tf, idx_a++, idx_b++);
 			}
 		}
