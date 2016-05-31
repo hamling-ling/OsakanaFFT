@@ -59,7 +59,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 
 #if defined(USE_HARDCORD_TABLE)
 	ctx->twiddles = s_twiddlesFp;
-	ctx->bitReverseIndexTable = s_bitReverse1024;
+	ctx->bitReverseIndexTable = s_bitReverseTable[log2N-1];
 #else
 	ctx->twiddles = (fp_complex_t*)malloc(sizeof(fp_complex_t) * N/2);
 	if (ctx->twiddles == NULL) {

@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#if _USE_Q7_8_FIXEDPOINT
+#if defined(_USE_Q7_8_FIXEDPOINT)
 #define FPSHFT		8
 typedef int16_t		Fp_t;
 typedef uint8_t		FpFract_t;

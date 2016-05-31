@@ -60,7 +60,7 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	}
 
 #if defined(USE_HARDCORD_TABLE)
-	ctx->bitReverseIndexTable = s_bitReverse1024;
+	ctx->bitReverseIndexTable = s_bitReverseTable[log2N - 1];
 #else
 	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
 	if (ctx->bitReverseIndexTable == NULL) {

@@ -183,9 +183,9 @@ int main()
 	//char buf[64] = { 0 };
 	//cout << Fp2CStr(FLOAT2FP(0.0), buf, sizeof(buf));
 	//testFft();
-	//testIfft();
+	testIfft();
 	//testFpFft();
-	testFpIfft();
+	//testFpIfft();
 	//benchFft();
 	//benchFpFft();
 
