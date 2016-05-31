@@ -2,6 +2,9 @@
 #define _GLOBALCONFIG_H_
 
 #define USE_HARDCORD_TABLE
-#define _USE_Q7_8_FIXEDPOINT
+//#define _USE_Q7_8_FIXEDPOINT
 //#define _USE_Q1_14_FIXEDPOINT
+#define USE_BIT_REVERSE_N16
+#define USE_TWIDDLE_TABLE_N16
+
 #endif

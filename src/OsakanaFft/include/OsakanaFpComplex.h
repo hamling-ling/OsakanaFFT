@@ -76,6 +76,12 @@ static inline fp_complex_t fp_complex_l_shift(const fp_complex_t* a, int n)
 	return x;
 }
 
+static inline void fp_complex_swap(fp_complex_t* a, fp_complex_t* b)
+{
+	FpSwap(&a->re, &b->re);
+	FpSwap(&a->im, &b->im);
+}
+
 static inline char* fp_complex_str(const fp_complex_t* a, char* buf, size_t buf_size)
 {
 	char buf_sub[32] = { '\0' };

@@ -2,16 +2,16 @@
 #define _BITREVERSETABLE_H
 
 #include <inttypes.h>
-#define USE_BIT_REVERSE_N2
-#define USE_BIT_REVERSE_N4
-#define USE_BIT_REVERSE_N8
-#define USE_BIT_REVERSE_N16
-#define USE_BIT_REVERSE_N32
-#define USE_BIT_REVERSE_N64
-#define USE_BIT_REVERSE_N128
-#define USE_BIT_REVERSE_N256
-#define USE_BIT_REVERSE_N512
-#define USE_BIT_REVERSE_N1024
+//#define USE_BIT_REVERSE_N2
+//#define USE_BIT_REVERSE_N4
+//#define USE_BIT_REVERSE_N8
+//#define USE_BIT_REVERSE_N16
+//#define USE_BIT_REVERSE_N32
+//#define USE_BIT_REVERSE_N64
+//#define USE_BIT_REVERSE_N128
+//#define USE_BIT_REVERSE_N256
+//#define USE_BIT_REVERSE_N512
+//#define USE_BIT_REVERSE_N1024
 
 #if defined(USE_BIT_REVERSE_N2)
 static const uint16_t s_bitReverse0002[] = {

@@ -4,16 +4,16 @@
 #include "OsakanaFp.h"
 #include "OsakanaFpComplex.h"
 
-#define USE_TWIDDLE_TABLE_N2
-#define USE_TWIDDLE_TABLE_N4
-#define USE_TWIDDLE_TABLE_N8
-#define USE_TWIDDLE_TABLE_N16
-#define USE_TWIDDLE_TABLE_N32
-#define USE_TWIDDLE_TABLE_N64
-#define USE_TWIDDLE_TABLE_N128
-#define USE_TWIDDLE_TABLE_N256
-#define USE_TWIDDLE_TABLE_N512
-#define USE_TWIDDLE_TABLE_N1024
+//#define USE_TWIDDLE_TABLE_N2
+//#define USE_TWIDDLE_TABLE_N4
+//#define USE_TWIDDLE_TABLE_N8
+//#define USE_TWIDDLE_TABLE_N16
+//#define USE_TWIDDLE_TABLE_N32
+//#define USE_TWIDDLE_TABLE_N64
+//#define USE_TWIDDLE_TABLE_N128
+//#define USE_TWIDDLE_TABLE_N256
+//#define USE_TWIDDLE_TABLE_N512
+//#define USE_TWIDDLE_TABLE_N1024
 
 #if defined(USE_TWIDDLE_TABLE_N2)
 static const fp_complex_t W0002[] = {

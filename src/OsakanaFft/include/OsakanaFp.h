@@ -21,7 +21,7 @@ typedef int32_t		FpBigFp_t;
 #define FPSHFT		16
 typedef int32_t		Fp_t;
 typedef uint16_t	FpFract_t;
-typedef int64_t		FpBigFp_t;2000
+typedef int64_t		FpBigFp_t;
 #endif
 
 #define FPONE	(1 << FPSHFT)
@@ -109,10 +109,16 @@ static inline Fp_t FpLShift(Fp_t a, int n)
 	return (a << n);
 }
 
+static inline void FpSwap(Fp_t* a, Fp_t* b)
+{
+	Fp_t temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
 static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 {
 	float af = Fp2Float(a);
-	uint16_t mask = FRACT_MASK;
 	FpBigFp_t fractParts = a & FRACT_MASK;
 
 	memset(buf, 0, buf_size);

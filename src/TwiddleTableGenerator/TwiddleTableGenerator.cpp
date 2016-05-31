@@ -106,16 +106,16 @@ void PrintTable3()
 	cout << "#include \"OsakanaFp.h\"" << endl;
 	cout << "#include \"OsakanaFpComplex.h\"" << endl << endl;
 
-	cout << "#define USE_TWIDDLE_TABLE_N2" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N4" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N8" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N16" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N32" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N64" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N128" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N256" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N512" << endl;
-	cout << "#define USE_TWIDDLE_TABLE_N1024" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N2" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N4" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N8" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N16" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N32" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N64" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N128" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N256" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N512" << endl;
+	cout << "//#define USE_TWIDDLE_TABLE_N1024" << endl;
 	cout << endl;
 
 	std::cout.precision(16);

@@ -48,6 +48,14 @@ static inline complex_t complex_mult(const complex_t* a, const complex_t* b)
 	return x;
 }
 
+static inline void complex_swap(complex_t* a, complex_t* b)
+{
+	complex_t temp = *a;
+	a->re = b->re;
+	a->im = b->im;
+	*b = temp;
+}
+
 static inline char* complex_str(const complex_t* a, char* buf, size_t buf_size)
 {
 	snprintf(buf, buf_size, "%f, %f", a->re, a->im);

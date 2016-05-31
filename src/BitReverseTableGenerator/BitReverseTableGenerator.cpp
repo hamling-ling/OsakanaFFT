@@ -40,16 +40,16 @@ void PrintTable1()
 	cout << endl;
 	cout << "#include <inttypes.h>" << endl;
 
-	cout << "#define USE_BIT_REVERSE_N2" << endl;
-	cout << "#define USE_BIT_REVERSE_N4" << endl;
-	cout << "#define USE_BIT_REVERSE_N8" << endl;
-	cout << "#define USE_BIT_REVERSE_N16" << endl;
-	cout << "#define USE_BIT_REVERSE_N32" << endl;
-	cout << "#define USE_BIT_REVERSE_N64" << endl;
-	cout << "#define USE_BIT_REVERSE_N128" << endl;
-	cout << "#define USE_BIT_REVERSE_N256" << endl;
-	cout << "#define USE_BIT_REVERSE_N512" << endl;
-	cout << "#define USE_BIT_REVERSE_N1024" << endl;
+	cout << "//#define USE_BIT_REVERSE_N2" << endl;
+	cout << "//#define USE_BIT_REVERSE_N4" << endl;
+	cout << "//#define USE_BIT_REVERSE_N8" << endl;
+	cout << "//#define USE_BIT_REVERSE_N16" << endl;
+	cout << "//#define USE_BIT_REVERSE_N32" << endl;
+	cout << "//#define USE_BIT_REVERSE_N64" << endl;
+	cout << "//#define USE_BIT_REVERSE_N128" << endl;
+	cout << "//#define USE_BIT_REVERSE_N256" << endl;
+	cout << "//#define USE_BIT_REVERSE_N512" << endl;
+	cout << "//#define USE_BIT_REVERSE_N1024" << endl;
 	cout << endl;
 
 	int log2N = 1;
