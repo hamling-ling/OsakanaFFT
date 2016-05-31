@@ -5,12 +5,12 @@
 #include <iostream>
 #include "StopWatch.h"
 
-#if 0
+#if 1
 #define N		1024	// num of samples
 #define log2N	10	// log2(N)
 #else
-#define N		32	// num of samples, 8, 16, 32, 64, 128, 256, 512...
-#define log2N	5	// log2(N)         3,  4,  5,  6,   7,   8,   9
+#define N		128	// num of samples, 8, 16, 32, 64, 128, 256, 512...
+#define log2N	7	// log2(N)         3,  4,  5,  6,   7,   8,   9
 #endif
 
 using namespace std;
@@ -84,7 +84,7 @@ void testFpFft()
 	OsakanaFpFftContext_t* ctx = NULL;
 	InitOsakanaFpFft(&ctx, N, log2N);
 
-	OsakanaFpFft(ctx, &f[0], &F[0]);
+	OsakanaFpFft(ctx, &f[0], &F[0], 1);
 
 	CleanOsakanaFpFft(ctx);
 }
@@ -98,7 +98,7 @@ void testFpIfft()
 	char buf[128] = { 0 };// debug
 
 	for (int i = 0; i < N; i++) {
-		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
+		float re = (float)sin(3.5 * i * 2.0 * M_PI / N);
 		float im = 0.0f;
 		f[i].re = Float2Fp(re);
 		f[i].im = Float2Fp(im);
@@ -107,8 +107,8 @@ void testFpIfft()
 	OsakanaFpFftContext_t* ctx = NULL;
 	InitOsakanaFpFft(&ctx, N, log2N);
 
-	OsakanaFpFft(ctx, &f[0], &F[0]);
-	OsakanaFpIfft(ctx, &F[0], &f2[0]);
+	OsakanaFpFft(ctx, &f[0], &F[0], 1);
+	OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
 
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
@@ -145,8 +145,8 @@ void benchFft()
 	InitOsakanaFpFft(&ctx, N, log2N);
 
 	for (int i = 0; i < 10000; i++) {
-		OsakanaFpFft(ctx, &f[0], &F[0]);
-		OsakanaFpIfft(ctx, &F[0], &f2[0]);
+		OsakanaFpFft(ctx, &f[0], &F[0], 1);
+		OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
 	}
 
 	CleanOsakanaFpFft(ctx);
@@ -171,8 +171,8 @@ void benchFpFft()
 	InitOsakanaFpFft(&ctx, N, log2N);
 
 	for (int i = 0; i < 10000; i++) {
-		OsakanaFpFft(ctx, &f[0], &F[0]);
-		OsakanaFpIfft(ctx, &F[0], &f2[0]);
+		OsakanaFpFft(ctx, &f[0], &F[0], 1);
+		OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
 	}
 
 	CleanOsakanaFpFft(ctx);
