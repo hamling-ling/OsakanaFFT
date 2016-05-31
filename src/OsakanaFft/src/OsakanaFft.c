@@ -50,7 +50,7 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	memset(ctx, 0, sizeof(OsakanaFftContext_t));
 	ctx->N = N;
 	ctx->log2N = log2N;
-	ctx->twiddles = (osk_complex_t*)malloc(sizeof(osk_complex_t*) * N/2);
+	ctx->twiddles = (osk_complex_t*)malloc(sizeof(osk_complex_t) * N/2);
 	
 	if (ctx->twiddles == NULL) {
 		ret = -2;
