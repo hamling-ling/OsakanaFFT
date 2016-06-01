@@ -5,7 +5,7 @@
 #include <iostream>
 #include "StopWatch.h"
 
-#if 0
+#if 1
 #define N		1024	// num of samples
 #define log2N	10	// log2(N)
 #else
@@ -140,8 +140,8 @@ void benchFpFft()
 
 int main()
 {
-	testFft();
-	//testFpFft();
+	//testFft();
+	testFpFft();
 	//benchFft();
 	//benchFpFft();
 
