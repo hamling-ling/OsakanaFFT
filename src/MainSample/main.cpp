@@ -9,51 +9,48 @@
 #define N		1024	// num of samples
 #define log2N	10	// log2(N)
 #else
-#define N		16	// num of samples, 8, 16, 32, 64, 128, 256, 512...
-#define log2N	4	// log2(N)         3,  4,  5,  6,   7,   8,   9
+#define N		8	// num of samples, 8, 16, 32, 64, 128, 256, 512...
+#define log2N	3	// log2(N)         3,  4,  5,  6,   7,   8,   9
 #endif
 
 using namespace std;
 
-void testIfft()
+void testFft()
 {
-	osk_complex_t f[N]  = { { 0.0f, 0.0f } };
-	osk_complex_t F[N]  = { { 0.0f, 0.0f } };
-	osk_complex_t f2[N] = { { 0.0f, 0.0f } };
+	osk_complex_t x[N]  = { { 0.0f, 0.0f } };
 
 	for (int i = 0; i < N; i++) {
-		f[i].re = (float)sin(0.3 * i * 2.0 * M_PI / N);
-		f[i].im = 0.0f;
+		x[i].re = (float)sin(3.5 * i * 2.0 * M_PI / N);
+		x[i].im = 0.0f;
 	}
 
 	OsakanaFftContext_t* ctx= NULL;
 	InitOsakanaFft(&ctx, N, log2N);
 
-	OsakanaFft(ctx, &f[0], &F[0]);
-	OsakanaIfft(ctx, &F[0], &f2[0]);
-
 	char buf[64] = { 0 };// debug
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << complex_str(&f[i], buf, sizeof(buf)) << endl;
+		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
+
+	OsakanaFft(ctx, &x[0]);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << complex_str(&F[i], buf, sizeof(buf)) << endl;
+		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
+
+	OsakanaIfft(ctx, &x[0]);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << complex_str(&f2[i], buf, sizeof(buf)) << endl;
+		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
 
 	CleanOsakanaFft(ctx);
 }
 
-void testFpIfft()
+void testFpFft()
 {
 	osk_fp_osk_complex_t x[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_osk_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_osk_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
 
 	char buf[128] = { 0 };// debug
 
@@ -72,16 +69,16 @@ void testFpIfft()
 	OsakanaFpFftContext_t* ctx = NULL;
 	InitOsakanaFpFft(&ctx, N, log2N);
 
-	OsakanaFpFft(ctx, &x[0], &F[0], 1);
+	OsakanaFpFft(ctx, &x[0], 1);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&F[i], buf, sizeof(buf)) << endl;
+		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
 
-	OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
+	OsakanaFpIfft(ctx, &x[0], 1);
 	cout << "--" << endl;
 	for (int i = 0; i < N && i < 10; i++) {
-		cout << fp_complex_str(&f2[i], buf, sizeof(buf)) << endl;
+		cout << fp_complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
 
 	CleanOsakanaFpFft(ctx);
@@ -143,12 +140,8 @@ void benchFpFft()
 
 int main()
 {
-	//char buf[64] = { 0 };
-	//cout << Fp2CStr(FLOAT2FP(0.0), buf, sizeof(buf));
-	//testFft();
-	//testIfft();
+	testFft();
 	//testFpFft();
-	testFpIfft();
 	//benchFft();
 	//benchFpFft();
 

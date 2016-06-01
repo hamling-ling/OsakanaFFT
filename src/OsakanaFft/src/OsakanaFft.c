@@ -25,7 +25,8 @@ struct _OsakanaFftContext_t {
 	osk_complex_t* twiddles;
 #if defined(USE_HARDCORD_TABLE)
 	// bit reverse index table
-	const uint16_t* bitReverseIndexTable;
+	const osk_bitreverse_idx_pair_t* bitReverseIndexTable;
+	uint16_t bitReverseIndexTableLen;
 #else
 	uint16_t* bitReverseIndexTable;
 #endif
@@ -62,15 +63,9 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 
 #if defined(USE_HARDCORD_TABLE)
 	ctx->bitReverseIndexTable = s_bitReverseTable[log2N - 1];
+	ctx->bitReverseIndexTableLen = s_bitReversePairNums[log2N - 1];
 #else
-	ctx->bitReverseIndexTable = (uint16_t*)malloc(sizeof(uint16_t) * N);
-	if (ctx->bitReverseIndexTable == NULL) {
-		ret = -3;
-		goto exit_error;
-	}
-	for (int i = 0; i < N; i++) {
-		ctx->bitReverseIndexTable[i] = bitReverse(log2N, i);
-	}
+	// T.B.D
 #endif
 	*pctx = ctx;
 	
@@ -109,11 +104,11 @@ static inline void butterfly(osk_complex_t* r, const osk_complex_t* tf, int idx_
 	r[idx_b] = complex_sub(&up, &dntf);
 }
 
-void OsakanaFft(const OsakanaFftContext_t* ctx, osk_complex_t* f, osk_complex_t* F)
+void OsakanaFft(const OsakanaFftContext_t* ctx, osk_complex_t* x)
 {
-	for (int i = 0; i < ctx->N; i++) {
-		int ridx = ctx->bitReverseIndexTable[i];
-		F[i] = f[ridx];
+	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
+		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
+		complex_swap(&x[pair->first], &x[pair->second]);
 	}
 
 	int dj = 2;
@@ -134,7 +129,7 @@ void OsakanaFft(const OsakanaFftContext_t* ctx, osk_complex_t* f, osk_complex_t*
 
 				int tw_idx = k << tw_idx_shift;
 				osk_complex_t tf = ctx->twiddles[tw_idx];
-				butterfly(&F[0], &tf, idx_a++, idx_b++);
+				butterfly(&x[0], &tf, idx_a++, idx_b++);
 			}
 		}
 		dj = dj << 1;
@@ -143,13 +138,11 @@ void OsakanaFft(const OsakanaFftContext_t* ctx, osk_complex_t* f, osk_complex_t*
 	}
 }
 
-void OsakanaIfft(const OsakanaFftContext_t* ctx, osk_complex_t* F, osk_complex_t* f)
+void OsakanaIfft(const OsakanaFftContext_t* ctx, osk_complex_t* x)
 {
-	for (int i = 0; i < ctx->N; i++) {
-		int ridx = ctx->bitReverseIndexTable[i];
-		f[i] = F[ridx];
-		f[i].re /= ctx->N;
-		f[i].im /= ctx->N;
+	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
+		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
+		complex_swap(&x[pair->first], &x[pair->second]);
 	}
 
 	int dj = 2;
@@ -169,7 +162,15 @@ void OsakanaIfft(const OsakanaFftContext_t* ctx, osk_complex_t* F, osk_complex_t
 				int tw_idx = k << tw_idx_shift;
 				osk_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
-				butterfly(&f[0], &tf, idx_a++, idx_b++);
+				butterfly(&x[0], &tf, idx_a, idx_b);
+
+				x[idx_a].re /= 2.0;
+				x[idx_a].im /= 2.0;
+				x[idx_b].re /= 2.0;
+				x[idx_b].im /= 2.0;
+
+				idx_a++;
+				idx_b++;
 			}
 		}
 		dj = dj << 1;
