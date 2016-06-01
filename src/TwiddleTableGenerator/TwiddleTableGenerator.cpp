@@ -39,7 +39,7 @@ void PrintTable1()
 	std::cout.precision(16);
 	std::cout.setf(std::ios::fixed, std::ios::floatfield);
 	for (int N = 2; N <= N_MAX; N = N << 1) {
-		cout << "static const osk_fp_osk_complex_t W";
+		cout << "static const osk_fp_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {
@@ -55,7 +55,7 @@ void PrintTable1()
 		cout << "};" << endl << endl;
 	}
 
-	cout << "static const osk_fp_osk_complex_t* s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_complex_t* s_twiddlesFp[] = {" << endl;
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "\tW";
 		cout << setw(4) << std::setfill('0') << N;
@@ -81,7 +81,7 @@ void PrintTable2()
 
 	std::cout.precision(16);
 	std::cout.setf(std::ios::fixed, std::ios::floatfield);
-	cout << "static const osk_fp_osk_complex_t s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_complex_t s_twiddlesFp[] = {" << endl;
 	for (int i = 0; i < N / 2; i++) {
 
 		osk_complex_t tf = twiddle(i, N);
@@ -123,7 +123,7 @@ void PrintTable3()
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		
-		cout << "static const osk_fp_osk_complex_t W";
+		cout << "static const osk_fp_complex_t W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {
@@ -140,7 +140,7 @@ void PrintTable3()
 		cout << "#endif" << endl << endl;
 	}
 
-	cout << "static const osk_fp_osk_complex_t* s_twiddlesFp[] = {" << endl;
+	cout << "static const osk_fp_complex_t* s_twiddlesFp[] = {" << endl;
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		cout << "\tW";

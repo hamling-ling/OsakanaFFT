@@ -16,20 +16,20 @@
 //#define USE_TWIDDLE_TABLE_N1024
 
 #if defined(USE_TWIDDLE_TABLE_N2)
-static const osk_fp_osk_complex_t W0002[] = {
+static const osk_fp_complex_t W0002[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) }
 };
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N4)
-static const osk_fp_osk_complex_t W0004[] = {
+static const osk_fp_complex_t W0004[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.0000000000000001f),	FLOAT2FP( -1.0000000000000000f) }
 };
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N8)
-static const osk_fp_osk_complex_t W0008[] = {
+static const osk_fp_complex_t W0008[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.7071067811865476f),	FLOAT2FP( -0.7071067811865476f) },
 	{ FLOAT2FP( 0.0000000000000001f),	FLOAT2FP( -1.0000000000000000f) },
@@ -38,7 +38,7 @@ static const osk_fp_osk_complex_t W0008[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N16)
-static const osk_fp_osk_complex_t W0016[] = {
+static const osk_fp_complex_t W0016[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9238795325112867f),	FLOAT2FP( -0.3826834323650898f) },
 	{ FLOAT2FP( 0.7071067811865476f),	FLOAT2FP( -0.7071067811865476f) },
@@ -51,7 +51,7 @@ static const osk_fp_osk_complex_t W0016[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N32)
-static const osk_fp_osk_complex_t W0032[] = {
+static const osk_fp_complex_t W0032[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9807852804032304f),	FLOAT2FP( -0.1950903220161282f) },
 	{ FLOAT2FP( 0.9238795325112867f),	FLOAT2FP( -0.3826834323650898f) },
@@ -72,7 +72,7 @@ static const osk_fp_osk_complex_t W0032[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N64)
-static const osk_fp_osk_complex_t W0064[] = {
+static const osk_fp_complex_t W0064[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9951847266721969f),	FLOAT2FP( -0.0980171403295606f) },
 	{ FLOAT2FP( 0.9807852804032304f),	FLOAT2FP( -0.1950903220161282f) },
@@ -109,7 +109,7 @@ static const osk_fp_osk_complex_t W0064[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N128)
-static const osk_fp_osk_complex_t W0128[] = {
+static const osk_fp_complex_t W0128[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9987954562051724f),	FLOAT2FP( -0.0490676743274180f) },
 	{ FLOAT2FP( 0.9951847266721969f),	FLOAT2FP( -0.0980171403295606f) },
@@ -178,7 +178,7 @@ static const osk_fp_osk_complex_t W0128[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N256)
-static const osk_fp_osk_complex_t W0256[] = {
+static const osk_fp_complex_t W0256[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9996988186962042f),	FLOAT2FP( -0.0245412285229123f) },
 	{ FLOAT2FP( 0.9987954562051724f),	FLOAT2FP( -0.0490676743274180f) },
@@ -311,7 +311,7 @@ static const osk_fp_osk_complex_t W0256[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N512)
-static const osk_fp_osk_complex_t W0512[] = {
+static const osk_fp_complex_t W0512[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9999247018391445f),	FLOAT2FP( -0.0122715382857199f) },
 	{ FLOAT2FP( 0.9996988186962042f),	FLOAT2FP( -0.0245412285229123f) },
@@ -572,7 +572,7 @@ static const osk_fp_osk_complex_t W0512[] = {
 #endif
 
 #if defined(USE_TWIDDLE_TABLE_N1024)
-static const osk_fp_osk_complex_t W1024[] = {
+static const osk_fp_complex_t W1024[] = {
 	{ FLOAT2FP( 1.0000000000000000f),	FLOAT2FP( -0.0000000000000000f) },
 	{ FLOAT2FP( 0.9999811752826011f),	FLOAT2FP( -0.0061358846491545f) },
 	{ FLOAT2FP( 0.9999247018391445f),	FLOAT2FP( -0.0122715382857199f) },
@@ -1088,7 +1088,7 @@ static const osk_fp_osk_complex_t W1024[] = {
 };
 #endif
 
-static const osk_fp_osk_complex_t* s_twiddlesFp[] = {
+static const osk_fp_complex_t* s_twiddlesFp[] = {
 #if defined(USE_TWIDDLE_TABLE_N2)
 	W0002,
 #else

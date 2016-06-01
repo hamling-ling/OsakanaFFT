@@ -23,12 +23,12 @@ struct _OsakanaFpFftContext_t {
 
 #if defined(USE_HARDCORD_TABLE)
 	// twiddle factor table
-	const osk_fp_osk_complex_t* twiddles;
+	const osk_fp_complex_t* twiddles;
 	// bit reverse index table
 	const osk_bitreverse_idx_pair_t* bitReverseIndexTable;
 	uint16_t bitReverseIndexTableLen;
 #else
-	osk_fp_osk_complex_t* twiddles;
+	osk_fp_complex_t* twiddles;
 	uint16_t* bitReverseIndexTable;
 #endif
 
@@ -36,10 +36,10 @@ struct _OsakanaFpFftContext_t {
 
 // W^n_N = exp(-i2pin/N)
 // = cos(2 pi n/N) - isin(2 pi n/N)
-static inline osk_fp_osk_complex_t twiddle(int n, int Nin)
+static inline osk_fp_complex_t twiddle(int n, int Nin)
 {
 	float theta = (float)(2.0f*M_PI*n / Nin);
-	osk_fp_osk_complex_t ret;
+	osk_fp_complex_t ret;
 	ret.re = Float2Fp((float)cos(theta));
 	ret.im = Float2Fp((float)-sin(theta));
 
@@ -63,11 +63,11 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	ctx->bitReverseIndexTable = s_bitReverseTable[log2N-1];
 	ctx->bitReverseIndexTableLen = s_bitReversePairNums[log2N - 1];
 #else
-	ctx->twiddles = (osk_fp_osk_complex_t*)malloc(sizeof(osk_fp_osk_complex_t) * N/2);
+	ctx->twiddles = (osk_fp_complex_t*)malloc(sizeof(osk_fp_complex_t) * N/2);
 	if (ctx->twiddles == NULL) {
 		ret = -3;
 		goto exit_error;
-	}	printf("malloc items %d\n", sizeof(osk_fp_osk_complex_t) * N / 2);// debug
+	}	printf("malloc items %d\n", sizeof(osk_fp_complex_t) * N / 2);// debug
 	for (int j = 0; j < N/2; j++) {
 		ctx->twiddles[j] = twiddle(j, N);
 	}
@@ -76,7 +76,7 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 	if (ctx->bitReverseIndexTable == NULL) {
 		ret = -4;
 		goto exit_error;
-	}printf("malloc reverse %d\n", sizeof(osk_fp_osk_complex_t) * N);// debug
+	}printf("malloc reverse %d\n", sizeof(osk_fp_complex_t) * N);// debug
 	for (int i = 0; i < N; i++) {
 		ctx->bitReverseIndexTable[i] = (uint16_t)bitReverse(log2N, i);
 	}
@@ -105,10 +105,10 @@ void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 	free(ctx);
 }
 
-static inline void fp_butterfly(osk_fp_osk_complex_t* r, const osk_fp_osk_complex_t* tf, int idx_a, int idx_b)
+static inline void fp_butterfly(osk_fp_complex_t* r, const osk_fp_complex_t* tf, int idx_a, int idx_b)
 {
-	osk_fp_osk_complex_t up = r[idx_a];
-	osk_fp_osk_complex_t dn = r[idx_b];
+	osk_fp_complex_t up = r[idx_a];
+	osk_fp_complex_t dn = r[idx_b];
 
 	//char buf[128] = { 0 };
 
@@ -121,7 +121,7 @@ static inline void fp_butterfly(osk_fp_osk_complex_t* r, const osk_fp_osk_comple
 	//fp_complex_str(&dn, buf, sizeof(buf));
 	//printf("dn=%s\n", buf);
 
-	osk_fp_osk_complex_t dntf = fp_complex_mult(&dn, tf);
+	osk_fp_complex_t dntf = fp_complex_mult(&dn, tf);
 	//fp_complex_str(&dntf, buf, sizeof(buf));
 	//printf("dntf=%s\n", buf);
 
@@ -134,7 +134,7 @@ static inline void fp_butterfly(osk_fp_osk_complex_t* r, const osk_fp_osk_comple
 	//printf("r[idx_b]=%s\n", buf);
 }
 
-void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, int scale)
+void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale)
 {
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
@@ -152,7 +152,7 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, int
 			for (int k = 0; k < bnum; k++) {
 
 				int tw_idx = k << tw_idx_shift;
-				osk_fp_osk_complex_t tf = ctx->twiddles[tw_idx];
+				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 
 				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
@@ -170,7 +170,7 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, int
 }
 
 
-void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, int scale)
+void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale)
 {
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
@@ -189,7 +189,7 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, in
 			for (int k = 0; k < bnum; k++) {
 
 				int tw_idx = k << tw_idx_shift;
-				osk_fp_osk_complex_t tf = ctx->twiddles[tw_idx];
+				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 
 				fp_butterfly(&x[0], &tf, idx_a, idx_b);
@@ -210,9 +210,9 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* x, in
 }
 #if 0
 
-void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* f, osk_fp_osk_complex_t* F, int scale)
+void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* f, osk_fp_complex_t* F, int scale)
 {
-	memcpy(F, f, sizeof(osk_fp_osk_complex_t) * ctx->N);
+	memcpy(F, f, sizeof(osk_fp_complex_t) * ctx->N);
 
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
@@ -231,7 +231,7 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* f, osk
 			for (int k = 0; k < bnum; k++) {
 
 				int tw_idx = k << tw_idx_shift;
-				osk_fp_osk_complex_t tf = ctx->twiddles[tw_idx];
+				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 
 				fp_butterfly(&F[0], &tf, idx_a, idx_b);
 
@@ -249,9 +249,9 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* f, osk
 }
 
 
-void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* F, osk_fp_osk_complex_t* f, int scale)
+void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* F, osk_fp_complex_t* f, int scale)
 {
-	memcpy(f, F, sizeof(osk_fp_osk_complex_t) * ctx->N);
+	memcpy(f, F, sizeof(osk_fp_complex_t) * ctx->N);
 
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
@@ -271,7 +271,7 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_osk_complex_t* F, os
 			for (int k = 0; k < bnum; k++) {
 
 				int tw_idx = k << tw_idx_shift;
-				osk_fp_osk_complex_t tf = ctx->twiddles[tw_idx];
+				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 
 				fp_butterfly(&f[0], &tf, idx_a, idx_b);

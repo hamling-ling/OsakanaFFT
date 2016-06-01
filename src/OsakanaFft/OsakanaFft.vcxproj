@@ -156,10 +156,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\OsakanaFft.c" />
-    <ClCompile Include="src\OsakanaFpFft.c" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\GlobalConfig.h" />
     <ClInclude Include="include\OsakanaComplex.h" />
     <ClInclude Include="include\OsakanaFft.h" />
@@ -169,6 +165,10 @@
     <ClInclude Include="src\bitreversetable.h" />
     <ClInclude Include="src\OsakanaFftUtil.h" />
     <ClInclude Include="src\twiddletable.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\OsakanaFft.cpp" />
+    <ClCompile Include="src\OsakanaFpFft.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
