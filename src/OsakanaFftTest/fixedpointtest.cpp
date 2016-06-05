@@ -62,7 +62,7 @@ namespace OsakanaFftTest
 			c = Float2Fp(f);
 			ss << "float " << f << " = Fp " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
 			outputLog(ss);
-
+			
 			// -float to fp
 			f = -x;
 			c = Float2Fp(f);
@@ -229,6 +229,20 @@ namespace OsakanaFftTest
 			a = Float2Fp(f);
 			c = FpLShift(a, 1);
 			ss << Fp2Str(a) << " << " << 2 << " = " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
+			outputLog(ss);
+			
+			// sqrt x
+			f = x;
+			a = Float2Fp(f);
+			c = FpSqrt(a);
+			ss << "sqrt(" << Fp2Str(a) << ") = " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
+			outputLog(ss);
+
+			// sqrt y
+			f = y;
+			a = Float2Fp(f);
+			c = FpSqrt(a);
+			ss << "sqrt(" << Fp2Str(a) << ") = " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
 			outputLog(ss);
 
 			return true;
