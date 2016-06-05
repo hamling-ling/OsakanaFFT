@@ -94,16 +94,20 @@ void ParabolicInterp(MachineContext_t* ctx, Fp_t* xs, uint16_t N)
 		if (0 == pPeak->index || N <= pPeak->index + 1) {
 			continue;
 		}
+		
+		//use Ragrange interpolation
 		Fp_t x0 = Int2Fp(pPeak->index - 1);
-		Fp_t x1 = Int2Fp(pPeak->index + 1);
+		Fp_t x1 = Int2Fp(pPeak->index + 0);
+		Fp_t x2 = Int2Fp(pPeak->index + 1);
 		Fp_t y0 = xs[pPeak->index - 1];
-		Fp_t y1 = xs[pPeak->index + 1];
+		Fp_t y1 = xs[pPeak->index + 0];
+		Fp_t y2 = xs[pPeak->index + 1];
 
 		Fp_t x0x0 = FpMul(x0, x0);
 		Fp_t x1x1 = FpMul(x1, x1);
-		Fp_t a = FpDiv((y0 - y1), (x0x0 - x1x1));
-		Fp_t b = y0 - FpMul(a, x0x0);
+		Fp_t x2x2 = FpMul(x2, x2);
 
+		// T.B.D.
 	}
 }
 
