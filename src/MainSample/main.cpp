@@ -84,66 +84,10 @@ void testFpFft()
 	CleanOsakanaFpFft(ctx);
 }
 
-#if 0
-void benchFft()
-{
-	StopWatch<std::chrono::milliseconds> sw;
-
-	osk_fp_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-
-	for (int i = 0; i < N; i++) {
-		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
-		float im = 0.0f;
-		f[i].re = Float2Fp(re);
-		f[i].im = Float2Fp(im);
-	}
-
-	OsakanaFpFftContext_t* ctx = NULL;
-	InitOsakanaFpFft(&ctx, N, log2N);
-
-	for (int i = 0; i < 10000; i++) {
-		OsakanaFpFft(ctx, &f[0], &F[0], 1);
-		OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
-	}
-
-	CleanOsakanaFpFft(ctx);
-
-}
-void benchFpFft()
-{
-	StopWatch<std::chrono::milliseconds> sw;
-
-	osk_fp_complex_t f[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_complex_t F[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-	osk_fp_complex_t f2[N] = { { FLOAT2FP(0.0f), FLOAT2FP(0.0f) } };
-
-	for (int i = 0; i < N; i++) {
-		float re = (float)sin(0.3 * i * 2.0 * M_PI / N);
-		float im = 0.0f;
-		f[i].re = Float2Fp(re);
-		f[i].im = Float2Fp(im);
-	}
-
-	OsakanaFpFftContext_t* ctx = NULL;
-	InitOsakanaFpFft(&ctx, N, log2N);
-
-	for (int i = 0; i < 10000; i++) {
-		OsakanaFpFft(ctx, &f[0], &F[0], 1);
-		OsakanaFpIfft(ctx, &F[0], &f2[0], 1);
-	}
-
-	CleanOsakanaFpFft(ctx);
-}
-#endif
-
 int main()
 {
 	//testFft();
 	testFpFft();
-	//benchFft();
-	//benchFpFft();
 
 	return 0;
 }
