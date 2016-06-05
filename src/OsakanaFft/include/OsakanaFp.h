@@ -9,19 +9,26 @@
 
 #if defined(_USE_Q7_8_FIXEDPOINT)
 #define FPSHFT		8
+#define FPSHFT_2	4
 typedef int16_t		Fp_t;
 typedef uint8_t		FpFract_t;
 typedef int32_t		FpBigFp_t;
+typedef uint16_t	FpUnSgned_t;
 #elif defined(_USE_Q1_14_FIXEDPOINT)
 #define FPSHFT		14
+#define FPSHFT_2	7
 typedef int16_t		Fp_t;
 typedef uint16_t	FpFract_t;
 typedef int32_t		FpBigFp_t;
+typedef uint16_t	FpFract_t;
+typedef uint16_t	FpUnSgned_t;
 #else // otherwise Q15.16
 #define FPSHFT		16
+#define FPSHFT_2	8
 typedef int32_t		Fp_t;
 typedef uint16_t	FpFract_t;
 typedef int64_t		FpBigFp_t;
+typedef uint32_t	FpUnSgned_t;
 #endif
 
 #define FPONE	(1 << FPSHFT)
@@ -90,7 +97,7 @@ static inline Fp_t FpMul(Fp_t a, Fp_t b)
 
 static inline Fp_t FpDiv(Fp_t a, Fp_t b)
 {
-	Fp_t fp = ((FpBigFp_t)a / (FpBigFp_t)b) << FPSHFT;
+	Fp_t fp = ((FpBigFp_t)a << FPSHFT) / (FpBigFp_t)b;
 	return fp;
 }
 
@@ -114,6 +121,40 @@ static inline void FpSwap(Fp_t* a, Fp_t* b)
 	Fp_t temp = *a;
 	*a = *b;
 	*b = temp;
+}
+
+/**
+ *	Positive only
+ */
+static inline Fp_t FpSqrt(Fp_t a)
+{
+	FpUnSgned_t op = (FpUnSgned_t)a;
+	FpUnSgned_t res = 0;
+	FpUnSgned_t one = INT2FP(1);// 1uL << (sizeof(Fp_t) * 8 - 2);
+
+	while (one > op)
+	{
+		one >>= 2;
+	}
+
+	while (one != 0)
+	{
+		if (op >= res + one)
+		{
+			op = op - (res + one);
+			res = res + 2 * one;
+		}
+		res >>= 1;
+		one >>= 2;
+	}
+
+	/* Do arithmetic rounding to nearest integer */
+	if (op > res)
+	{
+		res++;
+	}
+	res = res << FPSHFT_2;
+	return res;
 }
 
 static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
