@@ -42,6 +42,7 @@ extern "C" {
 	void DestroyPeakDetectMachineContext(MachineContext_t* ctx);
 	void Input(MachineContext_t* ctx, Fp_t x);
 	void ResetMachine(MachineContext_t* ctx);
+	void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int listmaxlen, int *num);
 	void ParabolicInterp(MachineContext_t* ctx, Fp_t* xs, uint16_t N);
 
 #ifdef __cplusplus

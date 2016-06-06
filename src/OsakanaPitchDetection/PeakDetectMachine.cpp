@@ -87,6 +87,26 @@ void ResetMachine(MachineContext_t* ctx)
 	ctx->detectors = s_eventDetectors;
 }
 
+void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int listmaxlen, int *num)
+{
+	if (ctx->keyMaxsNum == 0) {
+		*num = 0;
+		return;
+	}
+
+	int counter = 0;
+	Fp_t th = FpMul(ctx->globalKeyMax.value, filter);
+	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
+		Fp_t keyMax = ctx->keyMaxs[i].value;
+		if (FpMul(filter, keyMax) < th) {
+			continue;
+		}
+
+		list[counter++] = ctx->keyMaxs[i];
+	}
+	*num = counter;
+}
+
 void ParabolicInterp(MachineContext_t* ctx, Fp_t* xs, uint16_t N)
 {
 	for (int i = 0; i < ctx->keyMaxsNum; i++) {

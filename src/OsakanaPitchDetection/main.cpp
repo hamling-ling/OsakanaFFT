@@ -10,6 +10,13 @@
 #include "OsakanaFpFft.h"
 #include "PeakDetectMachine.h"
 
+#define N				1024		// fft sampling num(last half is 0 pad)
+#define N2				(1024/2)	// sampling num of analog input
+#define N_ADC			N2
+#define T				0.03701f		// time to take N2 signals to samples in sec.
+#define T_PER_SAMPLE	(0.03701f/N2)	// factor to compute index to freq
+#define FREQ_PER_001SAMPLE	((uint32_t)100.0f *1.0f/T_PER_SAMPLE)
+
 using namespace std;
 
 int readData(const string& filename, uint16_t* data, const int dataNum)
@@ -63,16 +70,15 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	const int N = 1024;
-	uint16_t adc_in[N] = { 0 };
+	uint16_t adc_in[N_ADC] = { 0 };
 	// supporse get 10bit analog input [0,1023]
-	readData(argv[1], &adc_in[0], 512);
+	readData(argv[1], &adc_in[0], N_ADC);
 
 	// convert to Q1.14 fixedpoint
 	osk_fp_complex_t x[N] = { { 0, 0} };
 	Fp_t x2[N] = { 0 };
 	char buf[128] = { 0 };// for output
-	for (int i = 0; i < 512; i++) {
+	for (int i = 0; i < N2; i++) {
 
 		//adc_in[i] = 512;// debug
 		FpBigFp_t w = adc_in[i] - 512; // center to 0 and make it signed
@@ -180,6 +186,14 @@ int main(int argc, char* argv[])
 		Fp2CStr(_nsdf[i], buf, sizeof(buf));
 		printf("Input %s\n", buf);
 		Input(mctx, _nsdf[i]);
+	}
+	
+	PeekInfo keyMaximums[1] = { 0 };
+	int keyMaxLen = 0;
+	GetKeyMaximums(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
+	if (0 < keyMaxLen) {
+		uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
+		printf("freq=%u Hz\n", freq_per_001sample /(keyMaximums[0].index*100));
 	}
 	DestroyPeakDetectMachineContext(mctx);
 
