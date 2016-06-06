@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 	_m[0] = x[0].re << 2;
 	for (int t = 1; t < N; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
-}
+	}
 	cout << "-- ms smart" << endl;
 	for (int i = 0; i < 10; i++) {
 		Fp2CStr(_m[i], buf, sizeof(buf));
@@ -162,7 +162,8 @@ int main(int argc, char* argv[])
 	Fp_t _nsdf[N/2] = { 0 };
 	for (int t = 0; t < N/2; t++) {
 		//_nsdf[t] = (x[t].re << (1 + 1 + 4));
-		_nsdf[t] = FpDiv(x[t].re, _m[t]);// possible zero div!
+		Fp_t mt = (_m[t] | 1); // add small number to avoid 0 div
+		_nsdf[t] = FpDiv(x[t].re, _m[t]);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
 	cout << "-- _nsdf" << endl;

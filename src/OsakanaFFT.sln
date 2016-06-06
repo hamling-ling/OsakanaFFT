@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloButterfly", "HelloButterfly\HelloButterfly.vcxproj", "{69438990-2FB3-4EF4-9E44-5B5A04D3D93E}"
 EndProject
@@ -22,6 +22,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BitReverseTableGenerator", "BitReverseTableGenerator\BitReverseTableGenerator.vcxproj", "{E99ADBE6-E62A-454F-B021-EB8CADF654A0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OsakanaPitchDetection", "OsakanaPitchDetection\OsakanaPitchDetection.vcxproj", "{C0597BE1-D998-486C-AB5D-D89A707681C6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BAF341D4-1B9D-4427-AADF-BD453E2BA7EC} = {BAF341D4-1B9D-4427-AADF-BD453E2BA7EC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
