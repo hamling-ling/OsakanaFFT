@@ -13,6 +13,7 @@
 typedef int16_t		Fp_t;
 typedef uint8_t		FpFract_t;
 typedef int32_t		FpBigFp_t;
+typedef uint32_t	FpWUnSgned_t;
 typedef uint16_t	FpUnSgned_t;
 #elif defined(_USE_Q1_14_FIXEDPOINT)
 #define FPSHFT		14
@@ -20,6 +21,7 @@ typedef uint16_t	FpUnSgned_t;
 typedef int16_t		Fp_t;
 typedef uint16_t	FpFract_t;
 typedef int32_t		FpBigFp_t;
+typedef uint32_t	FpWUnSgned_t;
 typedef uint16_t	FpFract_t;
 typedef uint16_t	FpUnSgned_t;
 #else // otherwise Q15.16
@@ -28,6 +30,7 @@ typedef uint16_t	FpUnSgned_t;
 typedef int32_t		Fp_t;
 typedef uint16_t	FpFract_t;
 typedef int64_t		FpBigFp_t;
+typedef uint64_t	FpWUnSgned_t;
 typedef uint32_t	FpUnSgned_t;
 #endif
 
@@ -36,6 +39,7 @@ typedef uint32_t	FpUnSgned_t;
 #define INT2FP(x) ((x) << FPSHFT)
 #define FLOAT2FP(x) ((int)((x) * (1 << FPSHFT)))
 #define FP2INT(x) ((x) >> FPSHFT)
+#define FPLOG2_10	FLOAT2FP(3.3219280948873622f)
 
 static inline void StrNCpy_S(	char *strDest,
 								size_t numberOfElements,
@@ -155,6 +159,41 @@ static inline Fp_t FpSqrt(Fp_t a)
 	}
 	res = res << FPSHFT_2;
 	return res;
+}
+
+static inline Fp_t FpLog2(Fp_t x)
+{
+	FpUnSgned_t b = 1U << (FPSHFT - 1);
+	FpUnSgned_t y = 0;
+
+	while (x < 1U << FPSHFT) {
+		x <<= 1;
+		y -= 1U << FPSHFT;
+	}
+
+	while (x >= 2U << FPSHFT) {
+		x >>= 1;
+		y += 1U << FPSHFT;
+	}
+
+	FpWUnSgned_t z = x;
+
+	for (size_t i = 0; i < FPSHFT; i++) {
+		z = z * z >> FPSHFT;
+		if (z >= 2U << FPSHFT) {
+			z >>= 1;
+			y += b;
+		}
+		b >>= 1;
+	}
+
+	return y;
+}
+
+static inline Fp_t FpLog10(Fp_t x)
+{
+	Fp_t log2_x = FpLog2(x);
+	return FpDiv(log2_x, FPLOG2_10);
 }
 
 static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)

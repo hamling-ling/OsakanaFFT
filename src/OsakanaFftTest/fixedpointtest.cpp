@@ -244,8 +244,6 @@ namespace OsakanaFftTest
 			c = FpSqrt(a);
 			ss << "sqrt(" << Fp2Str(a) << ") = " << Fp2Str(c) << "(" << Fp2HexStr(c) << ")" << endl;
 			outputLog(ss);
-
-			return true;
 		}
 	};
 }
