@@ -12,26 +12,26 @@
 #define FPSHFT_2	4
 typedef int16_t		Fp_t;
 typedef uint8_t		FpFract_t;
-typedef int32_t		FpBigFp_t;
-typedef uint32_t	FpWUnSgned_t;
-typedef uint16_t	FpUnSgned_t;
+typedef int32_t		FpW_t;
+typedef uint32_t	FpWU_t;
+typedef uint16_t	FpU_t;
 #elif defined(_USE_Q1_14_FIXEDPOINT)
 #define FPSHFT		14
 #define FPSHFT_2	7
 typedef int16_t		Fp_t;
 typedef uint16_t	FpFract_t;
-typedef int32_t		FpBigFp_t;
-typedef uint32_t	FpWUnSgned_t;
+typedef int32_t		FpW_t;
+typedef uint32_t	FpWU_t;
 typedef uint16_t	FpFract_t;
-typedef uint16_t	FpUnSgned_t;
+typedef uint16_t	FpU_t;
 #else // otherwise Q15.16
 #define FPSHFT		16
 #define FPSHFT_2	8
 typedef int32_t		Fp_t;
 typedef uint16_t	FpFract_t;
-typedef int64_t		FpBigFp_t;
-typedef uint64_t	FpWUnSgned_t;
-typedef uint32_t	FpUnSgned_t;
+typedef int64_t		FpW_t;
+typedef uint64_t	FpWU_t;
+typedef uint32_t	FpU_t;
 #endif
 
 #define FPONE	(1 << FPSHFT)
@@ -95,13 +95,13 @@ static inline float Fp2Float(Fp_t a)
 
 static inline Fp_t FpMul(Fp_t a, Fp_t b)
 {
-	Fp_t fp = ((FpBigFp_t)a * (FpBigFp_t)b) >> FPSHFT;
+	Fp_t fp = ((FpW_t)a * (FpW_t)b) >> FPSHFT;
 	return fp;
 }
 
 static inline Fp_t FpDiv(Fp_t a, Fp_t b)
 {
-	Fp_t fp = ((FpBigFp_t)a << FPSHFT) / (FpBigFp_t)b;
+	Fp_t fp = ((FpW_t)a << FPSHFT) / (FpW_t)b;
 	return fp;
 }
 
@@ -132,9 +132,9 @@ static inline void FpSwap(Fp_t* a, Fp_t* b)
  */
 static inline Fp_t FpSqrt(Fp_t a)
 {
-	FpUnSgned_t op = (FpUnSgned_t)a;
-	FpUnSgned_t res = 0;
-	FpUnSgned_t one = INT2FP(1);// 1uL << (sizeof(Fp_t) * 8 - 2);
+	FpU_t op = (FpU_t)a;
+	FpU_t res = 0;
+	FpU_t one = INT2FP(1);// 1uL << (sizeof(Fp_t) * 8 - 2);
 
 	while (one > op)
 	{
@@ -163,8 +163,8 @@ static inline Fp_t FpSqrt(Fp_t a)
 
 static inline Fp_t FpLog2(Fp_t x)
 {
-	FpUnSgned_t b = 1U << (FPSHFT - 1);
-	FpUnSgned_t y = 0;
+	FpU_t b = 1U << (FPSHFT - 1);
+	FpU_t y = 0;
 
 	while (x < 1U << FPSHFT) {
 		x <<= 1;
@@ -176,7 +176,7 @@ static inline Fp_t FpLog2(Fp_t x)
 		y += 1U << FPSHFT;
 	}
 
-	FpWUnSgned_t z = x;
+	FpWU_t z = x;
 
 	for (size_t i = 0; i < FPSHFT; i++) {
 		z = z * z >> FPSHFT;
@@ -199,7 +199,7 @@ static inline Fp_t FpLog10(Fp_t x)
 static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 {
 	float af = Fp2Float(a);
-	FpBigFp_t fractParts = a & FRACT_MASK;
+	FpW_t fractParts = a & FRACT_MASK;
 
 	memset(buf, 0, buf_size);
 	if (a < 0) {

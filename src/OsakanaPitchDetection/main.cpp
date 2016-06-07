@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
 	cout << "-- power spectrum" << endl;
 	for (int i = 0; i < N; i++) {
-		FpBigFp_t re = FpMul(x[i].re, x[i].re)
+		FpW_t re = FpMul(x[i].re, x[i].re)
 						+ FpMul(x[i].im, x[i].im);
 		re = re >> 1;
 		x[i].re = (Fp_t)re;
