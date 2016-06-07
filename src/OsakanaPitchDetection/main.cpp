@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	readData(argv[1], (uint16_t*)&x[0].re, 2, N_ADC);
 
 	// convert to Q1.14 fixedpoint
-	Fp_t x2[N] = { 0 };
+	Fp_t x2[N2] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
 		FpBigFp_t w = x[i].re - 512; // center to 0 and make it signed
