@@ -15,9 +15,57 @@
 #define N_ADC			N2
 #define T				0.03701f		// time to take N2 signals to samples in sec.
 #define T_PER_SAMPLE	(0.03701f/N2)	// factor to compute index to freq
-#define FREQ_PER_001SAMPLE	((uint32_t)100.0f *1.0f/T_PER_SAMPLE)
+#define FREQ_PER_001SAMPLE	((uint32_t)(100.0f *1.0f/T_PER_SAMPLE))
+#define NOTE_CONST		0.025085832972
+#define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
+
+static const char* kNoteStrings[]{
+	"A", "BÅÛ", "B", "C",
+	"C#", "D", "D#", "E",
+	"F", "F#", "G", "G#",
+};
+
+static const uint8_t kNoteTable[] = {
+	0,   0,   0,   5,   0,   8,   5,   2,   0,  10,   8,   6,   5,   3,   2,
+	1,   0,  11,  10,   9,   8,   7,   6,   5,   5,   4,   3,   3,   2,   1,
+	1,   0,   0,  11,  11,  10,  10,   9,   9,   8,   8,   7,   7,   7,   6,
+	6,   5,   5,   5,   4,   4,   4,   3,   3,   3,   2,   2,   2,   1,   1,
+	1,   1,   0,   0,   0,  11,  11,  11,  11,  10,  10,  10,  10,   9,   9,
+	9,   9,   8,   8,   8,   8,   8,   7,   7,   7,   7,   7,   6,   6,   6,
+	6,   6,   5,   5,   5,   5,   5,   4,   4,   4,   4,   4,   4,   3,   3,
+	3,   3,   3,   3,   2,   2,   2,   2,   2,   2,   2,   1,   1,   1,   1,
+	1,   1,   1,   0,   0,   0,   0,   0,   0,   0,  11,  11,  11,  11,  11,
+	11,  11,  11,  10,  10,  10,  10,  10,  10,  10,  10,   9,   9,   9,   9,
+	9,   9,   9,   9,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   7,
+	7,   7,   7,   7,   7,   7,   7,   7,   6,   6,   6,   6,   6,   6,   6,
+	6,   6,   6,   6,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   4,
+	4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   3,   3,   3,   3,
+	3,   3,   3,   3,   3,   3,   3,   3,   2,   2,   2,   2,   2,   2,   2,
+	2,   2,   2,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+	1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+	0,   0,   0,   0,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,
+	11,  11,  11,  11,  11,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,
+	10,  10,  10,  10,  10,  10,   9,   9,   9,   9,   9,   9,   9,   9,   9,
+	9,   9,   9,   9,   9,   9,   9,   9,   8,   8,   8,   8,   8,   8,   8,
+	8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   7,   7,   7,
+	7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,
+	7,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,
+	6,   6,   6,   6,   6,   6,   6,   5,   5,   5,   5,   5,   5,   5,   5,
+	5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   4,   4,
+	4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,
+	4,   4,   4,   4,   4,   4,   3,   3,   3,   3,   3,   3,   3,   3,   3,
+	3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,
+	3,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,
+	2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   1,   1,   1,
+	1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+	1,   1,   1,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,
+	0,   0,   0,   0,   0,   0,   0,   0,   0,  -0,  -0,  -0,  -0,  -0,  -0,
+	-0,  -0
+};
 
 using namespace std;
+
+static const uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
 
 int readData(const string& filename, uint16_t* data, const int dataNum)
 {
@@ -152,9 +200,9 @@ int main(int argc, char* argv[])
 		printf("%s\n", buf);
 	}
 #else
-	Fp_t _m[N] = { 0 }; // smarter way
+	Fp_t _m[N/2] = { 0 }; // smarter way
 	_m[0] = x[0].re << 2;
-	for (int t = 1; t < N; t++) {
+	for (int t = 1; t < N/2; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
 	cout << "-- ms smart" << endl;
@@ -192,9 +240,11 @@ int main(int argc, char* argv[])
 	int keyMaxLen = 0;
 	GetKeyMaximums(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
-		uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
-		printf("freq=%u Hz\n", freq_per_001sample /(keyMaximums[0].index*100));
+		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
+		uint8_t note = kNoteTable[keyMaximums[0].index];
+		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 	}
+
 	DestroyPeakDetectMachineContext(mctx);
 
 	CleanOsakanaFpFft(ctx);
