@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
 	osk_fp_complex_t x[N] = { { 0, 0 } };
 	// supporse get 10bit analog input [0,1023]
-	readData(argv[1], (uint16_t*)&x[0].re, 2, N_ADC);
+	//readData(argv[1], (uint16_t*)&x[0].re, 2, N_ADC);
 
 	// convert to Q1.14 fixedpoint
 	Fp_t x2[N2] = { 0 };
@@ -189,8 +189,8 @@ int main(int argc, char* argv[])
 	// nsdf
 	Fp_t* _nsdf = _m; // reuse buffer
 	for (int t = 0; t < N2; t++) {
-		Fp_t mt = (_m[t] | 1); // add small number to avoid 0 div
-		_nsdf[t] = FpDiv(x[t].re, _m[t]);
+		Fp_t mt = _m[t] + INT2FP(1); // add small number to avoid 0 div
+		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
 	cout << "-- _nsdf" << endl;
