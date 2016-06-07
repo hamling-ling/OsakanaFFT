@@ -10,62 +10,17 @@
 #include "OsakanaFpFft.h"
 #include "PeakDetectMachine.h"
 
-#define N				1024		// fft sampling num(last half is 0 pad)
-#define N2				(1024/2)	// sampling num of analog input
-#define N_ADC			N2
-#define T				0.03701f		// time to take N2 signals to samples in sec.
-#define T_PER_SAMPLE	(0.03701f/N2)	// factor to compute index to freq
+#define N					512		// fft sampling num(last half is 0 pad)
+#define LOG2N				9		// log2(N)
+#define N2					(N/2)	// sampling num of analog input
+#define N_ADC				N2
+#define T					(0.03701f/(1024/N))		// time to take N2 signals to samples in sec.
+#define T_PER_SAMPLE		(T/N2)	// factor to compute index to freq
 #define FREQ_PER_001SAMPLE	((uint32_t)(100.0f *1.0f/T_PER_SAMPLE))
-#define NOTE_CONST		0.025085832972
+#define NOTE_CONST			0.025085832972
 #define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
 
-static const char* kNoteStrings[]{
-	"A", "BÅÛ", "B", "C",
-	"C#", "D", "D#", "E",
-	"F", "F#", "G", "G#",
-};
-
-static const uint8_t kNoteTable[] = {
-	0,   0,   0,   5,   0,   8,   5,   2,   0,  10,   8,   6,   5,   3,   2,
-	1,   0,  11,  10,   9,   8,   7,   6,   5,   5,   4,   3,   3,   2,   1,
-	1,   0,   0,  11,  11,  10,  10,   9,   9,   8,   8,   7,   7,   7,   6,
-	6,   5,   5,   5,   4,   4,   4,   3,   3,   3,   2,   2,   2,   1,   1,
-	1,   1,   0,   0,   0,  11,  11,  11,  11,  10,  10,  10,  10,   9,   9,
-	9,   9,   8,   8,   8,   8,   8,   7,   7,   7,   7,   7,   6,   6,   6,
-	6,   6,   5,   5,   5,   5,   5,   4,   4,   4,   4,   4,   4,   3,   3,
-	3,   3,   3,   3,   2,   2,   2,   2,   2,   2,   2,   1,   1,   1,   1,
-	1,   1,   1,   0,   0,   0,   0,   0,   0,   0,  11,  11,  11,  11,  11,
-	11,  11,  11,  10,  10,  10,  10,  10,  10,  10,  10,   9,   9,   9,   9,
-	9,   9,   9,   9,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   7,
-	7,   7,   7,   7,   7,   7,   7,   7,   6,   6,   6,   6,   6,   6,   6,
-	6,   6,   6,   6,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   4,
-	4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   3,   3,   3,   3,
-	3,   3,   3,   3,   3,   3,   3,   3,   2,   2,   2,   2,   2,   2,   2,
-	2,   2,   2,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-	1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-	0,   0,   0,   0,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,  11,
-	11,  11,  11,  11,  11,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,
-	10,  10,  10,  10,  10,  10,   9,   9,   9,   9,   9,   9,   9,   9,   9,
-	9,   9,   9,   9,   9,   9,   9,   9,   8,   8,   8,   8,   8,   8,   8,
-	8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   7,   7,   7,
-	7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7,
-	7,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,
-	6,   6,   6,   6,   6,   6,   6,   5,   5,   5,   5,   5,   5,   5,   5,
-	5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   4,   4,
-	4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,
-	4,   4,   4,   4,   4,   4,   3,   3,   3,   3,   3,   3,   3,   3,   3,
-	3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,
-	3,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,
-	2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   1,   1,   1,
-	1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
-	1,   1,   1,   1,   1,   1,   1,   1,   1,   0,   0,   0,   0,   0,   0,
-	0,   0,   0,   0,   0,   0,   0,   0,   0,  -0,  -0,  -0,  -0,  -0,  -0,
-	-0,  -0
-};
-
 using namespace std;
-
-static const uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
 
 int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
@@ -84,7 +39,7 @@ int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataN
 			cout << "can't convert " << line << " to float" << endl;
 			return 1;
 		}
-		*data = static_cast<int16_t>(x);
+		*data = 0xFFFF;// static_cast<int16_t>(x);
 		data += stride;
 		counter++;
 	}
@@ -128,9 +83,11 @@ int main(int argc, char* argv[])
 	Fp_t x2[N2] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-		int data = x[i].re;
-		data -= 512; // center to 0 and make it signed
-		x[i].re = (Fp_t)data << 7; // to Q15.16
+		int data = x[i].re & 0x0000FFFF;
+		//data -= 512; // center to 0 and make it signed
+		data -= 0x7FFF;
+		//x[i].re = (Fp_t)data << 7; // to Q15.16
+		x[i].re = (Fp_t)(data >> 1);
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
@@ -142,7 +99,7 @@ int main(int argc, char* argv[])
 	}
 
 	OsakanaFpFftContext_t* ctx;
-	if (InitOsakanaFpFft(&ctx, N, 10) != 0) {
+	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
 		cout << "error" << endl;
 		return 1;
 	}

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <assert.h>
 #include "PeakDetectMachine.h"
 
