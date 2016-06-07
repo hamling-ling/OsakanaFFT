@@ -67,7 +67,7 @@ using namespace std;
 
 static const uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
 
-int readData(const string& filename, uint16_t* data, uint8_t stride, const int dataNum)
+int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
 	ifstream file(filename);
 	if (!file.is_open()) {
@@ -122,21 +122,21 @@ int main(int argc, char* argv[])
 
 	osk_fp_complex_t x[N] = { { 0, 0 } };
 	// supporse get 10bit analog input [0,1023]
-	//readData(argv[1], (uint16_t*)&x[0].re, 2, N_ADC);
+	readData(argv[1], &x[0].re, 2, N_ADC);
 
 	// convert to Q1.14 fixedpoint
 	Fp_t x2[N2] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-		FpBigFp_t w = x[i].re - 512; // center to 0 and make it signed
-		x[i].re = (Fp_t)w << 7; // to Q15.16
-
+		int data = x[i].re;
+		data -= 512; // center to 0 and make it signed
+		x[i].re = (Fp_t)data << 7; // to Q15.16
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
 
 	cout << "-- normalized input signal" << endl;
-	for (int i = 500; i < 520; i++) {
+	for (int i = 0; i < 10; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 	// nsdf
 	Fp_t* _nsdf = _m; // reuse buffer
 	for (int t = 0; t < N2; t++) {
-		Fp_t mt = _m[t] + INT2FP(1); // add small number to avoid 0 div
+		Fp_t mt = _m[t] +FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
@@ -204,8 +204,8 @@ int main(int argc, char* argv[])
 	MachineContext_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContext();
 	for (int i = 0; i < N2; i++) {
-		Fp2CStr(_nsdf[i], buf, sizeof(buf));
-		printf("Input %s\n", buf);
+		//Fp2CStr(_nsdf[i], buf, sizeof(buf));
+		//printf("Input %s\n", buf);
 		Input(mctx, _nsdf[i]);
 	}
 	
@@ -216,6 +216,11 @@ int main(int argc, char* argv[])
 		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
 		uint8_t note = kNoteTable[keyMaximums[0].index];
 		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
+		Fp_t delta = 0;
+		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
+			Fp2CStr(delta, buf, sizeof(buf));
+			printf("delta %s\n", buf);
+		}
 	}
 
 	DestroyPeakDetectMachineContext(mctx);
