@@ -127,18 +127,8 @@ int main(int argc, char* argv[])
 	Fp_t x2[N] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-
-		//adc_in[i] = 512;// debug
 		FpBigFp_t w = adc_in[i] - 512; // center to 0 and make it signed
-		//x[i].re = (Fp_t)w << 5; // to Q1.14
 		x[i].re = (Fp_t)w << 7; // to Q15.16
-
-		// cheating
-		//float wf = (adc_in[i] - 512.0) / 512.0;
-		//x[i].re = Float2Fp(wf);
-
-		//Fp2CStr(x.re[i], buf, sizeof(buf));
-		//printf("%s\n", buf);
 
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
@@ -165,14 +155,11 @@ int main(int argc, char* argv[])
 
 	cout << "-- power spectrum" << endl;
 	for (int i = 0; i < N; i++) {
-		//x[i] = fp_complex_mult(&x[i], &x[i]);
-
 		FpBigFp_t re = FpMul(x[i].re, x[i].re)
 						+ FpMul(x[i].im, x[i].im);
 		re = re >> 1;
 		x[i].re = (Fp_t)re;
 		x[i].im = 0;
-		//x[N - i - 1] = x[i];
 	}
 
 	for (int i = 30; i < 40; i++) {
@@ -187,22 +174,9 @@ int main(int argc, char* argv[])
 		printf("%s\n", buf);
 	}
 
-#if STRAIGHT_FORARD_M
-	Fp_t _m[N] = { 0 };
-	for (int t = 0; t < N; t++) {
-		for (int j = 0; j < N - t; j++) {
-			_m[t] = _m[t] + x2[j] + x2[j + t];
-		}
-	}
-	cout << "-- ms" << endl;
-	for (int i = 0; i < 10; i++) {
-		Fp2CStr(_m[i], buf, sizeof(buf));
-		printf("%s\n", buf);
-	}
-#else
-	Fp_t _m[N/2] = { 0 }; // smarter way
+	Fp_t _m[N2] = { 0 }; // smarter way
 	_m[0] = x[0].re << 2;
-	for (int t = 1; t < N/2; t++) {
+	for (int t = 1; t < N2; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
 	cout << "-- ms smart" << endl;
@@ -210,12 +184,10 @@ int main(int argc, char* argv[])
 		Fp2CStr(_m[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
-#endif
 
 	// nsdf
-	Fp_t _nsdf[N/2] = { 0 };
-	for (int t = 0; t < N/2; t++) {
-		//_nsdf[t] = (x[t].re << (1 + 1 + 4));
+	Fp_t _nsdf[N2] = { 0 };
+	for (int t = 0; t < N2; t++) {
 		Fp_t mt = (_m[t] | 1); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, _m[t]);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
@@ -230,7 +202,7 @@ int main(int argc, char* argv[])
 
 	MachineContext_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContext();
-	for (int i = 0; i < N/2; i++) {
+	for (int i = 0; i < N2; i++) {
 		Fp2CStr(_nsdf[i], buf, sizeof(buf));
 		printf("Input %s\n", buf);
 		Input(mctx, _nsdf[i]);
