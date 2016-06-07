@@ -67,7 +67,7 @@ using namespace std;
 
 static const uint32_t freq_per_001sample = FREQ_PER_001SAMPLE;
 
-int readData(const string& filename, uint16_t* data, const int dataNum)
+int readData(const string& filename, uint16_t* data, uint8_t stride, const int dataNum)
 {
 	ifstream file(filename);
 	if (!file.is_open()) {
@@ -76,15 +76,17 @@ int readData(const string& filename, uint16_t* data, const int dataNum)
 	}
 
 	string line;
-	int index = 0;
-	while (getline(file, line) && index < dataNum) {
+	int counter = 0;
+	while (getline(file, line) && counter < dataNum) {
 		istringstream iss(line);
 		float x;
 		if (!(iss >> x)) {
 			cout << "can't convert " << line << " to float" << endl;
 			return 1;
 		}
-		data[index++] = static_cast<int16_t>(x);
+		*data = static_cast<int16_t>(x);
+		data += stride;
+		counter++;
 	}
 
 	file.close();
@@ -118,16 +120,15 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	uint16_t adc_in[N_ADC] = { 0 };
+	osk_fp_complex_t x[N] = { { 0, 0 } };
 	// supporse get 10bit analog input [0,1023]
-	readData(argv[1], &adc_in[0], N_ADC);
+	readData(argv[1], (uint16_t*)&x[0].re, 2, N_ADC);
 
 	// convert to Q1.14 fixedpoint
-	osk_fp_complex_t x[N] = { { 0, 0} };
 	Fp_t x2[N] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-		FpBigFp_t w = adc_in[i] - 512; // center to 0 and make it signed
+		FpBigFp_t w = x[i].re - 512; // center to 0 and make it signed
 		x[i].re = (Fp_t)w << 7; // to Q15.16
 
 		x2[i] = FpMul(x[i].re, x[i].re);
