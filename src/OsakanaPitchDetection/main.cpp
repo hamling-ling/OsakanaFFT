@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 	}
 
 	// nsdf
-	Fp_t _nsdf[N2] = { 0 };
+	Fp_t* _nsdf = _m; // reuse buffer
 	for (int t = 0; t < N2; t++) {
 		Fp_t mt = (_m[t] | 1); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, _m[t]);
