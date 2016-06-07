@@ -107,28 +107,27 @@ void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int list
 	*num = counter;
 }
 
-void ParabolicInterp(MachineContext_t* ctx, Fp_t* xs, uint16_t N)
+ bool ParabolicInterp(MachineContext_t* ctx, int index, Fp_t* xs, int N, Fp_t* x)
 {
-	for (int i = 0; i < ctx->keyMaxsNum; i++) {
-		PeekInfo* pPeak = &(ctx->keyMaxs[i]);
-		if (0 == pPeak->index || N <= pPeak->index + 1) {
-			continue;
-		}
-		
-		//use Ragrange interpolation
-		Fp_t x0 = Int2Fp(pPeak->index - 1);
-		Fp_t x1 = Int2Fp(pPeak->index + 0);
-		Fp_t x2 = Int2Fp(pPeak->index + 1);
-		Fp_t y0 = xs[pPeak->index - 1];
-		Fp_t y1 = xs[pPeak->index + 0];
-		Fp_t y2 = xs[pPeak->index + 1];
-
-		Fp_t x0x0 = FpMul(x0, x0);
-		Fp_t x1x1 = FpMul(x1, x1);
-		Fp_t x2x2 = FpMul(x2, x2);
-
-		// T.B.D.
+	if (0 == index || N <= index + 1) {
+		return false;
 	}
+	
+	//use Ragrange interpolation
+	// consider (-1,y0),(0,y1),(1,y2)
+	// at x = (y0 - y2) / (2 * (y0 + y2) - y1) , y'=0
+	Fp_t y0 = xs[index - 1];
+	Fp_t y1 = xs[index + 0];
+	Fp_t y2 = xs[index + 1];
+	
+	Fp_t num = y0 - y2;
+	Fp_t denom = ((y0 + y2) << 1) - y1;
+	if (denom == 0) {
+		return false;
+	}
+	*x = FpDiv(num, denom);
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -150,6 +149,9 @@ static void UpdateLocalKeyMax(MachineContext_t* ctx, Fp_t x, uint16_t index)
 
 static void PushLocalKeyMax(MachineContext_t* ctx)
 {
+	if (kKeyMax <= ctx->keyMaxsNum + 1) {
+		return;
+	}
 	ctx->keyMaxs[ctx->keyMaxsNum] = ctx->localKeyMax;
 	ctx->keyMaxsNum++;
 	if (ctx->globalKeyMax.value < ctx->localKeyMax.value) {
@@ -184,7 +186,6 @@ static PeakDetectMachineEvent_t End_DetectEvent(MachineContext_t* ctx, Fp_t x) {
 
 static void ChangeState(MachineContext_t* ctx, PeakDetectMachineState_t state)
 {
-	printf("state %d -> %d\n", ctx->state, state);
 	ctx->state = state;
 }
 

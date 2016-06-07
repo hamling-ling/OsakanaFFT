@@ -43,7 +43,7 @@ extern "C" {
 	void Input(MachineContext_t* ctx, Fp_t x);
 	void ResetMachine(MachineContext_t* ctx);
 	void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int listmaxlen, int *num);
-	void ParabolicInterp(MachineContext_t* ctx, Fp_t* xs, uint16_t N);
+	bool ParabolicInterp(MachineContext_t* ctx, int index, Fp_t* xs, int N, Fp_t* x);
 
 #ifdef __cplusplus
 }
