@@ -20,7 +20,17 @@
 #define NOTE_CONST			0.025085832972
 #define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
 
+
 using namespace std;
+
+#if defined (_USE_Q1_14_FIXEDPOINT)
+static const string kNsdfFileName("nsdf_Q1.14.dat");
+#elif defined(_USE_Q7_8_FIXEDPOINT)
+static const string kNsdfFileName("nsdf_Q7.8.dat");
+#else
+static const string kNsdfFileName("nsdf_Q15.16.dat");
+#endif
+
 
 int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
@@ -160,7 +170,7 @@ int main(int argc, char* argv[])
 		printf("%s\n", buf);
 	}
 
-	saveData("nsdf.dat", _nsdf, 512);
+	saveData(kNsdfFileName, _nsdf, 512);
 
 	MachineContext_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContext();
