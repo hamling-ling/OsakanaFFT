@@ -39,7 +39,7 @@ int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataN
 			cout << "can't convert " << line << " to float" << endl;
 			return 1;
 		}
-		*data = 0xFFFF;// static_cast<int16_t>(x);
+		*data = static_cast<int16_t>(x);
 		data += stride;
 		counter++;
 	}
@@ -57,11 +57,9 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 	}
 
 	for (int i = 0; i < dataNum; i++) {
-		//stringstream ss;
 		char buf[128] = { 0 };
 		Fp2CStr(data[i], buf, sizeof(buf));
 		file << buf << endl;
-		//file << ss.str();
 	}
 
 	file.close();
@@ -83,11 +81,9 @@ int main(int argc, char* argv[])
 	Fp_t x2[N2] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-		int data = x[i].re & 0x0000FFFF;
-		//data -= 512; // center to 0 and make it signed
-		data -= 0x7FFF;
-		//x[i].re = (Fp_t)data << 7; // to Q15.16
-		x[i].re = (Fp_t)(data >> 1);
+		int data = x[i].re & 0x00003FFF;
+		data -= 512; // center to 0 and make it signed
+		x[i].re = (Fp_t)data << (FPSHFT-9+1);// div 512 then shift +1
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
