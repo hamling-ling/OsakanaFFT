@@ -19,7 +19,7 @@
 #define FREQ_PER_001SAMPLE	((uint32_t)(100.0f *1.0f/T_PER_SAMPLE))
 #define NOTE_CONST			0.025085832972
 #define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
-
+#define DEBUG_OUTPUT_NUM    512
 
 using namespace std;
 
@@ -31,6 +31,10 @@ static const string kNsdfFileName("nsdf_Q7.8.dat");
 static const string kNsdfFileName("nsdf_Q15.16.dat");
 #endif
 
+osk_fp_complex_t x[N] = { { 0, 0 } };
+Fp_t x2[N2] = { 0 };
+Fp_t _m[N2] = { 0 };
+char buf[128] = { 0 };// for output
 
 int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
@@ -76,81 +80,75 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 	return 0;
 }
 
-int main(int argc, char* argv[])
+
+int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string& filename)
 {
-	if (argc < 1) {
-		wcout << "need to give file in command-line paremeter" << endl;
-		return 1;
+	// till stabilized reset all
+	memset(&x, 0, sizeof(x));
+	memset(&x2, 0, sizeof(x2));
+	memset(&_m, 0, sizeof(_m));
+
+	// sampling from analog pin
+	printf("sampling...\n");
+	readData(filename, &x[0].re, 2, N_ADC);
+	printf("sampled\n");
+
+	printf("raw data --\n");
+	for (int i = 0; i < 512; i++) {
+		printf("%u\n", x[i].re);
 	}
-
-	osk_fp_complex_t x[N] = { { 0, 0 } };
-	// supporse get 10bit analog input [0,1023]
-	readData(argv[1], &x[0].re, 2, N_ADC);
-
-	// convert to Q1.14 fixedpoint
-	Fp_t x2[N2] = { 0 };
-	char buf[128] = { 0 };// for output
+	printf("normalizing...\n");
 	for (int i = 0; i < N2; i++) {
-
-		int data = x[i].re & 0x000003FF;
+		int data = x[i].re & 0x00003FFF;
 		data -= 512; // center to 0 and make it signed
-#if defined(_USE_Q7_8_FIXEDPOINT)
-		x[i].re = (Fp_t)data >> (9 - FPSHFT);// div 512 then shift
-#else
-		x[i].re = (Fp_t)data << (FPSHFT-9);// div 512 then shift
-#endif
-
+		x[i].re = (Fp_t)data << (FPSHFT - 9);// div 512 then shift
+		x[i].im = 0;
+		x[N - i - 1].re = 0;
+		x[N - i - 1].im = 0;
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
+	printf("normalized\n");
 
-	cout << "-- normalized input signal" << endl;
-	for (int i = 0; i < 10; i++) {
+	printf("-- normalized input signal\n");
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
 
-	OsakanaFpFftContext_t* ctx;
-	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
-		cout << "error" << endl;
-		return 1;
-	}
-
-	cout << "-- fft/N" << endl;
+	printf("-- fft/N\n");
 	OsakanaFpFft(ctx, x, 1);
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
 
-	cout << "-- power spectrum" << endl;
+	printf("-- power spectrum\n");
 	for (int i = 0; i < N; i++) {
-		FpW_t re = FpMul(x[i].re, x[i].re)
-						+ FpMul(x[i].im, x[i].im);
-		re = re >> 1;
-		x[i].re = (Fp_t)re;
+		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
+		x[i].re = (Fp_t)(re >> 1);
 		x[i].im = 0;
 	}
 
-	for (int i = 30; i < 40; i++) {
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
 
-	cout << "-- IFFT" << endl;
+	printf("-- IFFT\n");
 	OsakanaFpIfft(ctx, x, 1);
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
 
-	Fp_t _m[N2] = { 0 }; // smarter way
 	_m[0] = x[0].re << 2;
 	for (int t = 1; t < N2; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
-	cout << "-- ms smart" << endl;
-	for (int i = 0; i < 10; i++) {
+
+	printf("-- ms smart\n");
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		Fp2CStr(_m[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
@@ -158,26 +156,23 @@ int main(int argc, char* argv[])
 	// nsdf
 	Fp_t* _nsdf = _m; // reuse buffer
 	for (int t = 0; t < N2; t++) {
-		Fp_t mt = _m[t] +FLOAT2FP(0.01f); // add small number to avoid 0 div
+		Fp_t mt = _m[t] + FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
-	cout << "-- _nsdf" << endl;
-	for (int i = 0; i < 10; i++) {
+	printf("-- _nsdf\n");
+	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		Fp2CStr(_nsdf[i], buf, sizeof(buf));
 		printf("%s\n", buf);
 	}
 
-	saveData(kNsdfFileName, _nsdf, 512);
-
-	MachineContext_t* mctx = NULL;
-	mctx = CreatePeakDetectMachineContext();
+	printf("-- pitch detection\n");
 	for (int i = 0; i < N2; i++) {
 		//Fp2CStr(_nsdf[i], buf, sizeof(buf));
 		//printf("Input %s\n", buf);
 		Input(mctx, _nsdf[i]);
 	}
-	
+
 	PeekInfo keyMaximums[1] = { 0 };
 	int keyMaxLen = 0;
 	GetKeyMaximums(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
@@ -192,11 +187,35 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	printf("finished\n");
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 1) {
+		wcout << "need to give file in command-line paremeter" << endl;
+		return 1;
+	}
+
+	OsakanaFpFftContext_t* ctx;
+	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
+		printf("InitOsakanaFpFft error\n");
+		return 1;
+	}
+
+	MachineContext_t* mctx = NULL;
+	mctx = CreatePeakDetectMachineContext();
+
+	while (1) {
+		DetectPitch(ctx, mctx, argv[1]);
+		ResetMachine(mctx);
+		break;// for debug
+	}
+
 	DestroyPeakDetectMachineContext(mctx);
-
 	CleanOsakanaFpFft(ctx);
-	ctx = NULL;
 
-    return 0;
+	return 0;
 }
 
