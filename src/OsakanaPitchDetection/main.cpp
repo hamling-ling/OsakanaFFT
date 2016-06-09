@@ -67,11 +67,9 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 	}
 
 	for (int i = 0; i < dataNum; i++) {
-		//stringstream ss;
 		char buf[128] = { 0 };
 		Fp2CStr(data[i], buf, sizeof(buf));
 		file << buf << endl;
-		//file << ss.str();
 	}
 
 	file.close();
@@ -93,15 +91,15 @@ int main(int argc, char* argv[])
 	Fp_t x2[N2] = { 0 };
 	char buf[128] = { 0 };// for output
 	for (int i = 0; i < N2; i++) {
-		int data = x[i].re & 0x000003ff;//*
-		data -= 512;//*
-#if defined (_USE_Q1_14_FIXEDPOINT)
-		x[i].re = (Fp_t)(data << 6); //* to Q1.14( /512 then << 14 + 1)
-#elif defined(_USE_Q7_8_FIXEDPOINT)
-		x[i].re = (Fp_t)data << 8; // to Q7.8( /512 then << 16 + 1)
+
+		int data = x[i].re & 0x000003FF;
+		data -= 512; // center to 0 and make it signed
+#if defined(_USE_Q7_8_FIXEDPOINT)
+		x[i].re = (Fp_t)data >> (9 - FPSHFT);// div 512 then shift
 #else
-		x[i].re = (Fp_t)data << 8; // to Q15.16( /512 then << 16 + 1)
+		x[i].re = (Fp_t)data << (FPSHFT-9);// div 512 then shift
 #endif
+
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
