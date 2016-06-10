@@ -87,20 +87,15 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 
 int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string& filename)
 {
-	// till stabilized reset all
-	memset(&x, 0, sizeof(x));
-	memset(&x2, 0, sizeof(x2));
-	memset(&_m, 0, sizeof(_m));
-
 	// sampling from analog pin
-	DLOG("sampling...\n");
+	DLOG("sampling...");
 	readData(filename, &x[0].re, 2, N_ADC);
-	DLOG("sampled\n");
+	DLOG("sampled");
 
-	DLOG("raw data --\n");
+	DLOG("raw data --");
 	DRAWDATA(x, 512);
 
-	DLOG("normalizing...\n");
+	DLOG("normalizing...");
 	for (int i = 0; i < N2; i++) {
 		int data = x[i].re & 0x00003FFF;
 		data -= 512; // center to 0 and make it signed
@@ -111,46 +106,33 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
-	DLOG("normalized\n");
+	DLOG("normalized");
 
-	DLOG("-- normalized input signal\n");
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		fp_complex_str(&x[i], buf, sizeof(buf));
-		DLOG("%s\n", buf);
-	}
+	DLOG("-- normalized input signal");
+	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
 
-	DLOG("-- fft/N\n");
+	DLOG("-- fft/N");
 	OsakanaFpFft(ctx, x, 1);
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		fp_complex_str(&x[i], buf, sizeof(buf));
-		DLOG("%s\n", buf);
-	}
+	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
 
-	DLOG("-- power spectrum\n");
+	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
 		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
 		x[i].re = (Fp_t)(re >> 1);
 		x[i].im = 0;
 	}
+	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
 
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		fp_complex_str(&x[i], buf, sizeof(buf));
-		DLOG("%s\n", buf);
-	}
-
-	DLOG("-- IFFT\n");
+	DLOG("-- IFFT");
 	OsakanaFpIfft(ctx, x, 1);
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		fp_complex_str(&x[i], buf, sizeof(buf));
-		DLOG("%s\n", buf);
-	}
+	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
 
 	_m[0] = x[0].re << 2;
 	for (int t = 1; t < N2; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
 
-	printf("-- ms smart\n");
+	printf("-- ms smart");
 	DFPS(_m, DEBUG_OUTPUT_NUM);
 
 	// nsdf
@@ -160,10 +142,10 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
-	DLOG("-- _nsdf\n");
+	DLOG("-- _nsdf");
 	DFPS(_nsdf, DEBUG_OUTPUT_NUM);
 
-	DLOG("-- pitch detection\n");
+	DLOG("-- pitch detection");
 	for (int i = 0; i < N2; i++) {
 		Input(mctx, _nsdf[i]);
 	}
@@ -182,20 +164,20 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		}
 	}
 
-	printf("finished\n");
+	DLOG("finished");
 	return 0;
 }
 
 int main(int argc, char* argv[])
 {
 	if (argc < 1) {
-		wcout << "need to give file in command-line paremeter" << endl;
+		DLOG("need to give file in command-line paremeter");
 		return 1;
 	}
 
 	OsakanaFpFftContext_t* ctx;
 	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
-		printf("InitOsakanaFpFft error\n");
+		DLOG("InitOsakanaFpFft error");
 		return 1;
 	}
 

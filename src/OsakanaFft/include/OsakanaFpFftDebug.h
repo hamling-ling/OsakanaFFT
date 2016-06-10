@@ -3,17 +3,17 @@
 
 #define DEBUG_OUTPUT_NUM    512
 #if defined(_DEBUG)
-#define DLOG(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__);
+#define DLOG(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__);
 #define DCOMPLEX(cs, num) 	for (int i = 0; i < num; i++) { \
 								fp_complex_str(&cs[i], buf, sizeof(buf)); \
-								DLOG("%s\n", buf); \
+								DLOG("%s", buf); \
 							}
 #define DFPS(fps, num)		for (int i = 0; i < num; i++) { \
 								Fp2CStr(fps[i], buf, sizeof(buf)); \
-								printf("%s\n", buf); \
+								DLOG("%s", buf); \
 							}
 #define DRAWDATA(x, num)	for (int i = 0; i < num; i++) { \
-								DLOG("%u\n", x[i].re); \
+								DLOG("%u", x[i].re); \
 							}
 #else
 #define DLOG(fmt, ...)
