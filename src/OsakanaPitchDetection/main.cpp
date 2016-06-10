@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include "OsakanaFpFft.h"
+#include "OsakanaFpFftDebug.h"
 #include "PeakDetectMachine.h"
 
 #define N					512		// fft sampling num(last half is 0 pad)
@@ -19,7 +20,10 @@
 #define FREQ_PER_001SAMPLE	((uint32_t)(100.0f *1.0f/T_PER_SAMPLE))
 #define NOTE_CONST			0.025085832972
 #define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
+
+// debug
 #define DEBUG_OUTPUT_NUM    512
+
 
 using namespace std;
 
@@ -89,41 +93,40 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 	memset(&_m, 0, sizeof(_m));
 
 	// sampling from analog pin
-	printf("sampling...\n");
+	DLOG("sampling...\n");
 	readData(filename, &x[0].re, 2, N_ADC);
-	printf("sampled\n");
+	DLOG("sampled\n");
 
-	printf("raw data --\n");
-	for (int i = 0; i < 512; i++) {
-		printf("%u\n", x[i].re);
-	}
-	printf("normalizing...\n");
+	DLOG("raw data --\n");
+	DRAWDATA(x, 512);
+
+	DLOG("normalizing...\n");
 	for (int i = 0; i < N2; i++) {
 		int data = x[i].re & 0x00003FFF;
 		data -= 512; // center to 0 and make it signed
 		x[i].re = (Fp_t)data << (FPSHFT - 9);// div 512 then shift
 		x[i].im = 0;
-		x[N - i - 1].re = 0;
-		x[N - i - 1].im = 0;
+		x[N2+i].re = 0;
+		x[N2+1].im = 0;
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
-	printf("normalized\n");
+	DLOG("normalized\n");
 
-	printf("-- normalized input signal\n");
+	DLOG("-- normalized input signal\n");
 	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
-		printf("%s\n", buf);
+		DLOG("%s\n", buf);
 	}
 
-	printf("-- fft/N\n");
+	DLOG("-- fft/N\n");
 	OsakanaFpFft(ctx, x, 1);
 	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
-		printf("%s\n", buf);
+		DLOG("%s\n", buf);
 	}
 
-	printf("-- power spectrum\n");
+	DLOG("-- power spectrum\n");
 	for (int i = 0; i < N; i++) {
 		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
 		x[i].re = (Fp_t)(re >> 1);
@@ -132,14 +135,14 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 
 	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
-		printf("%s\n", buf);
+		DLOG("%s\n", buf);
 	}
 
-	printf("-- IFFT\n");
+	DLOG("-- IFFT\n");
 	OsakanaFpIfft(ctx, x, 1);
 	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
 		fp_complex_str(&x[i], buf, sizeof(buf));
-		printf("%s\n", buf);
+		DLOG("%s\n", buf);
 	}
 
 	_m[0] = x[0].re << 2;
@@ -148,10 +151,7 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 	}
 
 	printf("-- ms smart\n");
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		Fp2CStr(_m[i], buf, sizeof(buf));
-		printf("%s\n", buf);
-	}
+	DFPS(_m, DEBUG_OUTPUT_NUM);
 
 	// nsdf
 	Fp_t* _nsdf = _m; // reuse buffer
@@ -160,16 +160,11 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
-	printf("-- _nsdf\n");
-	for (int i = 0; i < DEBUG_OUTPUT_NUM; i++) {
-		Fp2CStr(_nsdf[i], buf, sizeof(buf));
-		printf("%s\n", buf);
-	}
+	DLOG("-- _nsdf\n");
+	DFPS(_nsdf, DEBUG_OUTPUT_NUM);
 
-	printf("-- pitch detection\n");
+	DLOG("-- pitch detection\n");
 	for (int i = 0; i < N2; i++) {
-		//Fp2CStr(_nsdf[i], buf, sizeof(buf));
-		//printf("Input %s\n", buf);
 		Input(mctx, _nsdf[i]);
 	}
 

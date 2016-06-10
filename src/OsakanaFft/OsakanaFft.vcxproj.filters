@@ -42,6 +42,9 @@
     <ClInclude Include="..\GlobalConfig.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="include\OsakanaFpFftDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\OsakanaFft.cpp">

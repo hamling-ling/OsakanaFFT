@@ -162,6 +162,7 @@
     <ClInclude Include="include\OsakanaFp.h" />
     <ClInclude Include="include\OsakanaFpComplex.h" />
     <ClInclude Include="include\OsakanaFpFft.h" />
+    <ClInclude Include="include\OsakanaFpFftDebug.h" />
     <ClInclude Include="src\bitreversetable.h" />
     <ClInclude Include="src\OsakanaFftUtil.h" />
     <ClInclude Include="src\twiddletable.h" />
