@@ -38,7 +38,6 @@ static const string kNsdfFileName("nsdf_Q15.16.dat");
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
 Fp_t _m[N2] = { 0 };
-char buf[128] = { 0 };// for output
 
 int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
@@ -102,7 +101,7 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		x[i].re = (Fp_t)data << (FPSHFT - 9);// div 512 then shift
 		x[i].im = 0;
 		x[N2+i].re = 0;
-		x[N2+1].im = 0;
+		x[N2+i].im = 0;
 		x2[i] = FpMul(x[i].re, x[i].re);
 		x2[i] = x2[i] >> 10;
 	}
@@ -132,7 +131,7 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
 
-	printf("-- ms smart");
+	DLOG("-- ms smart");
 	DFPS(_m, DEBUG_OUTPUT_NUM);
 
 	// nsdf
@@ -187,7 +186,7 @@ int main(int argc, char* argv[])
 	while (1) {
 		DetectPitch(ctx, mctx, argv[1]);
 		ResetMachine(mctx);
-		break;// for debug
+		//break;// for debug
 	}
 
 	DestroyPeakDetectMachineContext(mctx);

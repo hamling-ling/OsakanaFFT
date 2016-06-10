@@ -2,7 +2,9 @@
 #define _DEBUG_H_
 
 #define DEBUG_OUTPUT_NUM    512
+
 #if defined(_DEBUG)
+char buf[128] = { 0 };// not thread safe!
 #define DLOG(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__);
 #define DCOMPLEX(cs, num) 	for (int i = 0; i < num; i++) { \
 								fp_complex_str(&cs[i], buf, sizeof(buf)); \
