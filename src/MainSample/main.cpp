@@ -86,8 +86,8 @@ void testFpFft()
 
 int main()
 {
-	//testFft();
-	testFpFft();
+	testFft();
+	//testFpFft();
 
 	return 0;
 }

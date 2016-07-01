@@ -159,6 +159,7 @@
     <ClInclude Include="..\GlobalConfig.h" />
     <ClInclude Include="include\OsakanaComplex.h" />
     <ClInclude Include="include\OsakanaFft.h" />
+    <ClInclude Include="include\OsakanaFftDebug.h" />
     <ClInclude Include="include\OsakanaFp.h" />
     <ClInclude Include="include\OsakanaFpComplex.h" />
     <ClInclude Include="include\OsakanaFpFft.h" />

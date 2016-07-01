@@ -7,9 +7,11 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include "OsakanaFft.h"
 #include "OsakanaFpFft.h"
 #include "OsakanaFpFftDebug.h"
 #include "PeakDetectMachine.h"
+#include "PeakDetectMachineFp.h"
 
 #define N					512		// fft sampling num(last half is 0 pad)
 #define LOG2N				9		// log2(N)
@@ -22,7 +24,7 @@
 #define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
 
 // debug
-#define DEBUG_OUTPUT_NUM    512
+#define DEBUG_OUTPUT_NUM    10
 
 
 using namespace std;
@@ -39,7 +41,11 @@ osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
 Fp_t _m[N2] = { 0 };
 
-int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
+osk_complex_t xf[N] = { { 0, 0 } };
+float xf2[N2] = { 0 };
+float _mf[N2] = { 0 };
+
+int readDataFp(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
 {
 	ifstream file(filename);
 	if (!file.is_open()) {
@@ -57,6 +63,32 @@ int readData(const string& filename, Fp_t* data, uint8_t stride, const int dataN
 			return 1;
 		}
 		*data = static_cast<int16_t>(x);
+		data += stride;
+		counter++;
+	}
+
+	file.close();
+	return 0;
+}
+
+int readData(const string& filename, float* data, uint8_t stride, const int dataNum)
+{
+	ifstream file(filename);
+	if (!file.is_open()) {
+		cout << "can't open " << filename << endl;
+		return 1;
+	}
+
+	string line;
+	int counter = 0;
+	while (getline(file, line) && counter < dataNum) {
+		istringstream iss(line);
+		float x;
+		if (!(iss >> x)) {
+			cout << "can't convert " << line << " to float" << endl;
+			return 1;
+		}
+		*data = x;
 		data += stride;
 		counter++;
 	}
@@ -83,12 +115,11 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 	return 0;
 }
 
-
-int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string& filename)
+int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const string& filename)
 {
 	// sampling from analog pin
 	DLOG("sampling...");
-	readData(filename, &x[0].re, 2, N_ADC);
+	readDataFp(filename, &x[0].re, 2, N_ADC);
 	DLOG("sampled");
 
 	DLOG("raw data --");
@@ -108,11 +139,11 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 	DLOG("normalized");
 
 	DLOG("-- normalized input signal");
-	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
+	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- fft/N");
 	OsakanaFpFft(ctx, x, 1);
-	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
+	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
@@ -120,11 +151,11 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 		x[i].re = (Fp_t)(re >> 1);
 		x[i].im = 0;
 	}
-	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
+	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
 	OsakanaFpIfft(ctx, x, 1);
-	DCOMPLEX(x, DEBUG_OUTPUT_NUM);
+	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	_m[0] = x[0].re << 2;
 	for (int t = 1; t < N2; t++) {
@@ -146,20 +177,98 @@ int DetectPitch(OsakanaFpFftContext_t* ctx, MachineContext_t* mctx, const string
 
 	DLOG("-- pitch detection");
 	for (int i = 0; i < N2; i++) {
-		Input(mctx, _nsdf[i]);
+		InputFp(mctx, _nsdf[i]);
 	}
 
-	PeekInfo keyMaximums[1] = { 0 };
+	PeekInfoFp keyMaximums[1] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximums(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
+	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
 		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
 		uint8_t note = kNoteTable[keyMaximums[0].index];
 		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		Fp_t delta = 0;
-		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
+		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			Fp2CStr(delta, buf, sizeof(buf));
 			printf("delta %s\n", buf);
+		}
+	}
+
+	DLOG("finished");
+	return 0;
+}
+
+int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& filename)
+{
+	// sampling from analog pin
+	DLOG("sampling...");
+	readData(filename, &xf[0].re, 2, N_ADC);
+	DLOG("sampled");
+
+	DLOG("raw data --");
+	DRAWDATAf(xf, DEBUG_OUTPUT_NUM);
+
+	DLOG("normalizing...");
+	for (int i = 0; i < N2; i++) { 
+		xf[i].re -= 512.0f;
+		xf[i].im = 0.0f;
+		xf[N2 + i].re = 0.0f;
+		xf[N2 + i].im = 0.0f;
+		xf2[i] = xf[i].re * xf[i].re;
+	}
+	DLOG("normalized");
+
+	DLOG("-- normalized input signal");
+	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
+
+	DLOG("-- fft/N");
+	OsakanaFft(ctx, xf);
+	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
+
+	DLOG("-- power spectrum");
+	for (int i = 0; i < N; i++) {
+		xf[i].re = xf[i].re * xf[i].re + xf[i].im * xf[i].im;
+		xf[i].im = 0.0f;
+	}
+	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
+
+	DLOG("-- IFFT");
+	OsakanaIfft(ctx, xf);
+	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
+
+	_mf[0] = xf[0].re * 4.0f;
+	for (int t = 1; t < N2; t++) {
+		_mf[t] = _mf[t - 1] - xf2[t - 1] + xf2[t];
+	}
+
+	DLOG("-- ms smart");
+	DFPS(_mf, DEBUG_OUTPUT_NUM);
+
+	// nsdf
+	float* _nsdf = _mf; // reuse buffer
+	for (int t = 0; t < N2; t++) {
+		float mt = _mf[t] + 0.01f; // add small number to avoid 0 div
+		_nsdf[t] = FpDiv(xf[t].re, mt);
+		_nsdf[t] = _nsdf[t] * 2.0f * 2.0f;
+	}
+	DLOG("-- _nsdf");
+	DFPS(_nsdf, DEBUG_OUTPUT_NUM);
+
+	DLOG("-- pitch detection");
+	for (int i = 0; i < N2; i++) {
+		Input(mctx, _nsdf[i]);
+	}
+
+	PeekInfo keyMaximums[1] = { 0 };
+	int keyMaxLen = 0;
+	GetKeyMaximums(mctx, 0.8f, keyMaximums, 1, &keyMaxLen);
+	if (0 < keyMaxLen) {
+		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
+		uint8_t note = kNoteTable[keyMaximums[0].index];
+		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
+		float delta = 0;
+		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
+			printf("delta f\n", delta);
 		}
 	}
 
@@ -174,23 +283,44 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+
+
+#if 1
+	MachineContextFp_t* mctx = NULL;
+	mctx = CreatePeakDetectMachineContextFp();
+
 	OsakanaFpFftContext_t* ctx;
 	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
 		DLOG("InitOsakanaFpFft error");
 		return 1;
 	}
 
+	while (1) {
+		DetectPitchFp(ctx, mctx, argv[1]);
+		ResetMachineFp(mctx);
+		break;// for debug
+	}
+	CleanOsakanaFpFft(ctx);
+
+	DestroyPeakDetectMachineContextFp(mctx);
+#else
 	MachineContext_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContext();
+
+	OsakanaFftContext_t* ctx;
+	if (InitOsakanaFft(&ctx, N, LOG2N) != 0) {
+		DLOG("InitOsakanaFpFft error");
+		return 1;
+	}
 
 	while (1) {
 		DetectPitch(ctx, mctx, argv[1]);
 		ResetMachine(mctx);
-		//break;// for debug
+		break;// for debug
 	}
 
 	DestroyPeakDetectMachineContext(mctx);
-	CleanOsakanaFpFft(ctx);
+#endif
 
 	return 0;
 }

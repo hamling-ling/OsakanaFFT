@@ -45,6 +45,9 @@
     <ClInclude Include="include\OsakanaFpFftDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="include\OsakanaFftDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\OsakanaFft.cpp">

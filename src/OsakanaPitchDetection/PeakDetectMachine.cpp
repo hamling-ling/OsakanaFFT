@@ -1,27 +1,29 @@
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 #include "PeakDetectMachine.h"
 
-static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx, Fp_t x);
-static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx, Fp_t x);
-static PeakDetectMachineEvent_t End_DetectEvent(MachineContext_t* ctx, Fp_t x);
+static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx, float x);
+static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx, float x);
+static PeakDetectMachineEvent_t End_DetectEvent(MachineContext_t* ctx, float x);
 static void ChangeState(MachineContext_t* ctx, PeakDetectMachineState_t state);
 
-static void SeachingBell_PosCross(MachineContext_t* ctx, Fp_t x);
-static void SeachingBell_NegCross(MachineContext_t* ctx, Fp_t x);
-static void SeachingBell_NmlData(MachineContext_t* ctx, Fp_t x);
-static void SeachingBell_EndOfData(MachineContext_t* ctx, Fp_t x);
+static void SeachingBell_PosCross(MachineContext_t* ctx, float x);
+static void SeachingBell_NegCross(MachineContext_t* ctx, float x);
+static void SeachingBell_NmlData(MachineContext_t* ctx, float x);
+static void SeachingBell_EndOfData(MachineContext_t* ctx, float x);
 
-static void WalkingOnBell_PosCross(MachineContext_t* ctx, Fp_t x);
-static void WalkingOnBell_NegCross(MachineContext_t* ctx, Fp_t x);
-static void WalkingOnBell_NmlData(MachineContext_t* ctx, Fp_t x);
-static void WalkingOnBell_EndOfData(MachineContext_t* ctx, Fp_t x);
+static void WalkingOnBell_PosCross(MachineContext_t* ctx, float x);
+static void WalkingOnBell_NegCross(MachineContext_t* ctx, float x);
+static void WalkingOnBell_NmlData(MachineContext_t* ctx, float x);
+static void WalkingOnBell_EndOfData(MachineContext_t* ctx, float x);
 
-static void End_PosCross(MachineContext_t* ctx, Fp_t x);
-static void End_NegCross(MachineContext_t* ctx, Fp_t x);
-static void End_NmlData(MachineContext_t* ctx, Fp_t x);
-static void End_EndOfData(MachineContext_t* ctx, Fp_t x);
+static void End_PosCross(MachineContext_t* ctx, float x);
+static void End_NegCross(MachineContext_t* ctx, float x);
+static void End_NmlData(MachineContext_t* ctx, float x);
+static void End_EndOfData(MachineContext_t* ctx, float x);
 
-typedef PeakDetectMachineEvent_t (*EventDetector_t)(MachineContext_t* ctx, Fp_t x);
+typedef PeakDetectMachineEvent_t (*EventDetector_t)(MachineContext_t* ctx, float x);
 
 static StateFunc_t s_funcs[kStateNum][kEventNum] = {
 	{ SeachingBell_PosCross,	SeachingBell_NegCross,	SeachingBell_NmlData,	SeachingBell_EndOfData },
@@ -64,13 +66,12 @@ MachineContext_t* CreatePeakDetectMachineContext()
 	return ctx;
 }
 
-
 void DestroyPeakDetectMachineContext(MachineContext_t* ctx)
 {
 	free(ctx);
 }
 
-void Input(MachineContext_t* ctx, Fp_t x)
+void Input(MachineContext_t* ctx, float x)
 {
 	EventDetector_t detector = ctx->detectors[ctx->state];
 	PeakDetectMachineEvent_t evt = detector(ctx, x);
@@ -86,7 +87,7 @@ void ResetMachine(MachineContext_t* ctx)
 	ctx->detectors = s_eventDetectors;
 }
 
-void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int listmaxlen, int *num)
+void GetKeyMaximums(MachineContext_t* ctx, float filter, PeekInfo* list, int listmaxlen, int *num)
 {
 	if (ctx->keyMaxsNum == 0) {
 		*num = 0;
@@ -94,10 +95,10 @@ void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int list
 	}
 
 	int counter = 0;
-	Fp_t th = FpMul(ctx->globalKeyMax.value, filter);
+	float th = ctx->globalKeyMax.value * filter;
 	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
-		Fp_t keyMax = ctx->keyMaxs[i].value;
-		if (FpMul(filter, keyMax) < th) {
+		float keyMax = ctx->keyMaxs[i].value;
+		if (filter * keyMax < th) {
 			continue;
 		}
 
@@ -106,7 +107,7 @@ void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int list
 	*num = counter;
 }
 
- bool ParabolicInterp(MachineContext_t* ctx, int index, Fp_t* xs, int N, Fp_t* x)
+ bool ParabolicInterp(MachineContext_t* ctx, int index, float* xs, int N, float* x)
 {
 	if (0 == index || N <= index + 1) {
 		return false;
@@ -115,16 +116,16 @@ void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int list
 	//use Ragrange interpolation
 	// consider (-1,y0),(0,y1),(1,y2)
 	// at x = (y0 - y2) / (2 * (y0 + y2) - y1) , y'=0
-	Fp_t y0 = xs[index - 1];
-	Fp_t y1 = xs[index + 0];
-	Fp_t y2 = xs[index + 1];
+	float y0 = xs[index - 1];
+	float y1 = xs[index + 0];
+	float y2 = xs[index + 1];
 	
-	Fp_t num = y0 - y2;
-	Fp_t denom = ((y0 + y2) << 1) - y1;
+	float num = y0 - y2;
+	float denom = ((y0 + y2) * 2.0) - y1;
 	if (denom == 0) {
 		return false;
 	}
-	*x = FpDiv(num, denom);
+	*x = num / denom;
 
 	return true;
 }
@@ -133,14 +134,14 @@ void GetKeyMaximums(MachineContext_t* ctx, Fp_t filter, PeekInfo* list, int list
 // Private
 /////////////////////////////////////////////////////////////////////
 
-static void UpdateValueHistory(MachineContext_t* ctx, Fp_t x)
+static void UpdateValueHistory(MachineContext_t* ctx, float x)
 {
 	ctx->lastInput.value = x;
 	ctx->lastInput.index = ctx->currentIndex;
 	ctx->currentIndex++;
 }
 
-static void UpdateLocalKeyMax(MachineContext_t* ctx, Fp_t x, uint16_t index)
+static void UpdateLocalKeyMax(MachineContext_t* ctx, float x, uint16_t index)
 {
 	PeekInfo localMax = { x, index };
 	ctx->localKeyMax = localMax;
@@ -158,7 +159,7 @@ static void PushLocalKeyMax(MachineContext_t* ctx)
 	}
 }
 
-static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx, Fp_t x) {
+static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx, float x) {
 	if (ctx->lastInput.value < 0 && 0 <= x) {
 		return kEventPosCross;
 	}
@@ -170,7 +171,7 @@ static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx,
 	}
 }
 
-static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx, Fp_t x) {
+static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx, float x) {
 	if (0 <= ctx->lastInput.value && x < 0) {
 		return kEventNegCross;
 	}
@@ -179,7 +180,7 @@ static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx,
 	}
 }
 
-static PeakDetectMachineEvent_t End_DetectEvent(MachineContext_t* ctx, Fp_t x) {
+static PeakDetectMachineEvent_t End_DetectEvent(MachineContext_t* ctx, float x) {
 	return kEventEndOfData;
 }
 
@@ -188,7 +189,7 @@ static void ChangeState(MachineContext_t* ctx, PeakDetectMachineState_t state)
 	ctx->state = state;
 }
 
-static void SeachingBell_PosCross(MachineContext_t* ctx, Fp_t x)
+static void SeachingBell_PosCross(MachineContext_t* ctx, float x)
 {
 	// reset local max
 	UpdateLocalKeyMax(ctx, x, ctx->currentIndex);
@@ -196,36 +197,36 @@ static void SeachingBell_PosCross(MachineContext_t* ctx, Fp_t x)
 	ChangeState(ctx, kStateWalkingOnBell);
 }
 
-static void SeachingBell_NegCross(MachineContext_t* ctx, Fp_t x)
+static void SeachingBell_NegCross(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 	ChangeState(ctx, kStateSearchingBell);
 }
 
-static void SeachingBell_NmlData(MachineContext_t* ctx, Fp_t x)
+static void SeachingBell_NmlData(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }
 
-static void SeachingBell_EndOfData(MachineContext_t* ctx, Fp_t x)
+static void SeachingBell_EndOfData(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 	ChangeState(ctx, kStateEnd);
 }
 
-static void WalkingOnBell_PosCross(MachineContext_t* ctx, Fp_t x)
+static void WalkingOnBell_PosCross(MachineContext_t* ctx, float x)
 {
 	assert(true);
 }
 
-static void WalkingOnBell_NegCross(MachineContext_t* ctx, Fp_t x)
+static void WalkingOnBell_NegCross(MachineContext_t* ctx, float x)
 {
 	PushLocalKeyMax(ctx);
 	UpdateValueHistory(ctx, x);
 	ChangeState(ctx, kStateSearchingBell);
 }
 
-static void WalkingOnBell_NmlData(MachineContext_t* ctx, Fp_t x)
+static void WalkingOnBell_NmlData(MachineContext_t* ctx, float x)
 {
 	// update local key max
 	if (ctx->localKeyMax.value < x) {
@@ -235,27 +236,27 @@ static void WalkingOnBell_NmlData(MachineContext_t* ctx, Fp_t x)
 	UpdateValueHistory(ctx, x);
 }
 
-static void WalkingOnBell_EndOfData(MachineContext_t* ctx, Fp_t x)
+static void WalkingOnBell_EndOfData(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }
 
-static void End_PosCross(MachineContext_t* ctx, Fp_t x)
+static void End_PosCross(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }
 
-static void End_NegCross(MachineContext_t* ctx, Fp_t x)
+static void End_NegCross(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }
 
-static void End_NmlData(MachineContext_t* ctx, Fp_t x)
+static void End_NmlData(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }
 
-static void End_EndOfData(MachineContext_t* ctx, Fp_t x)
+static void End_EndOfData(MachineContext_t* ctx, float x)
 {
 	UpdateValueHistory(ctx, x);
 }

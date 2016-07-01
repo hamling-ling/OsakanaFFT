@@ -1,6 +1,9 @@
 #include <assert.h>
 #include "OsakanaFpFft.h"
 #include "OsakanaFftUtil.h"
+
+#define USE_HARDCORD_TABLE
+
 #if defined(USE_HARDCORD_TABLE)
 #include "twiddletable.h"
 #include "bitreversetable.h"
