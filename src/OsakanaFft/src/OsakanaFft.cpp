@@ -1,11 +1,10 @@
 //#include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <algorithm>
 #include "OsakanaFft.h"
 #include "OsakanaFftUtil.h"
-#if defined(USE_HARDCORD_TABLE)
 #include "bitreversetable.h"
-#endif
 
 // mbed has memset() in mbed.h
 #ifdef __MBED__
@@ -24,13 +23,8 @@ struct _OsakanaFftContext_t {
 	int log2N;
 	// twiddle factor table
 	osk_complex_t* twiddles;
-#if defined(USE_HARDCORD_TABLE)
-	// bit reverse index table
-	const osk_bitreverse_idx_pair_t* bitReverseIndexTable;
+	osk_bitreverse_idx_pair_t* bitReverseIndexTable;
 	uint16_t bitReverseIndexTableLen;
-#else
-	uint16_t* bitReverseIndexTable;
-#endif
 };
 
 // W^n_N = exp(-i2pin/N)
@@ -39,6 +33,47 @@ static inline osk_complex_t twiddle(int n, int Nin)
 {
 	float theta = (float)(2.0f*M_PI*n / Nin);
 	return MakeComplex((float)cos(theta), (float)-sin(theta));
+}
+
+void BitReverseTableForN(int N, int log2N, osk_bitreverse_idx_pair_t** ret_table, uint16_t* ret_count)
+{
+	uint16_t* table = (uint16_t*)malloc(sizeof(uint16_t) * N);
+	memset(table, 0xFFFF, sizeof(uint16_t)*N);
+
+	for (int i = 0; i < N; i++) {
+		uint32_t r_idx = bitReverse(log2N, i);
+		if (r_idx == i) {
+			continue;
+		}
+		uint16_t idx_min = std::min(
+			static_cast<uint16_t>(i),
+			static_cast<uint16_t>(r_idx));
+		uint16_t idx_max = std::max(
+			static_cast<uint16_t>(i),
+			static_cast<uint16_t>(r_idx));
+		table[idx_min] = idx_max;
+	}
+
+	int item_num = 0;
+	for (int i = 0; i < N; i++) {
+		if (table[i] != 0xFFFF) {
+			item_num++;
+		}
+	}
+
+	*ret_table = (osk_bitreverse_idx_pair_t*)malloc(sizeof(osk_bitreverse_idx_pair_t) * (item_num));
+	int counter = 0;
+	for (uint16_t i = 0; i < N; i++) {
+		if (table[i] == 0xFFFF) {
+			continue;
+		}
+		(*ret_table)[counter].first = i;
+		(*ret_table)[counter].second = table[i];
+		counter++;
+	}
+	*ret_count = counter;
+
+	free(table);
 }
 
 int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
@@ -52,22 +87,20 @@ int InitOsakanaFft(OsakanaFftContext_t** pctx, int N, int log2N)
 	memset(ctx, 0, sizeof(OsakanaFftContext_t));
 	ctx->N = N;
 	ctx->log2N = log2N;
+
 	ctx->twiddles = (osk_complex_t*)malloc(sizeof(osk_complex_t) * N/2);
-	
 	if (ctx->twiddles == NULL) {
 		ret = -2;
 		goto exit_error;
 	}
+
 	for (int j = 0; j < N / 2; j++) {
 		ctx->twiddles[j] = twiddle(j, N);
+		//printf("twiddles[%d]=( %f, %f)\n", j, ctx->twiddles[j].re, ctx->twiddles[j].im);
 	}
 
-#if defined(USE_HARDCORD_TABLE)
-	ctx->bitReverseIndexTable = s_bitReverseTable[log2N - 1];
-	ctx->bitReverseIndexTableLen = s_bitReversePairNums[log2N - 1];
-#else
-	// T.B.D
-#endif
+	BitReverseTableForN(N, log2N, &(ctx->bitReverseIndexTable), &(ctx->bitReverseIndexTableLen));
+
 	*pctx = ctx;
 	
 	return 0;
@@ -84,10 +117,7 @@ void CleanOsakanaFft(OsakanaFftContext_t* ctx)
 {
 	free(ctx->twiddles);
 	ctx->twiddles = NULL;
-
-#if !defined(USE_HARDCORD_TABLE)
 	free(ctx->bitReverseIndexTable);
-#endif
 	ctx->bitReverseIndexTable = NULL;
 
 	free(ctx);
