@@ -21,13 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PeakDetectMachine.h">
+    <ClInclude Include="include\PeakDetectMachine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PeakDetectMachineCommon.h">
+    <ClInclude Include="include\PeakDetectMachineCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PeakDetectMachineFp.h">
+    <ClInclude Include="include\PeakDetectMachineFp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,10 +38,10 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="PeakDetectMachine.cpp">
+    <ClCompile Include="src\PeakDetectMachine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="PeakDetectMachineFp.cpp">
+    <ClCompile Include="src\PeakDetectMachineFp.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
