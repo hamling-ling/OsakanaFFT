@@ -2,7 +2,6 @@
 #define _PEAKDETECTMACHINE_H_
 
 #include "PeakDetectMachineCommon.h"
-#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {

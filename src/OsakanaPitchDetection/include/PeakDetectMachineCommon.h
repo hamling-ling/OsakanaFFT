@@ -1,7 +1,7 @@
 #ifndef _PEAKDETECTMACHINECOMMON_H_
 #define _PEAKDETECTMACHINECOMMON_H_
 
-#include <cstdint>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,9 +25,9 @@ typedef enum {
 } PeakDetectMachineEvent_t;
 
 static const char* kNoteStrings[] = {
-	"A", "Bb", "B", "C",
-	"C#", "D", "D#", "E",
-	"F", "F#", "G", "G#",
+	"C",	"C#",	"D",	"D#",
+	"E",	 "F",	"F#",	"G",
+	"G#",	"A",	"Bb",	"B"
 	};
 
 // N=512

@@ -9,19 +9,20 @@
 #include <fstream>
 #include "OsakanaFft.h"
 #include "OsakanaFpFft.h"
-#include "OsakanaFpFftDebug.h"
 #include "PeakDetectMachine.h"
 #include "PeakDetectMachineFp.h"
+
+#define LOG_NEWLINE "\n"
+#define LOG_PRINTF	printf
+#include "OsakanaFpFftDebug.h"
 
 #define N					512		// fft sampling num(last half is 0 pad)
 #define LOG2N				9		// log2(N)
 #define N2					(N/2)	// sampling num of analog input
 #define N_ADC				N2
-#define T					(0.03701f/(1024/N))		// time to take N2 signals to samples in sec.
-#define T_PER_SAMPLE		(T/N2)	// factor to compute index to freq
-#define FREQ_PER_001SAMPLE	((uint32_t)(100.0f *1.0f/T_PER_SAMPLE))
-#define NOTE_CONST			0.025085832972
-#define NOTE_CONST_INV10	3986	// 10/NOTE_CONST
+#define T1024_1024			(45.336000000000006)	// adc speedd(time to take 1024x1024 samples in sec)
+#define T_PER_SAMPLE		(T1024_1024/1024.0f/1024.0f)	// factor to compute index to freq
+#define FREQ_PER_SAMPLE		((float)(1.0f/T_PER_SAMPLE))
 
 // debug
 #define DEBUG_OUTPUT_NUM    10
@@ -184,9 +185,9 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	int keyMaxLen = 0;
 	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
-		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
+		uint32_t freq = FREQ_PER_SAMPLE / (keyMaximums[0].index);
 		uint8_t note = kNoteTable[keyMaximums[0].index];
-		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
+		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
@@ -263,13 +264,15 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	int keyMaxLen = 0;
 	GetKeyMaximums(mctx, 0.8f, keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
-		uint32_t freq = FREQ_PER_001SAMPLE / (keyMaximums[0].index * 100);
-		uint8_t note = kNoteTable[keyMaximums[0].index];
-		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		float delta = 0;
 		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			printf("delta %f\n", delta);
+			DLOG("delta %f\n", delta);
 		}
+		
+		float freq = FREQ_PER_SAMPLE / (keyMaximums[0].index + delta);
+		const float k = log10f(pow(2.0f, 1.0f / 12.0f));
+		uint16_t midi = (uint16_t)round(log10f(freq / 27.5f) / k) + 21;
+		DLOG("freq=%f Hz, note=%s\n", freq, kNoteStrings[midi % 12]);
 	}
 
 	DLOG("finished");
