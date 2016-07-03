@@ -1,3 +1,4 @@
+#include "OsakanaFftConfig.h"
 #include <assert.h>
 #include "OsakanaFpFft.h"
 #include "OsakanaFftUtil.h"

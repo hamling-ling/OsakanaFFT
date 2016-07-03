@@ -1,4 +1,4 @@
-//#include <stdlib.h>
+#include "OsakanaFftConfig.h"
 #include <math.h>
 #include <assert.h>
 #include <algorithm>

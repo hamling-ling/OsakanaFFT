@@ -98,7 +98,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <BufferSecurityCheck>true</BufferSecurityCheck>
-      <ForcedIncludeFiles>$(SolutionDir)GlobalConfig.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,7 +136,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <BufferSecurityCheck>true</BufferSecurityCheck>
-      <ForcedIncludeFiles>$(SolutionDir)GlobalConfig.h</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
