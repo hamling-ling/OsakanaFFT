@@ -24,6 +24,7 @@ static void End_NmlData(MachineContext_t* ctx, float x);
 static void End_EndOfData(MachineContext_t* ctx, float x);
 
 typedef PeakDetectMachineEvent_t (*EventDetector_t)(MachineContext_t* ctx, float x);
+typedef void(*StateFunc_t)(MachineContext_t* ctx, float x);
 
 static StateFunc_t s_funcs[kStateNum][kEventNum] = {
 	{ SeachingBell_PosCross,	SeachingBell_NegCross,	SeachingBell_NmlData,	SeachingBell_EndOfData },
@@ -38,14 +39,14 @@ static EventDetector_t s_eventDetectors[kStateNum] = {
 typedef struct _MachineContext_t {
 	uint16_t maxDataNum;
 	uint16_t currentIndex;
-	PeekInfo lastInput;
+	PeakInfo_t lastInput;
 	// collection of key maximum for each bell
-	PeekInfo keyMaxs[kKeyMax];
+	PeakInfo_t keyMaxs[kKeyMax];
 	uint16_t keyMaxsNum;
 	// max of all bell
-	PeekInfo globalKeyMax;
+	PeakInfo_t globalKeyMax;
 	// max of current bell
-	PeekInfo localKeyMax;
+	PeakInfo_t localKeyMax;
 	PeakDetectMachineState_t state;
 	StateFunc_t (*funcs)[kEventNum];
 	EventDetector_t* detectors;
@@ -87,7 +88,7 @@ void ResetMachine(MachineContext_t* ctx)
 	ctx->detectors = s_eventDetectors;
 }
 
-void GetKeyMaximums(MachineContext_t* ctx, float filter, PeekInfo* list, int listmaxlen, int *num)
+void GetKeyMaximums(MachineContext_t* ctx, float filter, PeakInfo_t* list, int listmaxlen, int *num)
 {
 	if (ctx->keyMaxsNum == 0) {
 		*num = 0;
@@ -121,7 +122,7 @@ void GetKeyMaximums(MachineContext_t* ctx, float filter, PeekInfo* list, int lis
 	float y2 = xs[index + 1];
 	
 	float num = y0 - y2;
-	float denom = ((y0 + y2) * 2.0) - y1;
+	float denom = ((y0 + y2) * 2.0f) - y1;
 	if (denom == 0) {
 		return false;
 	}
@@ -143,7 +144,7 @@ static void UpdateValueHistory(MachineContext_t* ctx, float x)
 
 static void UpdateLocalKeyMax(MachineContext_t* ctx, float x, uint16_t index)
 {
-	PeekInfo localMax = { x, index };
+	PeakInfo_t localMax = { x, index };
 	ctx->localKeyMax = localMax;
 }
 

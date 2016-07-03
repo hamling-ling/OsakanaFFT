@@ -5,12 +5,12 @@
 
 #if defined(_DEBUG)
 #define DCOMPLEXFp(cs, num) 	for (int i = 0; i < num; i++) { \
-								fp_complex_str(&cs[i], buf, sizeof(buf)); \
-								DLOG("%s", buf); \
+								fp_complex_str(&cs[i], debug_output_buf_, sizeof(debug_output_buf_)); \
+								DLOG("%s", debug_output_buf_); \
 							}
-#define DFPSFp(fps, num)		for (int i = 0; i < num; i++) { \
-								Fp2CStr(fps[i], buf, sizeof(buf)); \
-								DLOG("%s", buf); \
+#define DFPSFp(fps, num)	for (int i = 0; i < num; i++) { \
+								Fp2CStr(fps[i], debug_output_buf_, sizeof(debug_output_buf_)); \
+								DLOG("%s", debug_output_buf_); \
 							}
 #else
 #define DCOMPLEXFp(cs, num)

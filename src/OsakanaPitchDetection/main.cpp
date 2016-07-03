@@ -163,7 +163,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	}
 
 	DLOG("-- ms smart");
-	DFPS(_m, DEBUG_OUTPUT_NUM);
+	DFPSFp(_m, DEBUG_OUTPUT_NUM);
 
 	// nsdf
 	Fp_t* _nsdf = _m; // reuse buffer
@@ -173,14 +173,14 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		_nsdf[t] = _nsdf[t] * 2 * 2;
 	}
 	DLOG("-- _nsdf");
-	DFPS(_nsdf, DEBUG_OUTPUT_NUM);
+	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- pitch detection");
 	for (int i = 0; i < N2; i++) {
 		InputFp(mctx, _nsdf[i]);
 	}
 
-	PeekInfoFp keyMaximums[1] = { 0 };
+	PeakInfoFp_t keyMaximums[1] = { 0 };
 	int keyMaxLen = 0;
 	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
@@ -189,8 +189,8 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			Fp2CStr(delta, buf, sizeof(buf));
-			printf("delta %s\n", buf);
+			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
+			printf("delta %s\n", debug_output_buf_);
 		}
 	}
 
@@ -248,7 +248,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	float* _nsdf = _mf; // reuse buffer
 	for (int t = 0; t < N2; t++) {
 		float mt = _mf[t] + 0.01f; // add small number to avoid 0 div
-		_nsdf[t] = FpDiv(xf[t].re, mt);
+		_nsdf[t] = xf[t].re / mt;
 		_nsdf[t] = _nsdf[t] * 2.0f * 2.0f;
 	}
 	DLOG("-- _nsdf");
@@ -259,7 +259,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 		Input(mctx, _nsdf[i]);
 	}
 
-	PeekInfo keyMaximums[1] = { 0 };
+	PeakInfo_t keyMaximums[1] = { 0 };
 	int keyMaxLen = 0;
 	GetKeyMaximums(mctx, 0.8f, keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
@@ -268,7 +268,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 		printf("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		float delta = 0;
 		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			printf("delta f\n", delta);
+			printf("delta %f\n", delta);
 		}
 	}
 
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 
 
 
-#if 1
+#if 0
 	MachineContextFp_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContextFp();
 
