@@ -212,6 +212,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	DLOG("normalizing...");
 	for (int i = 0; i < N2; i++) { 
 		xf[i].re -= 512.0f;
+		xf[i].re /= 1023.0f;
 		xf[i].im = 0.0f;
 		xf[N2 + i].re = 0.0f;
 		xf[N2 + i].im = 0.0f;
@@ -237,7 +238,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	OsakanaIfft(ctx, xf);
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
-	_mf[0] = xf[0].re * 4.0f;
+	_mf[0] = xf[0].re;
 	for (int t = 1; t < N2; t++) {
 		_mf[t] = _mf[t - 1] - xf2[t - 1] + xf2[t];
 	}
@@ -250,7 +251,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	for (int t = 0; t < N2; t++) {
 		float mt = _mf[t] + 0.01f; // add small number to avoid 0 div
 		_nsdf[t] = xf[t].re / mt;
-		_nsdf[t] = _nsdf[t] * 2.0f * 2.0f;
+		_nsdf[t] = _nsdf[t] * 2.0f;
 	}
 	DLOG("-- _nsdf");
 	DFPS(_nsdf, DEBUG_OUTPUT_NUM);
