@@ -1,6 +1,3 @@
-// OsakanaPitchDetection.cpp : コンソール アプリケーションのエントリ ポイントを定義します。
-//
-
 #include "stdafx.h"
 
 #include <string>
@@ -16,11 +13,19 @@
 #define LOG_PRINTF	printf
 #include "OsakanaFpFftDebug.h"
 
+#if 0	//GR-CITRUS
 #define N					512		// fft sampling num(last half is 0 pad)
 #define LOG2N				9		// log2(N)
+#define T1024_1024			(45.336000000000006)	// adc speedd(time to take 1024x1024 samples in sec)
+#endif
+#if 1	// HRM1017
+#define N					512		// fft sampling num(last half is 0 pad)
+#define LOG2N				9		// log2(N)
+#define T1024_1024			(37.01)	// adc speedd(time to take 1024x1024 samples in sec)
+#endif
+
 #define N2					(N/2)	// sampling num of analog input
 #define N_ADC				N2
-#define T1024_1024			(45.336000000000006)	// adc speedd(time to take 1024x1024 samples in sec)
 #define T_PER_SAMPLE		(T1024_1024/1024.0f/1024.0f)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		((float)(1.0f/T_PER_SAMPLE))
 
@@ -287,9 +292,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-
-
-#if 0
+#if 1
 	MachineContextFp_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContextFp();
 
