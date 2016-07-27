@@ -21,7 +21,7 @@
 #if 1	// HRM1017
 #define N					512		// fft sampling num(last half is 0 pad)
 #define LOG2N				9		// log2(N)
-#define T1024_1024			(37.01)	// adc speedd(time to take 1024x1024 samples in sec)
+#define T1024_1024			(75.8)	// adc speedd(time to take 1024x1024 samples in sec)
 #endif
 
 #define N2					(N/2)	// sampling num of analog input
@@ -135,7 +135,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	for (int i = 0; i < N2; i++) {
 		int data = x[i].re & 0x00003FFF;
 		data -= 512; // center to 0 and make it signed
-		x[i].re = (Fp_t)data << (FPSHFT - 9);// div 512 then shift
+		x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
 		x[i].im = 0;
 		x[N2+i].re = 0;
 		x[N2+i].im = 0;

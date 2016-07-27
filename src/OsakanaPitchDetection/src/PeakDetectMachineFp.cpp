@@ -116,13 +116,13 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	
 	//use Ragrange interpolation
 	// consider (-1,y0),(0,y1),(1,y2)
-	// at x = (y0 - y2) / (2 * (y0 + y2) - y1) , y'=0
+	// at x = (y0-y2)/(2*(y0+y2)-4*y1), y'=0
 	Fp_t y0 = xs[index - 1];
 	Fp_t y1 = xs[index + 0];
 	Fp_t y2 = xs[index + 1];
 	
 	Fp_t num = y0 - y2;
-	Fp_t denom = ((y0 + y2) << 1) - y1;
+	Fp_t denom = ((y0 + y2) << 1) - (y1 << 2);
 	if (denom == 0) {
 		return false;
 	}
