@@ -190,14 +190,21 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	int keyMaxLen = 0;
 	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
-		uint32_t freq = FREQ_PER_SAMPLE / (keyMaximums[0].index);
-		uint8_t note = kNoteTable[keyMaximums[0].index];
-		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
 			printf("delta %s\n", debug_output_buf_);
 		}
+		Fp_t fp_idx = delta + Int2Fp(keyMaximums[0].index);
+		Fp2CStr(fp_idx, debug_output_buf_, sizeof(debug_output_buf_));
+		printf("fp_idx %s\n", debug_output_buf_);
+
+		uint32_t freq = FREQ_PER_SAMPLE / Fp2Int(fp_idx);
+
+		Fp_t fp_idx_rnd = fp_idx + (Int2Fp(1) >> 2);
+		int idx_rnd = Fp2Int(fp_idx_rnd);
+		uint8_t note = kNoteTable[idx_rnd];
+		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 	}
 
 	DLOG("finished");
