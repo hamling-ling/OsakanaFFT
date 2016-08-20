@@ -24,9 +24,9 @@ static void End_NmlData(MachineContextFp_t* ctx, Fp_t x);
 static void End_EndOfData(MachineContextFp_t* ctx, Fp_t x);
 
 typedef PeakDetectMachineEvent_t (*EventDetector_t)(MachineContextFp_t* ctx, Fp_t x);
-typedef void(*StateFunc_t)(MachineContextFp_t* ctx, Fp_t x);
+typedef void(*StateFuncFp_t)(MachineContextFp_t* ctx, Fp_t x);
 
-static StateFunc_t s_funcs[kStateNum][kEventNum] = {
+static StateFuncFp_t s_funcs[kStateNum][kEventNum] = {
 	{ SeachingBell_PosCross,	SeachingBell_NegCross,	SeachingBell_NmlData,	SeachingBell_EndOfData },
 	{ WalkingOnBell_PosCross,	WalkingOnBell_NegCross, WalkingOnBell_NmlData , WalkingOnBell_EndOfData },
 	{ End_PosCross,				End_NegCross,			End_NmlData,			End_EndOfData }
@@ -48,7 +48,7 @@ typedef struct _MachineContextFp_t {
 	// max of current bell
 	PeakInfoFp_t localKeyMax;
 	PeakDetectMachineState_t state;
-	StateFunc_t (*funcs)[kEventNum];
+	StateFuncFp_t(*funcs)[kEventNum];
 	EventDetector_t* detectors;
 } MachineContextFp_t;
 
@@ -77,7 +77,7 @@ void InputFp(MachineContextFp_t* ctx, Fp_t x)
 	EventDetector_t detector = ctx->detectors[ctx->state];
 	PeakDetectMachineEvent_t evt = detector(ctx, x);
 	
-	StateFunc_t stateFunc = ctx->funcs[ctx->state][(int)evt];
+	StateFuncFp_t stateFunc = ctx->funcs[ctx->state][(int)evt];
 	stateFunc(ctx, x);
 }
 
@@ -116,13 +116,13 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	
 	//use Ragrange interpolation
 	// consider (-1,y0),(0,y1),(1,y2)
-	// at x = (y0 - y2) / (2 * (y0 + y2) - y1) , y'=0
+	// at x = (y0-y2)/(2*(y0+y2)-4*y1), y'=0
 	Fp_t y0 = xs[index - 1];
 	Fp_t y1 = xs[index + 0];
 	Fp_t y2 = xs[index + 1];
 	
 	Fp_t num = y0 - y2;
-	Fp_t denom = ((y0 + y2) << 1) - y1;
+	Fp_t denom = ((y0 + y2) << 1) - (y1 << 2);
 	if (denom == 0) {
 		return false;
 	}

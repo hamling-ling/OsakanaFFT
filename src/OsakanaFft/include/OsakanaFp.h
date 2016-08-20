@@ -1,6 +1,7 @@
 #ifndef _OSAKANAFP_H_
 #define _OSAKANAFP_H_
 
+#include "OsakanaFftConfig.h"
 #include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>

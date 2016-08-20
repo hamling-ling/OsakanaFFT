@@ -1,6 +1,3 @@
-// OsakanaPitchDetection.cpp : コンソール アプリケーションのエントリ ポイントを定義します。
-//
-
 #include "stdafx.h"
 
 #include <string>
@@ -16,13 +13,25 @@
 #define LOG_PRINTF	printf
 #include "OsakanaFpFftDebug.h"
 
+#if 0	//GR-CITRUS
 #define N					512		// fft sampling num(last half is 0 pad)
 #define LOG2N				9		// log2(N)
-#define N2					(N/2)	// sampling num of analog input
-#define N_ADC				N2
-#define T1024_1024			(45.336000000000006)	// adc speedd(time to take 1024x1024 samples in sec)
+#define T1024_1024			(45.336000000000006f)	// adc speedd(time to take 1024x1024 samples in sec)
 #define T_PER_SAMPLE		(T1024_1024/1024.0f/1024.0f)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		((float)(1.0f/T_PER_SAMPLE))
+#define FREQ_PER_1024SAMPLE	(FREQ_PER_SAMPLE*1024)
+#endif
+#if 1	// HRM1017
+#define N					512		// fft sampling num(last half is 0 pad)
+#define LOG2N				9		// log2(N)
+#define T1024_1024			(75.8f)	// adc speedd(time to take 1024x1024 samples in sec)
+#define T_PER_SAMPLE		FLOAT2FP(7.228851318359375e-5f)	// factor to compute index to freq
+#define FREQ_PER_SAMPLE		(13833)			// 13833.45646437995 casted to int
+#define FREQ_PER_1024SAMPLE	14165459
+#endif
+
+#define N2					(N/2)	// sampling num of analog input
+#define N_ADC				N2
 
 // debug
 #define DEBUG_OUTPUT_NUM    10
@@ -130,7 +139,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	for (int i = 0; i < N2; i++) {
 		int data = x[i].re & 0x00003FFF;
 		data -= 512; // center to 0 and make it signed
-		x[i].re = (Fp_t)data << (FPSHFT - 9);// div 512 then shift
+		x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
 		x[i].im = 0;
 		x[N2+i].re = 0;
 		x[N2+i].im = 0;
@@ -185,14 +194,24 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	int keyMaxLen = 0;
 	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
 	if (0 < keyMaxLen) {
-		uint32_t freq = FREQ_PER_SAMPLE / (keyMaximums[0].index);
-		uint8_t note = kNoteTable[keyMaximums[0].index];
-		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
 			printf("delta %s\n", debug_output_buf_);
 		}
+		// want freq = FREQ_PER_SAMPLE / (index+delta)
+		// idx1024=1024*index
+		int32_t idx1024 = keyMaximums[0].index << 10;
+		// int expression of 1024*delta
+		int32_t delta1024 = (delta >> (FPSHFT - 10));
+		idx1024 += delta1024;
+		// freq = freq_per_sample / idx
+		int32_t freq = FREQ_PER_1024SAMPLE / idx1024;
+		
+		int32_t idx = (idx1024 + 512) >> 10;
+		uint8_t note = kNoteTable[keyMaximums[0].index] % 12;
+
+		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 	}
 
 	DLOG("finished");
@@ -287,9 +306,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-
-
-#if 0
+#if 1
 	MachineContextFp_t* mctx = NULL;
 	mctx = CreatePeakDetectMachineContextFp();
 
