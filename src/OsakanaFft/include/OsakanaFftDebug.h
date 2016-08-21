@@ -10,8 +10,10 @@
 char debug_output_buf_[128] = { 0 };// not thread safe!
 #if defined(LOG_PRINTF)
 char debug_output_buf2_[128] = { 0 };
-#define DLOG(fmt, ...)		snprintf(debug_output_buf2_,sizeof(debug_output_buf2_), fmt LOG_NEWLINE, __VA_ARGS__); \
-                            LOG_PRINTF(debug_output_buf2_);
+#define DLOG(...)			snprintf(debug_output_buf2_,sizeof(debug_output_buf2_), __VA_ARGS__); \
+                            LOG_PRINTF(debug_output_buf2_); \
+                            LOG_PRINTF(LOG_NEWLINE);
+
 #else
 #define DLOG(fmt, ...)		fprintf(stderr, fmt LOG_NEWLINE, __VA_ARGS__);
 #endif
@@ -39,3 +41,4 @@ char debug_output_buf2_[128] = { 0 };
 #endif
 
 #endif
+
