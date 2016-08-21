@@ -209,7 +209,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		int32_t freq = FREQ_PER_1024SAMPLE / idx1024;
 		
 		int32_t idx = (idx1024 + 512) >> 10;
-		uint8_t note = kNoteTable[keyMaximums[0].index] % 12;
+		uint8_t note = kNoteTable[idx] % 12;
 
 		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
 	}
