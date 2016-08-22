@@ -22,8 +22,8 @@
 #define FREQ_PER_1024SAMPLE	(FREQ_PER_SAMPLE*1024)
 #endif
 #if 1	// HRM1017
-#define N					512		// fft sampling num(last half is 0 pad)
-#define LOG2N				9		// log2(N)
+#define N					256		// fft sampling num(last half is 0 pad)
+#define LOG2N				8		// log2(N)
 #define T1024_1024			(75.8f)	// adc speedd(time to take 1024x1024 samples in sec)
 #define T_PER_SAMPLE		FLOAT2FP(7.228851318359375e-5f)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		(13833)			// 13833.45646437995 casted to int
@@ -180,7 +180,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	for (int t = 0; t < N2; t++) {
 		Fp_t mt = _m[t] + FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
-		_nsdf[t] = _nsdf[t] * 2 * 2;
+		_nsdf[t] = _nsdf[t] << 2;
 	}
 	DLOG("-- _nsdf");
 	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
