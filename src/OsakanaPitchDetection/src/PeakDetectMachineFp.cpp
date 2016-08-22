@@ -97,15 +97,26 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 
 	int counter = 0;
 	Fp_t th = ctx->globalKeyMax.value * filter;
+	int max_counter = 0;
 	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
 		Fp_t keyMax = ctx->keyMaxs[i].value;
 		if (filter * keyMax < th) {
 			continue;
 		}
 
+		if (list[max_counter].value < list[counter].value) {
+			max_counter = counter;
+		}
+
 		list[counter++] = ctx->keyMaxs[i];
 	}
 	*num = counter;
+
+	{
+		PeakInfoFp_t tmp = list[0];
+		//list[0] = list[max_counter];
+		//list[max_counter] = tmp;
+	}
 }
 
  bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int N, Fp_t* x)
