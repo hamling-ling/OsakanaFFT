@@ -190,9 +190,9 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		InputFp(mctx, _nsdf[i]);
 	}
 
-	PeakInfoFp_t keyMaximums[1] = { 0 };
+	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, 1, &keyMaxLen);
+	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
@@ -280,9 +280,9 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 		Input(mctx, _nsdf[i]);
 	}
 
-	PeakInfo_t keyMaximums[1] = { 0 };
+	PeakInfo_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximums(mctx, 0.8f, keyMaximums, 1, &keyMaxLen);
+	GetKeyMaximums(mctx, 0.8f, keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfo_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		float delta = 0;
 		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {

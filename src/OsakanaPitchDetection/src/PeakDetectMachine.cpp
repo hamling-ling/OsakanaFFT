@@ -95,11 +95,25 @@ void GetKeyMaximums(MachineContext_t* ctx, float filter, PeakInfo_t* list, int l
 		return;
 	}
 
-	int counter = 0;
+	if (listmaxlen < 0) {
+		*num = 0;
+		return;
+	}
+
+	// elem num above threshold
 	float th = ctx->globalKeyMax.value * filter;
+	// elem num above threshold
+	int counter = 0;
+
+	// [0] is reserved for globalMax
+	list[0] = ctx->globalKeyMax;
 	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
 		float keyMax = ctx->keyMaxs[i].value;
 		if (filter * keyMax < th) {
+			continue;
+		}
+
+		if (i == list[0].index) {
 			continue;
 		}
 
