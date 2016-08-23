@@ -144,7 +144,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		x[N2+i].re = 0;
 		x[N2+i].im = 0;
 		x2[i] = FpMul(x[i].re, x[i].re);
-		x2[i] = x2[i] >> 10;
+		x2[i] = x2[i] >> (LOG2N/2);
 	}
 	DLOG("normalized");
 
@@ -158,16 +158,16 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
 		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
-		x[i].re = (Fp_t)(re >> 1);
+		x[i].re = (Fp_t)(re << LOG2N/2);
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
-	OsakanaFpIfft(ctx, x, 1);
+	OsakanaFpIfft(ctx, x, 0);
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
-	_m[0] = x[0].re << 2;
+	_m[0] = x[0].re >> (0);
 	for (int t = 1; t < N2; t++) {
 		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
 	}
@@ -180,7 +180,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	for (int t = 0; t < N2; t++) {
 		Fp_t mt = _m[t] + FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
-		_nsdf[t] = _nsdf[t] << 2;
+		_nsdf[t] = _nsdf[t];
 	}
 	DLOG("-- _nsdf");
 	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
@@ -192,7 +192,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(mctx, FLOAT2FP(0.8f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(mctx, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
