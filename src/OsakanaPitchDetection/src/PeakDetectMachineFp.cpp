@@ -107,7 +107,7 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 
 	// [0] is reserved for globalMax
 	list[0] = ctx->globalKeyMax;
-	for (int i = 1; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
+	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
 		Fp_t keyMax = ctx->keyMaxs[i].value;
 		if (filter * keyMax < th) {
 			continue;
@@ -134,7 +134,7 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	Fp_t y0 = xs[index - 1];
 	Fp_t y1 = xs[index + 0];
 	Fp_t y2 = xs[index + 1];
-	
+
 	Fp_t num = y0 - y2;
 	Fp_t denom = ((y0 + y2) << 1) - (y1 << 2);
 	if (denom == 0) {
