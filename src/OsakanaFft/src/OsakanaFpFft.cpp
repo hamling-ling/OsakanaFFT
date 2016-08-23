@@ -199,8 +199,8 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sc
 				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				// div f[idx_a] by 2 instead of div by N end of func
-				x[idx_a] = fp_complex_l_shift(&x[idx_a], 1 - scale);
-				x[idx_b] = fp_complex_l_shift(&x[idx_b], 1 - scale);
+				x[idx_a] = fp_complex_l_shift(&x[idx_a], scale);
+				x[idx_b] = fp_complex_l_shift(&x[idx_b], scale);
 
 				idx_a++;
 				idx_b++;
