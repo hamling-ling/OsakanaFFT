@@ -101,7 +101,7 @@ void GetKeyMaximums(MachineContext_t* ctx, float filter, PeakInfo_t* list, int l
 	}
 
 	// elem num above threshold
-	float th = ctx->globalKeyMax.value * filter;
+	float th = filter;
 	// elem num above threshold
 	int counter = 1;
 
