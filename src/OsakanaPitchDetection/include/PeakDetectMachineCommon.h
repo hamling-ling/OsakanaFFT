@@ -27,8 +27,8 @@ typedef enum {
 static const char* kNoteStrings[] = {
 	"C",	"C#",	"D",	"D#",
 	"E",	 "F",	"F#",	"G",
-	"G#",	"A",	"Bb",	"B"
-	};
+	"G#",	"A",	"Bb",	"B"
+};
 
 // N=256
 // sampling rate = 0.0740234375(HRM1017).
@@ -53,3 +53,4 @@ static const uint8_t kNoteTable[] = {
 
 
 #endif
+
