@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "OsakanaFft.h"
 #include "OsakanaFpFft.h"
 #include "PeakDetectMachine.h"
@@ -34,7 +35,7 @@
 #define N_ADC				N2
 
 // debug
-#define DEBUG_OUTPUT_NUM    10
+#define DEBUG_OUTPUT_NUM    N
 
 
 using namespace std;
@@ -133,18 +134,31 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DLOG("sampled");
 
 	DLOG("raw data --");
-	DRAWDATA(x, 512);
+	DRAWDATA(x, N);
 
 	DLOG("normalizing...");
-	for (int i = 0; i < N2; i++) {
-		int data = x[i].re & 0x00003FFF;
-		data -= 512; // center to 0 and make it signed
-		x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
-		x[i].im = 0;
-		x[N2+i].re = 0;
-		x[N2+i].im = 0;
-		x2[i] = FpMul(x[i].re, x[i].re);
-		x2[i] = x2[i] >> (LOG2N/2);
+	{
+		Fp_t maxAmp = 0;
+		Fp_t minAmp = 0;
+		for (int i = 0; i < N2; i++) {
+			int data = x[i].re & 0x00003FFF;
+			data -= 512; // center to 0 and make it signed
+			x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
+			x[i].im = 0;
+			x[N2 + i].re = 0;
+			x[N2 + i].im = 0;
+			x2[i] = FpMul(x[i].re, x[i].re);
+			x2[i] = x2[i] >> (LOG2N - 2);
+			maxAmp = std::max(maxAmp, x[i].re);
+			minAmp = std::min(minAmp, x[i].re);
+		}
+		if (maxAmp - minAmp < FLOAT2FP(0.2)) {
+			return 1;
+		}
+		//Fp2CStr(maxAmp, debug_output_buf_, sizeof(debug_output_buf_));
+		//printf("maxAmp %s\n", debug_output_buf_);
+		//Fp2CStr(minAmp, debug_output_buf_, sizeof(debug_output_buf_));
+		//printf("minAmp %s\n", debug_output_buf_);
 	}
 	DLOG("normalized");
 
@@ -158,7 +172,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
 		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
-		x[i].re = (Fp_t)(re << LOG2N/2);
+		x[i].re = (Fp_t)(re << (LOG2N - 2));
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
@@ -186,7 +200,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- pitch detection");
-	for (int i = 0; i < N2; i++) {
+	for (int i = 0; i < N2/2; i++) {
 		InputFp(mctx, _nsdf[i]);
 	}
 
@@ -196,9 +210,12 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
-			printf("delta %s\n", debug_output_buf_);
+			//Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
+			//printf("delta %s\n", debug_output_buf_);
+			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
+			//printf("nsdf=%s\n", debug_output_buf_);
 		}
+
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index
 		int32_t idx1024 = keyMaximums[0].index << 10;

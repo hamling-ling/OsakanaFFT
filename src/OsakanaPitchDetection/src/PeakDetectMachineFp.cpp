@@ -113,7 +113,7 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 			continue;
 		}
 
-		if (i == list[0].index) {
+		if (ctx->keyMaxs[i].index == list[0].index) {
 			continue;
 		}
 
