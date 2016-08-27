@@ -34,8 +34,18 @@
 #define N2					(N/2)	// sampling num of analog input
 #define N_ADC				N2
 
+// To avoid overflow
+// FFT result scaled to 1/N (bit shift used by 1>>LOG2N)
+// 1/N FFT result power spectrum 1/(N^2) which is too small
+// we scale the power spectrum result by 1 << SC_PW.
+// The power spectrum result is finally scaled by 1 >> (LOG2N*2-SC_PW)
+// Other values used with the scaled power spectrum also required to scaled.
+// Here the value is only x2 and it should be scaled by 1 >> (LOG2N*2-SC_PW)
+#define SC_PW				(LOG2N-5)
+#define SC_X2				(LOG2N*2-SC_PW)
+
 // debug
-#define DEBUG_OUTPUT_NUM    N
+#define DEBUG_OUTPUT_NUM    10
 
 
 using namespace std;
@@ -148,17 +158,14 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 			x[N2 + i].re = 0;
 			x[N2 + i].im = 0;
 			x2[i] = FpMul(x[i].re, x[i].re);
-			x2[i] = x2[i] >> (LOG2N - 2);
+			x2[i] = x2[i] >> SC_X2;
+
 			maxAmp = std::max(maxAmp, x[i].re);
 			minAmp = std::min(minAmp, x[i].re);
 		}
 		if (maxAmp - minAmp < FLOAT2FP(0.2)) {
 			return 1;
 		}
-		//Fp2CStr(maxAmp, debug_output_buf_, sizeof(debug_output_buf_));
-		//printf("maxAmp %s\n", debug_output_buf_);
-		//Fp2CStr(minAmp, debug_output_buf_, sizeof(debug_output_buf_));
-		//printf("minAmp %s\n", debug_output_buf_);
 	}
 	DLOG("normalized");
 
@@ -166,24 +173,25 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- fft/N");
-	OsakanaFpFft(ctx, x, 1);
+	OsakanaFpFft(ctx, x, 1); // 1 means scaling. (this x) = (nromal x) >> LOG2N
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
-		FpW_t re = FpMul(x[i].re, x[i].re) + FpMul(x[i].im, x[i].im);
-		x[i].re = (Fp_t)(re << (LOG2N - 2));
+		Fp_t re = FpMul(x[i].re, x[i].re) + 
+				  FpMul(x[i].im, x[i].im); // (this x) = (normal x) >> LOG2N*2
+		x[i].re = (Fp_t)(re << (SC_PW)); // x = x >> (LOG2N*2-SC_PW)
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
-	OsakanaFpIfft(ctx, x, 0);
+	OsakanaFpIfft(ctx, x, 1);// 1 means not *N scaling
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
-	_m[0] = x[0].re >> (0);
+	_m[0] = (x[0].re << 2);// why 2?
 	for (int t = 1; t < N2; t++) {
-		_m[t] = _m[t - 1] - x2[t - 1] + x2[t];
+		_m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
 	}
 
 	DLOG("-- ms smart");
@@ -194,7 +202,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	for (int t = 0; t < N2; t++) {
 		Fp_t mt = _m[t] + FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
-		_nsdf[t] = _nsdf[t];
+		_nsdf[t] = _nsdf[t] << 1;
 	}
 	DLOG("-- _nsdf");
 	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
@@ -248,7 +256,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	DLOG("normalizing...");
 	for (int i = 0; i < N2; i++) { 
 		xf[i].re -= 512.0f;
-		xf[i].re /= 1023.0f;
+		xf[i].re /= 512.0f;
 		xf[i].im = 0.0f;
 		xf[N2 + i].re = 0.0f;
 		xf[N2 + i].im = 0.0f;
@@ -274,9 +282,10 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	OsakanaIfft(ctx, xf);
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
-	_mf[0] = xf[0].re;
+	_mf[0] = xf[0].re * 2.0f;// why 2?
 	for (int t = 1; t < N2; t++) {
-		_mf[t] = _mf[t - 1] - xf2[t - 1] + xf2[t];
+		// why 2?
+		_mf[t] = _mf[t - 1] + 2.0f * (- xf2[t - 1] + xf2[t]);
 	}
 
 	DLOG("-- ms smart");
