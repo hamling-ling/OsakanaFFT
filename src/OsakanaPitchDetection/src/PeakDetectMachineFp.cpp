@@ -105,6 +105,11 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	// elem num above threshold
 	int counter = 1;
 
+	if (ctx->globalKeyMax.value < th) {
+		counter = 0;
+		return;
+	}
+
 	// [0] is reserved for globalMax
 	list[0] = ctx->globalKeyMax;
 	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
