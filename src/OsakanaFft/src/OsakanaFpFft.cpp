@@ -158,10 +158,10 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sca
 				int tw_idx = k << tw_idx_shift;
 				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 
-				fp_butterfly(&x[0], &tf, idx_a, idx_b);
-
 				x[idx_a] = fp_complex_r_shift(&x[idx_a], scale);
 				x[idx_b] = fp_complex_r_shift(&x[idx_b], scale);
+
+				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				idx_a++;
 				idx_b++;
@@ -186,7 +186,6 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sc
 	int tw_idx_shift = ctx->log2N - 1;
 
 	for (int i = 0; i < ctx->log2N; i++) {
-
 		for (int j = 0; j < ctx->N; j += dj) {
 			int idx_a = j;
 			int idx_b = j + bnum;
@@ -199,8 +198,8 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sc
 				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				// div f[idx_a] by 2 instead of div by N end of func
-				x[idx_a] = fp_complex_l_shift(&x[idx_a], scale);
-				x[idx_b] = fp_complex_l_shift(&x[idx_b], scale);
+				x[idx_a] = fp_complex_l_shift(&x[idx_a], 1 - scale);
+				x[idx_b] = fp_complex_l_shift(&x[idx_b], 1 - scale);
 
 				idx_a++;
 				idx_b++;
