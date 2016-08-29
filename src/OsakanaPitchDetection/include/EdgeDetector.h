@@ -10,7 +10,8 @@ public:
 	~EdgeDetector();
 	bool Input(uint16_t val);
 private:
-	uint16_t _val;
+	uint16_t _history[3];
+	uint16_t _lastNotifiedVal;
 };
 
 #endif
