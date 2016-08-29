@@ -151,7 +151,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		Fp_t maxAmp = 0;
 		Fp_t minAmp = 0;
 		for (int i = 0; i < N2; i++) {
-			int data = x[i].re & 0x00003FFF;
+			int data = x[i].re & 0x00003FF;
 			data -= 512; // center to 0 and make it signed
 			x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
 			x[i].im = 0;
