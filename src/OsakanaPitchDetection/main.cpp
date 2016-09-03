@@ -60,7 +60,6 @@ static const string kNsdfFileName("nsdf_Q15.16.dat");
 
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
-Fp_t _m[N2] = { 0 };
 
 osk_complex_t xf[N] = { { 0, 0 } };
 float xf2[N2] = { 0 };
@@ -189,28 +188,37 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	OsakanaFpIfft(ctx, x, 1);// 1 means not *N scaling
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
-	_m[0] = (x[0].re << 2);// why 2?
+	// following loop compute :
+	// _m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
+	// where [0] = x[0].re * 2
+	// nsdf[t] = 2 * x[t].re / m[t]
+	Fp_t m_old = (x[0].re << 1);// why 2?
+	Fp_t x2_old = x2[0];
+	Fp_t* _nsdf = x2;// reuse memory
+	
+	Fp_t mt = m_old + FLOAT2FP(0.01f); // add small number to avoid 0 div
+	_nsdf[0] = FpDiv(x[0].re, mt);
+	_nsdf[0] = _nsdf[0] << 1;
+
 	for (int t = 1; t < N2; t++) {
-		_m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
-	}
+		//_m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
+		Fp_t m = m_old + 2 * (-x2_old + x2[t]);
 
-	DLOG("-- ms smart");
-	DFPSFp(_m, DEBUG_OUTPUT_NUM);
+		// prepare for next loop
+		x2_old = x2[t];
+		m_old = m;
 
-	// nsdf
-	Fp_t* _nsdf = _m; // reuse buffer
-	for (int t = 0; t < N2; t++) {
-		Fp_t mt = _m[t] + FLOAT2FP(0.01f); // add small number to avoid 0 div
+		// nsdf
+		Fp_t mt = m_old + FLOAT2FP(0.01f); // add small number to avoid 0 div
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] << 1;
+
+		// curve analysis
+		InputFp(mctx, _nsdf[t]);
 	}
+
 	DLOG("-- _nsdf");
 	DFPSFp(_nsdf, DEBUG_OUTPUT_NUM);
-
-	DLOG("-- pitch detection");
-	for (int i = 0; i < N2/2; i++) {
-		InputFp(mctx, _nsdf[i]);
-	}
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
