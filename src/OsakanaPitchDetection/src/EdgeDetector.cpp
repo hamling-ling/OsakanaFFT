@@ -25,3 +25,8 @@ bool EdgeDetector::Input(uint16_t val)
 	}
 	return false;
 }
+
+uint16_t EdgeDetector::CurrentNote()
+{
+	return _lastNotifiedVal;
+}

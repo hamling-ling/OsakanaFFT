@@ -9,6 +9,7 @@ public:
 	EdgeDetector(int val);
 	~EdgeDetector();
 	bool Input(uint16_t val);
+	uint16_t CurrentNote();
 private:
 	uint16_t _history[3];
 	uint16_t _lastNotifiedVal;
