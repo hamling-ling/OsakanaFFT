@@ -61,6 +61,9 @@ static const string kNsdfFileName("nsdf_Q15.16.dat");
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
 
+Fp_t rawdata_min = 512;
+Fp_t rawdata_max = 0;
+
 osk_complex_t xf[N] = { { 0, 0 } };
 float xf2[N2] = { 0 };
 float _mf[N2] = { 0 };
@@ -83,6 +86,8 @@ int readDataFp(const string& filename, Fp_t* data, uint8_t stride, const int dat
 			return 1;
 		}
 		*data = static_cast<int16_t>(x);
+		rawdata_min = std::min(*data, rawdata_min);
+		rawdata_max = std::max(*data, rawdata_max);
 		data += stride;
 		counter++;
 	}
@@ -135,6 +140,28 @@ int saveData(const string& filename, Fp_t* data, const int dataNum)
 	return 0;
 }
 
+int GetSourceSignalShiftScale(Fp_t amplitude)
+{
+	//Fp2CStr(amplitude, debug_output_buf_, sizeof(debug_output_buf_));
+	//printf("amp %s\n", debug_output_buf_);
+
+	if (amplitude > FLOAT2FP(0.5)) {
+		return 0;
+	} else 	if (amplitude > FLOAT2FP(0.25)) {
+		return 1;
+	} else if (amplitude > FLOAT2FP(0.125)) {
+		return 2;
+	} else if (amplitude > FLOAT2FP(0.0625)) {
+		return 3;
+	}
+}
+
+static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
+	rawData = rawData & 0x00003FF;
+	rawData -= 512;// center to 0 and make it signed
+	return (Fp_t)(rawData << (FPSHFT - 9 + extraShft));// div 512 then shift
+}
+
 int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const string& filename)
 {
 	// sampling from analog pin
@@ -143,27 +170,22 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DLOG("sampled");
 
 	DLOG("raw data --");
-	DRAWDATA(x, N);
+	DRAWDATA(x, 0);
 
 	DLOG("normalizing...");
 	{
-		Fp_t maxAmp = 0;
-		Fp_t minAmp = 0;
+		Fp_t amplitude = std::max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
+		if (amplitude < FLOAT2FP(0.0625)) {
+			return 1;
+		}
+		int extraShift = GetSourceSignalShiftScale(amplitude);
 		for (int i = 0; i < N2; i++) {
-			int data = x[i].re & 0x00003FF;
-			data -= 512; // center to 0 and make it signed
-			x[i].re = (Fp_t)(data << (FPSHFT - 9));// div 512 then shift
+			x[i].re = ScaleRawData(x[i].re, extraShift);
 			x[i].im = 0;
 			x[N2 + i].re = 0;
 			x[N2 + i].im = 0;
 			x2[i] = FpMul(x[i].re, x[i].re);
 			x2[i] = x2[i] >> SC_X2;
-
-			maxAmp = std::max(maxAmp, x[i].re);
-			minAmp = std::min(minAmp, x[i].re);
-		}
-		if (maxAmp - minAmp < FLOAT2FP(0.2)) {
-			return 1;
 		}
 	}
 	DLOG("normalized");
