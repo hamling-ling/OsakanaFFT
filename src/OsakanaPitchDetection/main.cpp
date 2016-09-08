@@ -22,13 +22,21 @@
 #define FREQ_PER_SAMPLE		((float)(1.0f/T_PER_SAMPLE))
 #define FREQ_PER_1024SAMPLE	(FREQ_PER_SAMPLE*1024)
 #endif
-#if 1	// HRM1017
+#if 0	// HRM1017
 #define N					256		// fft sampling num(last half is 0 pad)
 #define LOG2N				8		// log2(N)
-#define T1024_1024			(80.73633333333335f)	// adc speedd(time to take 1024x1024 samples in sec)
+#define T1024_1024			(80.73633333333335f)	// adc speed(time to take 1024x1024 samples in sec)
 #define T_PER_SAMPLE		FLOAT2FP(7.699616750081382e-05)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		(12988)			// 12987.659418105848 casted to int
 #define FREQ_PER_1024SAMPLE	13299363
+#endif
+#if 1	// HRM1017 with min,max
+#define N					256		// fft sampling num(last half is 0 pad)
+#define LOG2N				8		// log2(N)
+#define T1024_1024			(77.3946666667)	// adc speed(time to take 1024x1024 samples in sec)
+#define T_PER_SAMPLE		FLOAT2FP(7.38093058268e-05)	// factor to compute index to freq
+#define FREQ_PER_SAMPLE		(13548)			// rounded
+#define FREQ_PER_1024SAMPLE	13873589		// rounded 
 #endif
 
 #define N2					(N/2)	// sampling num of analog input
