@@ -231,8 +231,8 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	_nsdf[0] = _nsdf[0] << 1;
 
 	for (int t = 1; t < N2; t++) {
-		//_m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
-		Fp_t m = m_old + 2 * (-x2_old + x2[t]);
+		//_m[t] = _m[t - 1] - x2[t - 1]
+		Fp_t m = m_old - x2_old;
 
 		// prepare for next loop
 		x2_old = x2[t];
@@ -322,8 +322,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 
 	_mf[0] = xf[0].re * 2.0f;// why 2?
 	for (int t = 1; t < N2; t++) {
-		// why 2?
-		_mf[t] = _mf[t - 1] + 2.0f * (- xf2[t - 1] + xf2[t]);
+		_mf[t] = _mf[t - 1] - xf2[t - 1];
 	}
 
 	DLOG("-- ms smart");
