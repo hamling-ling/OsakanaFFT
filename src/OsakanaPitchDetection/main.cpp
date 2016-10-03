@@ -53,7 +53,7 @@
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
-#define DEBUG_OUTPUT_NUM    10
+#define DEBUG_OUTPUT_NUM    128
 
 
 using namespace std;
@@ -162,6 +162,7 @@ int GetSourceSignalShiftScale(Fp_t amplitude)
 	} else if (amplitude > FLOAT2FP(0.0625)) {
 		return 3;
 	}
+	return 4;
 }
 
 static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
@@ -183,7 +184,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DLOG("normalizing...");
 	{
 		Fp_t amplitude = std::max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
-		if (amplitude < FLOAT2FP(0.0625)) {
+		if (amplitude <= FLOAT2FP(0.0625)) {
 			return 1;
 		}
 		int extraShift = GetSourceSignalShiftScale(amplitude);
@@ -207,9 +208,11 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
-		Fp_t re = FpMul(x[i].re, x[i].re) + 
-				  FpMul(x[i].im, x[i].im); // (this x) = (normal x) >> LOG2N*2
-		x[i].re = (Fp_t)(re << (SC_PW)); // x = x >> (LOG2N*2-SC_PW)
+		//Fp_t re = FpMul(x[i].re, x[i].re) + 
+		//		  FpMul(x[i].im, x[i].im); // (this x) = (normal x) >> LOG2N*2
+		//x[i].re = (Fp_t)(re << (SC_PW)); // x = x >> (LOG2N*2-SC_PW)
+		FpW_t re = x[i].re * x[i].re + x[i].im * x[i].im;
+		x[i].re = (Fp_t)(re >> (FPSHFT - SC_PW));
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
@@ -226,9 +229,11 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	Fp_t x2_old = x2[0];
 	Fp_t* _nsdf = x2;// reuse memory
 	
-	Fp_t mt = m_old + FLOAT2FP(0.01f); // add small number to avoid 0 div
+	Fp_t mt = m_old;
 	_nsdf[0] = FpDiv(x[0].re, mt);
 	_nsdf[0] = _nsdf[0] << 1;
+	// curve analysis
+	InputFp(mctx, _nsdf[0]);
 
 	for (int t = 1; t < N2; t++) {
 		//_m[t] = _m[t - 1] - x2[t - 1]
@@ -239,7 +244,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		m_old = m;
 
 		// nsdf
-		Fp_t mt = m_old + FLOAT2FP(0.01f); // add small number to avoid 0 div
+		Fp_t mt = m_old;
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] << 1;
 
@@ -256,8 +261,8 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			//Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
-			//printf("delta %s\n", debug_output_buf_);
+			Fp2CStr(delta, debug_output_buf_, sizeof(debug_output_buf_));
+			printf("delta %s\n", debug_output_buf_);
 			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
 			//printf("nsdf=%s\n", debug_output_buf_);
 		}
@@ -269,7 +274,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		int32_t delta1024 = (delta >> (FPSHFT - 10));
 		idx1024 += delta1024;
 		// freq = freq_per_sample / idx
-		int32_t freq = FREQ_PER_1024SAMPLE / idx1024;
+		int32_t freq = (FREQ_PER_1024SAMPLE + (idx1024 >> 1)) / idx1024;
 		
 		int32_t idx = (idx1024 + 512) >> 10;
 		uint8_t note = kNoteTable[idx] % 12;
@@ -331,7 +336,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	// nsdf
 	float* _nsdf = _mf; // reuse buffer
 	for (int t = 0; t < N2; t++) {
-		float mt = _mf[t] + 0.01f; // add small number to avoid 0 div
+		float mt = _mf[t]; // add small number to avoid 0 div
 		_nsdf[t] = xf[t].re / mt;
 		_nsdf[t] = _nsdf[t] * 2.0f;
 	}
@@ -345,7 +350,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 
 	PeakInfo_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximums(mctx, 0.8f, keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfo_t), &keyMaxLen);
+	GetKeyMaximums(mctx, 0.5f, keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfo_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		float delta = 0;
 		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {

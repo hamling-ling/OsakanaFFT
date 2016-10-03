@@ -113,29 +113,10 @@ static inline void fp_butterfly(osk_fp_complex_t* r, const osk_fp_complex_t* tf,
 {
 	osk_fp_complex_t up = r[idx_a];
 	osk_fp_complex_t dn = r[idx_b];
-
-	//char buf[128] = { 0 };
-
-	//r[idx_a] = up + tf * dn;
-	//r[idx_b] = up - tf * dn;
-	
-	//fp_complex_str(&up, buf, sizeof(buf));
-	//printf("up=%s\n", buf);
-
-	//fp_complex_str(&dn, buf, sizeof(buf));
-	//printf("dn=%s\n", buf);
-
 	osk_fp_complex_t dntf = fp_complex_mult(&dn, tf);
-	//fp_complex_str(&dntf, buf, sizeof(buf));
-	//printf("dntf=%s\n", buf);
 
 	r[idx_a] = fp_complex_add(&up, &dntf);
-	//fp_complex_str(&r[idx_a], buf, sizeof(buf));
-	//printf("r[idx_a]=%s\n", buf);
-
 	r[idx_b] = fp_complex_sub(&up, &dntf);
-	//fp_complex_str(&r[idx_b], buf, sizeof(buf));
-	//printf("r[idx_b]=%s\n", buf);
 }
 
 void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale)
@@ -158,10 +139,10 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sca
 				int tw_idx = k << tw_idx_shift;
 				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 
+				fp_butterfly(&x[0], &tf, idx_a, idx_b);
+
 				x[idx_a] = fp_complex_r_shift(&x[idx_a], scale);
 				x[idx_b] = fp_complex_r_shift(&x[idx_b], scale);
-
-				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				idx_a++;
 				idx_b++;

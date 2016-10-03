@@ -40,9 +40,17 @@ static inline osk_fp_complex_t fp_complex_mult(const osk_fp_complex_t* a, const 
 {
 	osk_fp_complex_t x;
 	//x.re = a->re * b->re - a->im * b->im;
-	x.re = FpMul(a->re, b->re) - FpMul(a->im, b->im);
+	//x.re = FpMul(a->re, b->re) - FpMul(a->im, b->im);
+	FpW_t re_w = (FpW_t)a->re * (FpW_t)b->re;
+	re_w -= (FpW_t)a->im * (FpW_t)b->im;
+	x.re = (Fp_t)(re_w >> FPSHFT);
+
 	//x.im = a->re * b->im + a->im * b->re;
-	x.im = FpMul(a->re, b->im) + FpMul(a->im, b->re);
+	//x.im = FpMul(a->re, b->im) + FpMul(a->im, b->re);
+	FpW_t im_w = (FpW_t)a->re  * (FpW_t)b->im;
+	im_w += (FpW_t)a->im * (FpW_t)b->re;
+	x.im = (Fp_t)(im_w >> FPSHFT);
+
 	return x;
 }
 
