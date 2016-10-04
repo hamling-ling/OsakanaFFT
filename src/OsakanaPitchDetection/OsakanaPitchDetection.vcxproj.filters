@@ -30,7 +30,10 @@
     <ClInclude Include="include\PeakDetectMachineFp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="EdgeDetector.h">
+    <ClInclude Include="include\EdgeDetector.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NoteTable8.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

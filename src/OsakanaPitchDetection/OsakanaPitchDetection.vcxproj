@@ -158,7 +158,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="EdgeDetector.h" />
+    <ClInclude Include="include\EdgeDetector.h" />
+    <ClInclude Include="include\NoteTable8.h" />
     <ClInclude Include="include\PeakDetectMachine.h" />
     <ClInclude Include="include\PeakDetectMachineCommon.h" />
     <ClInclude Include="include\PeakDetectMachineFp.h" />

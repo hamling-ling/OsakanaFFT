@@ -49,8 +49,9 @@ static const uint8_t kNoteTable[] = {
 };
 #endif
 
+#if 0
 // N=256
-// sampling rate = 0.07558072916669921875(HRM1017 with min, max)
+// sampling rate = 0.07558072916669921875(GR-Kurumi with min, max)
 // todo:this platform dependent table should not be here
 static const uint8_t kNoteTable[] = {
 	0,   128,  116,  109,  104,  100,   97,   95,   92,   90,   88,   87,
@@ -65,6 +66,12 @@ static const uint8_t kNoteTable[] = {
 	47,   47,   47,   47,   47,   46,   46,   46,   46,   46,   46,   46,
 	45,   45,   45,   45,   45,   45,   45,   44
 };
+#endif
+
+// N=256
+// sampling rate = 0.07558072916669921875(GR-Kurumi with min, max)
+// x8 precision
+#include "NoteTable8.h"
 
 #ifdef __cplusplus
 }
