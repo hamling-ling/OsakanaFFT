@@ -127,9 +127,9 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	*num = counter;
 }
 
- bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int N, Fp_t* x)
+ bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int sampleNum, Fp_t* x)
 {
-	if (0 == index || N <= index + 1) {
+	if (0 == index || sampleNum <= index + 1) {
 		return false;
 	}
 	
