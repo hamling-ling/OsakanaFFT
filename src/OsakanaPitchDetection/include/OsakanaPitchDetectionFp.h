@@ -3,8 +3,16 @@
 
 #include <string>
 #include "OsakanaPitchDetectionCommon.h"
-#include "PeakDetectMachineFp.h"
 
-int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const std::string& filename);
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+	typedef struct _MachineContextFp_t MachineContextFp_t;
+	int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const std::string& filename);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif

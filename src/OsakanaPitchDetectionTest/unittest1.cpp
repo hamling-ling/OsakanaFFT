@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "PeakDetectMachineFp.h"
+#include "../OsakanaPitchDetection/src/PeakDetectMachineFp.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

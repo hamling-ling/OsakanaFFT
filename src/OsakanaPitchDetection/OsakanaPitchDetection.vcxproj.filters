@@ -18,18 +18,6 @@
     <ClInclude Include="include\EdgeDetector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\NoteTable8.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PeakDetectMachine.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PeakDetectMachineCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PeakDetectMachineFp.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="include\OsakanaPitchDetection.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -38,6 +26,18 @@
     </ClInclude>
     <ClInclude Include="include\OsakanaPitchDetectionCommon.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NoteTable8.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PeakDetectMachine.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PeakDetectMachineCommon.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PeakDetectMachineFp.h">
+      <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

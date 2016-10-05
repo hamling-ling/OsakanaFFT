@@ -3,20 +3,15 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "OsakanaPitchDetection.h"
+#include "../include/OsakanaPitchDetection.h"
+#include "PeakDetectMachine.h"
 
 #define LOG_NEWLINE "\n"
 #define LOG_PRINTF	printf
-#include "OsakanaFpFftDebug.h"
+#include "../../OsakanaFft/include/OsakanaFftDebug.h"
 
 
 using namespace std;
-
-osk_fp_complex_t x[N] = { { 0, 0 } };
-Fp_t x2[N2] = { 0 };
-
-Fp_t rawdata_min = 512;
-Fp_t rawdata_max = 0;
 
 osk_complex_t xf[N] = { { 0, 0 } };
 float xf2[N2] = { 0 };

@@ -5,6 +5,10 @@
 #include "OsakanaPitchDetection.h"
 #include "OsakanaPitchDetectionFp.h"
 
+// need to fix
+#include "../OsakanaPitchDetection/src/PeakDetectMachine.h"
+#include "../OsakanaPitchDetection/src/PeakDetectMachineFp.h"
+
 int main(int argc, char* argv[])
 {
 	if (argc < 1) {

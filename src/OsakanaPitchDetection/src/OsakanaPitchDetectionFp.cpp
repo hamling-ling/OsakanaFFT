@@ -3,7 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "OsakanaPitchDetectionFp.h"
+#include "../include/OsakanaPitchDetectionFp.h"
+#include "PeakDetectMachineFp.h"
 
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };

@@ -2,6 +2,7 @@
 #define _OSAKANAPITCHDETECTIONCOMMON_H_
 
 #include "OsakanaFft.h"
+#include "OsakanaFp.h"
 #include "OsakanaFpFft.h"
 
 #define LOG_NEWLINE "\n"

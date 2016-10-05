@@ -1,4 +1,4 @@
-#include "EdgeDetector.h"
+#include "../include/EdgeDetector.h"
 #include <string.h>
 
 EdgeDetector::EdgeDetector(int val) : _lastNotifiedVal(0)
