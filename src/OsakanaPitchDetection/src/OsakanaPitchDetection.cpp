@@ -1,7 +1,4 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
+
 #include <algorithm>
 #include "../include/OsakanaPitchDetection.h"
 #include "PeakDetectMachine.h"
@@ -11,43 +8,49 @@
 #include "../../OsakanaFft/include/OsakanaFftDebug.h"
 
 
-using namespace std;
-
 osk_complex_t xf[N] = { { 0, 0 } };
 float xf2[N2] = { 0 };
 float _mf[N2] = { 0 };
 
-static int readData(const string& filename, float* data, uint8_t stride, const int dataNum)
+
+PitchDetector::PitchDetector()
+	: _fft(NULL), _det(NULL), _func(NULL)
 {
-	ifstream file(filename);
-	if (!file.is_open()) {
-		cout << "can't open " << filename << endl;
+}
+
+PitchDetector::~PitchDetector()
+{
+	Cleanup();
+}
+
+int PitchDetector::Initialize(void* readFunc)
+{
+	_det = CreatePeakDetectMachineContext();
+
+	if (InitOsakanaFft(&_fft, N, LOG2N) != 0) {
+		DLOG("InitOsakanaFpFft error");
 		return 1;
 	}
+	_func = (ReadDataFunc_t)readFunc;
 
-	string line;
-	int counter = 0;
-	while (getline(file, line) && counter < dataNum) {
-		istringstream iss(line);
-		float x;
-		if (!(iss >> x)) {
-			cout << "can't convert " << line << " to float" << endl;
-			return 1;
-		}
-		*data = x;
-		data += stride;
-		counter++;
-	}
-
-	file.close();
 	return 0;
 }
 
-int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& filename)
+void PitchDetector::Cleanup()
 {
+	CleanOsakanaFft(_fft);
+	DestroyPeakDetectMachineContext(_det);
+	_fft = NULL;
+	_det = NULL;
+}
+
+int PitchDetector::DetectPitch()
+{
+	ResetMachine(_det);
+
 	// sampling from analog pin
 	DLOG("sampling...");
-	readData(filename, &xf[0].re, 2, N_ADC);
+	_func(&xf[0].re, 2, N_ADC);
 	DLOG("sampled");
 
 	DLOG("raw data --");
@@ -68,7 +71,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- fft/N");
-	OsakanaFft(ctx, xf);
+	OsakanaFft(_fft, xf);
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
@@ -79,7 +82,7 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
-	OsakanaIfft(ctx, xf);
+	OsakanaIfft(_fft, xf);
 	DCOMPLEX(xf, DEBUG_OUTPUT_NUM);
 
 	_mf[0] = xf[0].re * 2.0f;// why 2?
@@ -102,15 +105,15 @@ int DetectPitch(OsakanaFftContext_t* ctx, MachineContext_t* mctx, const string& 
 
 	DLOG("-- pitch detection");
 	for (int i = 0; i < N2; i++) {
-		Input(mctx, _nsdf[i]);
+		Input(_det, _nsdf[i]);
 	}
 
 	PeakInfo_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximums(mctx, 0.5f, keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfo_t), &keyMaxLen);
+	GetKeyMaximums(_det, 0.5f, keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfo_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		float delta = 0;
-		if (ParabolicInterp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
+		if (ParabolicInterp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			DLOG("delta %f\n", delta);
 		}
 		

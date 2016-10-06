@@ -1,46 +1,13 @@
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
+
 #include "../include/OsakanaPitchDetectionFp.h"
 #include "PeakDetectMachineFp.h"
+#include <algorithm>
 
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
 
 Fp_t rawdata_min = 512;
 Fp_t rawdata_max = 0;
-
-using namespace std;
-
-static int readDataFp(const string& filename, Fp_t* data, uint8_t stride, const int dataNum)
-{
-	ifstream file(filename);
-	if (!file.is_open()) {
-		cout << "can't open " << filename << endl;
-		return 1;
-	}
-
-	string line;
-	int counter = 0;
-	while (getline(file, line) && counter < dataNum) {
-		istringstream iss(line);
-		float x;
-		if (!(iss >> x)) {
-			cout << "can't convert " << line << " to float" << endl;
-			return 1;
-		}
-		*data = static_cast<int16_t>(x);
-		rawdata_min = std::min(*data, rawdata_min);
-		rawdata_max = std::max(*data, rawdata_max);
-		data += stride;
-		counter++;
-	}
-
-	file.close();
-	return 0;
-}
 
 int GetSourceSignalShiftScale(Fp_t amplitude)
 {
@@ -65,11 +32,42 @@ static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
 	return (Fp_t)(rawData << (FPSHFT - 9 + extraShft));// div 512 then shift
 }
 
-int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const string& filename)
+PitchDetectorFp::PitchDetectorFp()
+	: _fft(NULL), _det(NULL), _func(NULL)
+{
+}
+
+PitchDetectorFp::~PitchDetectorFp()
+{
+	Cleanup();
+}
+
+int PitchDetectorFp::Initialize(void* readFunc)
+{
+	_det = CreatePeakDetectMachineContextFp();
+
+	if (InitOsakanaFpFft(&_fft, N, LOG2N) != 0) {
+		DLOG("InitOsakanaFpFft error");
+		return 1;
+	}
+	_func = (ReadFpDataFunc_t)readFunc;
+
+	return 0;
+}
+
+void PitchDetectorFp::Cleanup()
+{
+	CleanOsakanaFpFft(_fft);
+	DestroyPeakDetectMachineContextFp(_det);
+	_fft = NULL;
+	_det = NULL;
+}
+
+int PitchDetectorFp::DetectPitch()
 {
 	// sampling from analog pin
 	DLOG("sampling...");
-	readDataFp(filename, &x[0].re, 2, N_ADC);
+	_func(&x[0].re, 2, N_ADC, &rawdata_min, &rawdata_max);
 	DLOG("sampled");
 
 	DLOG("raw data --");
@@ -97,7 +95,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- fft/N");
-	OsakanaFpFft(ctx, x, 1); // 1 means scaling. (this x) = (nromal x) >> LOG2N
+	OsakanaFpFft(_fft, x, 1); // 1 means scaling. (this x) = (nromal x) >> LOG2N
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
@@ -112,7 +110,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
-	OsakanaFpIfft(ctx, x, 1);// 1 means not *N scaling
+	OsakanaFpIfft(_fft, x, 1);// 1 means not *N scaling
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	// following loop compute :
@@ -127,7 +125,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 	_nsdf[0] = FpDiv(x[0].re, mt);
 	_nsdf[0] = _nsdf[0] << 1;
 	// curve analysis
-	InputFp(mctx, _nsdf[0]);
+	InputFp(_det, _nsdf[0]);
 
 	for (int t = 1; t < N2; t++) {
 		//_m[t] = _m[t - 1] - x2[t - 1]
@@ -143,7 +141,7 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 		_nsdf[t] = _nsdf[t] << 1;
 
 		// curve analysis
-		InputFp(mctx, _nsdf[t]);
+		InputFp(_det, _nsdf[t]);
 	}
 
 	DLOG("-- _nsdf");
@@ -151,10 +149,10 @@ int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const st
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(mctx, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(_det, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
-		if (ParabolicInterpFp(mctx, keyMaximums[0].index, _nsdf, N2, &delta)) {
+		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			char printbuf[64] = { '\0' };
 			Fp2CStr(delta, printbuf, sizeof(printbuf));
 			printf("delta %s\n", printbuf);

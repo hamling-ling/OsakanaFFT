@@ -50,4 +50,14 @@
 // debug
 #define DEBUG_OUTPUT_NUM    128
 
+class BasePitchDetector
+{
+public:
+	BasePitchDetector() {};
+	virtual ~BasePitchDetector() {};
+	virtual int Initialize(void* readFunc) = 0;
+	virtual void Cleanup() = 0;
+	virtual int DetectPitch() = 0;
+};
+
 #endif

@@ -1,18 +1,26 @@
 #ifndef OSAKANAPITCHDETECTIONFP_H_
 #define OSAKANAPITCHDETECTIONFP_H_
 
-#include <string>
 #include "OsakanaPitchDetectionCommon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+typedef struct _OsakanaFpFftContext_t OsakanaFpFftContext_t;
+typedef struct _MachineContextFp_t MachineContextFp_t;
 
-	typedef struct _MachineContextFp_t MachineContextFp_t;
-	int DetectPitchFp(OsakanaFpFftContext_t* ctx, MachineContextFp_t* mctx, const std::string& filename);
+typedef int (*ReadFpDataFunc_t)(Fp_t* data, uint8_t stride, const int dataNum, Fp_t* rawdata_min, Fp_t* rawdata_max);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+class PitchDetectorFp : BasePitchDetector
+{
+public:
+	PitchDetectorFp();
+	virtual ~PitchDetectorFp();
+	virtual int Initialize(void* readFunc);
+	virtual void Cleanup();
+	virtual int DetectPitch();
+
+private:
+	OsakanaFpFftContext_t* _fft;
+	MachineContextFp_t* _det;
+	ReadFpDataFunc_t _func;
+};
 
 #endif

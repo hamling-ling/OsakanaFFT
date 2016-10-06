@@ -99,6 +99,10 @@ exit_error:
 
 void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)
 {
+	if (ctx == NULL) {
+		return;
+	}
+
 #if !defined(USE_HARDCORD_TABLE)
 	free(ctx->twiddles);
 	free(ctx->bitReverseIndexTable);

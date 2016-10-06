@@ -2,12 +2,67 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "OsakanaPitchDetection.h"
 #include "OsakanaPitchDetectionFp.h"
 
-// need to fix
-#include "../OsakanaPitchDetection/src/PeakDetectMachine.h"
-#include "../OsakanaPitchDetection/src/PeakDetectMachineFp.h"
+using namespace std;
+
+string g_filename;
+
+static int readFpData(Fp_t* data, uint8_t stride, const int dataNum, Fp_t* rawdata_min, Fp_t* rawdata_max)
+{
+	ifstream file(g_filename);
+	if (!file.is_open()) {
+		cout << "can't open " << g_filename << endl;
+		return 1;
+	}
+
+	string line;
+	int counter = 0;
+	while (getline(file, line) && counter < dataNum) {
+		istringstream iss(line);
+		float x;
+		if (!(iss >> x)) {
+			cout << "can't convert " << line << " to float" << endl;
+			return 1;
+		}
+		*data = static_cast<int16_t>(x);
+		*rawdata_min = std::min(*data, *rawdata_min);
+		*rawdata_max = std::max(*data, *rawdata_max);
+		data += stride;
+		counter++;
+	}
+
+	file.close();
+	return 0;
+}
+
+static int readData(float* data, uint8_t stride, const int dataNum)
+{
+	ifstream file(g_filename);
+	if (!file.is_open()) {
+		cout << "can't open " << g_filename << endl;
+		return 1;
+	}
+
+	string line;
+	int counter = 0;
+	while (getline(file, line) && counter < dataNum) {
+		istringstream iss(line);
+		float x;
+		if (!(iss >> x)) {
+			cout << "can't convert " << line << " to float" << endl;
+			return 1;
+		}
+		*data = x;
+		data += stride;
+		counter++;
+	}
+
+	file.close();
+	return 0;
+}
 
 int main(int argc, char* argv[])
 {
@@ -17,41 +72,19 @@ int main(int argc, char* argv[])
 	}
 
 #if 1
-	MachineContextFp_t* mctx = NULL;
-	mctx = CreatePeakDetectMachineContextFp();
-
-	OsakanaFpFftContext_t* ctx;
-	if (InitOsakanaFpFft(&ctx, N, LOG2N) != 0) {
-		DLOG("InitOsakanaFpFft error");
-		return 1;
-	}
-
-	while (1) {
-		DetectPitchFp(ctx, mctx, argv[1]);
-		ResetMachineFp(mctx);
-		break;// for debug
-	}
-	CleanOsakanaFpFft(ctx);
-
-	DestroyPeakDetectMachineContextFp(mctx);
+	PitchDetectorFp detector;
+	detector.Initialize(readFpData);
 #else
-	MachineContext_t* mctx = NULL;
-	mctx = CreatePeakDetectMachineContext();
-
-	OsakanaFftContext_t* ctx;
-	if (InitOsakanaFft(&ctx, N, LOG2N) != 0) {
-		DLOG("InitOsakanaFpFft error");
-		return 1;
-	}
+	PitchDetector detector;
+	detector.Initialize(readData);
+#endif
+	g_filename = argv[1];
 
 	while (1) {
-		DetectPitch(ctx, mctx, argv[1]);
-		ResetMachine(mctx);
+		detector.DetectPitch();
 		break;// for debug
 	}
-
-	DestroyPeakDetectMachineContext(mctx);
-#endif
+	detector.Cleanup();
 
 	return 0;
 }
