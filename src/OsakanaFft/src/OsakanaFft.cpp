@@ -115,6 +115,10 @@ exit_error:
 
 void CleanOsakanaFft(OsakanaFftContext_t* ctx)
 {
+	if (ctx == NULL) {
+		return;
+	}
+
 	free(ctx->twiddles);
 	ctx->twiddles = NULL;
 	free(ctx->bitReverseIndexTable);
