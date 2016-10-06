@@ -50,6 +50,12 @@
 // debug
 #define DEBUG_OUTPUT_NUM    128
 
+typedef struct PitchInfo_t {
+	uint16_t freq;
+	uint8_t midiNote;
+	const char* noteStr;
+} PitchInfo_t;
+
 class BasePitchDetector
 {
 public:
@@ -57,7 +63,7 @@ public:
 	virtual ~BasePitchDetector() {};
 	virtual int Initialize(void* readFunc) = 0;
 	virtual void Cleanup() = 0;
-	virtual int DetectPitch() = 0;
+	virtual int DetectPitch(PitchInfo_t* pitchInfo) = 0;
 };
 
 #endif

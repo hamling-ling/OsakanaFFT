@@ -44,7 +44,7 @@ void PitchDetector::Cleanup()
 	_det = NULL;
 }
 
-int PitchDetector::DetectPitch()
+int PitchDetector::DetectPitch(PitchInfo_t* pitchInfo)
 {
 	ResetMachine(_det);
 
@@ -121,6 +121,10 @@ int PitchDetector::DetectPitch()
 		const float k = log10f(pow(2.0f, 1.0f / 12.0f));
 		uint16_t midi = (uint16_t)round(log10f(freq / 27.5f) / k) + 21;
 		DLOG("freq=%f Hz, note=%s\n", freq, kNoteStrings[midi % 12]);
+
+		pitchInfo->freq = (uint16_t)round(freq);
+		pitchInfo->midiNote = midi;
+		pitchInfo->noteStr = kNoteStrings[midi % 12];
 	}
 
 	DLOG("finished");

@@ -15,7 +15,7 @@ public:
 	virtual ~PitchDetectorFp();
 	virtual int Initialize(void* readFunc);
 	virtual void Cleanup();
-	virtual int DetectPitch();
+	virtual int DetectPitch(PitchInfo_t* pitchInfo);
 
 private:
 	OsakanaFpFftContext_t* _fft;

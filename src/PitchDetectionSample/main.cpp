@@ -80,8 +80,9 @@ int main(int argc, char* argv[])
 #endif
 	g_filename = argv[1];
 
+	PitchInfo_t pitchInfo;
 	while (1) {
-		detector.DetectPitch();
+		detector.DetectPitch(&pitchInfo);
 		break;// for debug
 	}
 	detector.Cleanup();

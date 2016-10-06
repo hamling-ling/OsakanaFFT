@@ -63,7 +63,7 @@ void PitchDetectorFp::Cleanup()
 	_det = NULL;
 }
 
-int PitchDetectorFp::DetectPitch()
+int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 {
 	// sampling from analog pin
 	DLOG("sampling...");
@@ -175,6 +175,10 @@ int PitchDetectorFp::DetectPitch()
 		uint8_t note = kNoteTable8[idx8] % 12;
 
 		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
+
+		pitchInfo->freq = (uint16_t)freq;
+		pitchInfo->midiNote = kNoteTable8[idx8];
+		pitchInfo->noteStr = kNoteStrings[note];
 	}
 
 	DLOG("finished");
