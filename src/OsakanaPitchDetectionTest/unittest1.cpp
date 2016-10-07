@@ -123,6 +123,7 @@ namespace OsakanaPitchDetectionTest
 				testFpFftWithFreq(1.0, x.second, x.first);
 			}
 		}
+
 		TEST_METHOD(TestFpFftRangeScale05)
 		{
 			for (auto x : g_expValues) {
@@ -130,9 +131,42 @@ namespace OsakanaPitchDetectionTest
 			}
 		}
 
+		TEST_METHOD(TestFpFftRangeScale025)
+		{
+			for (auto x : g_expValues) {
+				testFpFftWithFreq(0.25, x.second, x.first);
+			}
+		}
+
+		TEST_METHOD(TestFpFftRangeScale0125)
+		{
+			for (auto x : g_expValues) {
+				testFpFftWithFreq(0.125, x.second, x.first);
+			}
+		}
+
+		TEST_METHOD(TestFpFftContinuous)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			for (auto x : g_expValues) {
+				uint8_t expNote = x.first;
+				float freq = x.second;
+
+				CreateSineData(g_data, freq, 0.5);
+
+				PitchInfo_t pitchInfo;
+				int result = detector.DetectPitch(&pitchInfo);
+
+				Assert::AreEqual(result, 0);
+				Assert::AreEqual(pitchInfo.midiNote, expNote);
+			}
+		}
+
 		TEST_METHOD(TestFft)
 		{
-			CreateSineData(g_data, 261.6);
+			CreateSineData(g_data, 261.6, 1.0);
 			PitchDetector detector;
 			detector.Initialize(readData);
 

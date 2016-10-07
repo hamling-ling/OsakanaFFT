@@ -65,6 +65,8 @@ void PitchDetectorFp::Cleanup()
 
 int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 {
+	ResetMachineFp(_det);
+
 	// sampling from analog pin
 	DLOG("sampling...");
 	_func(&x[0].re, 2, N_ADC, &rawdata_min, &rawdata_max);
