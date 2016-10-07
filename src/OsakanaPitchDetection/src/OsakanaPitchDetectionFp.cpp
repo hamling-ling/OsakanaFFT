@@ -92,7 +92,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	DLOG("normalized");
 
 	DLOG("-- normalized input signal");
-	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
+	DCOMPLEXFp(x, 256);
 
 	DLOG("-- fft/N");
 	OsakanaFpFft(_fft, x, 1); // 1 means scaling. (this x) = (nromal x) >> LOG2N

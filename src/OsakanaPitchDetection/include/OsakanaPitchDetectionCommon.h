@@ -44,7 +44,7 @@
 // The power spectrum result is finally scaled by 1 >> (LOG2N*2-SC_PW)
 // Other values used with the scaled power spectrum also required to scaled.
 // Here the value is only x2 and it should be scaled by 1 >> (LOG2N*2-SC_PW)
-#define SC_PW				(LOG2N-6)
+#define SC_PW				(LOG2N-7)
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
