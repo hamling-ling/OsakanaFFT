@@ -8,6 +8,7 @@
 #include <algorithm>
 using namespace std;
 #endif
+#include <inttypes.h>
 
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
@@ -177,9 +178,9 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			char printbuf[64] = { '\0' };
-			Fp2CStr(delta, printbuf, sizeof(printbuf));
-			printf("delta %s\n", printbuf);
+			//char printbuf[64] = { '\0' };
+			//Fp2CStr(delta, printbuf, sizeof(printbuf));
+			//printf("delta %s\n", printbuf);
 			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
 			//printf("nsdf=%s\n", debug_output_buf_);
 		}

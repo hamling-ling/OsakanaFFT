@@ -27,6 +27,9 @@ vector<pair<uint8_t, float> > g_expValues = {
 
 static int readFpData(Fp_t* data, uint8_t stride, const int dataNum, Fp_t* rawdata_min, Fp_t* rawdata_max)
 {
+	*rawdata_min = 512;
+	*rawdata_max = 0;
+
 	int counter = 0;
 	while (counter < dataNum) {
 		float x = g_data[counter];
