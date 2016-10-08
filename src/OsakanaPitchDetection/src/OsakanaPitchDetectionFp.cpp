@@ -41,6 +41,19 @@ static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
 	return (Fp_t)(rawData << (FPSHFT - 9 + extraShft));// div 512 then shift
 }
 
+static void PrintResult(uint16_t freq, const char* str)
+{
+#if defined(BROKEN_SPRINTF)
+	LOG_PRINTF("freq=");
+	LOG_PRINTF(freq, DEC);
+	LOG_PRINTF(", note=");
+	LOG_PRINTF(str);
+	LOG_PRINTF(LOG_NEWLINE);
+#else
+	ILOG("freq=%u Hz, note=%s\n", freq, str);
+#endif
+}
+
 PitchDetectorFp::PitchDetectorFp()
 	: _fft(NULL), _det(NULL), _func(NULL)
 {
@@ -114,7 +127,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		//Fp_t re = FpMul(x[i].re, x[i].re) + 
 		//		  FpMul(x[i].im, x[i].im); // (this x) = (normal x) >> LOG2N*2
 		//x[i].re = (Fp_t)(re << (SC_PW)); // x = x >> (LOG2N*2-SC_PW)
-		FpW_t re = x[i].re * x[i].re + x[i].im * x[i].im;
+		FpW_t re = (FpW_t)x[i].re * (FpW_t)x[i].re + (FpW_t)x[i].im * (FpW_t)x[i].im;
 		x[i].re = (Fp_t)(re >> (FPSHFT - SC_PW));
 		x[i].im = 0;
 	}
@@ -185,7 +198,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		int32_t idx8 = (idx1024 + 4) >> 7;
 		uint8_t note = kNoteTable8[idx8] % 12;
 
-		DLOG("freq=%u Hz, note=%s\n", freq, kNoteStrings[note]);
+		PrintResult(freq, kNoteStrings[note]);
 
 		pitchInfo->freq = (uint16_t)freq;
 		pitchInfo->midiNote = kNoteTable8[idx8];

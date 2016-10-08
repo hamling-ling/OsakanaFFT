@@ -7,8 +7,9 @@
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
-#define LOG_PRINTF	Serial.print
-#define LOG_NEWLINE			"\r\n"
+#define LOG_PRINTF		Serial.print
+#define LOG_NEWLINE		"\r\n"
+#define BROKEN_SPRINTF
 #else                               // anything else
 #define LOG_PRINTF	printf
 #define LOG_NEWLINE "\n"
