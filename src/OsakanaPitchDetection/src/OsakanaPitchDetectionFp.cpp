@@ -1,7 +1,13 @@
 
 #include "../include/OsakanaPitchDetectionFp.h"
 #include "PeakDetectMachineFp.h"
+
+#if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
+#include <Arduino.h>
+#else                               // anything else
 #include <algorithm>
+using namespace std;
+#endif
 
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
@@ -16,11 +22,14 @@ int GetSourceSignalShiftScale(Fp_t amplitude)
 
 	if (amplitude > FLOAT2FP(0.5)) {
 		return 0;
-	} else 	if (amplitude > FLOAT2FP(0.25)) {
+	}
+	else 	if (amplitude > FLOAT2FP(0.25)) {
 		return 1;
-	} else if (amplitude > FLOAT2FP(0.125)) {
+	}
+	else if (amplitude > FLOAT2FP(0.125)) {
 		return 2;
-	} else if (amplitude > FLOAT2FP(0.0625)) {
+	}
+	else if (amplitude > FLOAT2FP(0.0625)) {
 		return 3;
 	}
 	return 4;
@@ -77,7 +86,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	DLOG("normalizing...");
 	{
-		Fp_t amplitude = std::max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
+		Fp_t amplitude = max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
 		if (amplitude <= FLOAT2FP(0.0625)) {
 			return 1;
 		}
@@ -122,7 +131,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	Fp_t m_old = (x[0].re << 1);// why 2?
 	Fp_t x2_old = x2[0];
 	Fp_t* _nsdf = x2;// reuse memory
-	
+
 	Fp_t mt = m_old;
 	_nsdf[0] = FpDiv(x[0].re, mt);
 	_nsdf[0] = _nsdf[0] << 1;
@@ -151,7 +160,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(_det, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums)/sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(_det, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
@@ -170,7 +179,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		idx1024 += delta1024;
 		// freq = freq_per_sample / idx
 		int32_t freq = (FREQ_PER_1024SAMPLE + (idx1024 >> 1)) / idx1024;
-		
+
 		//int32_t idx = (idx1024 + 512) >> 10;
 		//uint8_t note = kNoteTable[idx] % 12;
 		int32_t idx8 = (idx1024 + 4) >> 7;

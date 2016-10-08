@@ -5,8 +5,16 @@
 #include "OsakanaFp.h"
 #include "OsakanaFpFft.h"
 
-#define LOG_NEWLINE "\n"
+#if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
+#include <Arduino.h>
+#define LOG_PRINTF	Serial.print
+#define LOG_NEWLINE			"\r\n"
+#else                               // anything else
 #define LOG_PRINTF	printf
+#define LOG_NEWLINE "\n"
+#endif
+
+#define _DEBUG
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS

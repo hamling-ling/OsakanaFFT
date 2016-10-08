@@ -1,6 +1,13 @@
 #ifndef _OSAKANAFFTDEBUG_H_
 #define _OSAKANAFFTDEBUG_H_
 
+#define ILOG(...)			{ \
+								char debug_output_buf2_[128] = { 0 }; \
+								snprintf(debug_output_buf2_,sizeof(debug_output_buf2_), __VA_ARGS__); \
+								LOG_PRINTF(debug_output_buf2_); \
+								LOG_PRINTF(LOG_NEWLINE); \
+							}
+
 #if defined(_DEBUG)
 
 #if !defined(LOG_NEWLINE) 

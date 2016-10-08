@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	
-#if 0
+#if 1
 	PitchDetectorFp detector;
 	detector.Initialize(readFpData);
 #else
