@@ -1,27 +1,36 @@
-#include "../include/EdgeDetector.h"
+//#include "../include/EdgeDetector.h"
+#include "EdgeDetector.h"
+#include "ContinuityDetector.h"
+#include "VolumeComparator.h"
 #include <string.h>
 
-EdgeDetector::EdgeDetector(int val) : _lastNotifiedVal(0)
+EdgeDetector::EdgeDetector()
+	:
+	_lastNotifiedVal(0),
+	_cd(new ContinuityDetector()),
+	_vc(new VolumeComparator(256, 128))
 {
-    memset(_history, 0, sizeof(_history));
 }
 
 EdgeDetector::~EdgeDetector()
 {
+	delete _cd;
+	delete _vc;
 }
 
-bool EdgeDetector::Input(uint16_t val)
+bool EdgeDetector::Input(uint16_t value,  uint16_t volume)
 {
-	_history[0] = _history[1];
-	_history[1] = _history[2];
-	_history[2] = val;
-	if(_history[1] == _history[2]) {
-	    if(_history[0] != _history[1]) {
-	        if(_history[1] != _lastNotifiedVal) {
-	            _lastNotifiedVal = val;
-	            return true;
-	        }
-	    }
+	if (!_vc->Input(volume)) {
+		// cutoff to small value
+		value = 0;
+	}
+
+	if (_cd->Input(value)) {
+		// 3 times continued value!
+		if (_lastNotifiedVal != value) {
+			_lastNotifiedVal = value;
+			return true;
+		}
 	}
 	return false;
 }

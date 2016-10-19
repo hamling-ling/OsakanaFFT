@@ -23,17 +23,21 @@
     <ClInclude Include="include\OsakanaPitchDetection.h" />
     <ClInclude Include="include\OsakanaPitchDetectionCommon.h" />
     <ClInclude Include="include\OsakanaPitchDetectionFp.h" />
+    <ClInclude Include="src\ContinuityDetector.h" />
     <ClInclude Include="src\NoteTable8.h" />
     <ClInclude Include="src\PeakDetectMachine.h" />
     <ClInclude Include="src\PeakDetectMachineCommon.h" />
     <ClInclude Include="src\PeakDetectMachineFp.h" />
+    <ClInclude Include="src\VolumeComparator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ContinuityDetector.cpp" />
     <ClCompile Include="src\EdgeDetector.cpp" />
     <ClCompile Include="src\OsakanaPitchDetection.cpp" />
     <ClCompile Include="src\OsakanaPitchDetectionFp.cpp" />
     <ClCompile Include="src\PeakDetectMachine.cpp" />
     <ClCompile Include="src\PeakDetectMachineFp.cpp" />
+    <ClCompile Include="src\VolumeComparator.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D3BF0752-6AB4-41EB-93E6-21B50762C764}</ProjectGuid>

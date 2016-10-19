@@ -89,7 +89,7 @@ namespace OsakanaPitchDetectionTest
 		Logger::WriteMessage(ss.str().c_str());
 	}
 
-	TEST_CLASS(UnitTest1)
+	TEST_CLASS(PitchDetectionTest)
 	{
 	public:
 		
