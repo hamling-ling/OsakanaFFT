@@ -63,6 +63,7 @@ typedef struct PitchInfo_t {
 	uint16_t freq;
 	uint8_t midiNote;
 	const char* noteStr;
+	uint16_t volume;// 0-1023
 } PitchInfo_t;
 
 class BasePitchDetector

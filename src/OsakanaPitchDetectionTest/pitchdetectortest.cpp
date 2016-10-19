@@ -148,6 +148,24 @@ namespace OsakanaPitchDetectionTest
 			}
 		}
 
+		TEST_METHOD(TestFpFftRangeScaleTooSmall)
+		{
+			CreateSineData(g_data, 261.6, 0.03125);
+
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo;
+			memset(&pitchInfo, 0, sizeof(pitchInfo));
+
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreEqual(result, 1);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual((int)pitchInfo.freq, 0);
+			Assert::AreEqual((int)pitchInfo.volume, 0);
+		}
+
 		TEST_METHOD(TestFpFftContinuous)
 		{
 			PitchDetectorFp detector;
@@ -178,6 +196,38 @@ namespace OsakanaPitchDetectionTest
 
 			Assert::AreEqual(result, 0);
 			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)60);
+		}
+
+		TEST_METHOD(TestVolume512)
+		{
+			CreateSineData(g_data, 261.6, 0.5);
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo;
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)60);
+
+			bool isAround512 = (500 < pitchInfo.volume && pitchInfo.volume < 520);
+			Assert::IsTrue(isAround512);
+		}
+
+		TEST_METHOD(TestVolume1024)
+		{
+			CreateSineData(g_data, 261.6, 1.0);
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo;
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)60);
+
+			bool isAround512 = (1020 < pitchInfo.volume && pitchInfo.volume < 1030);
+			Assert::IsTrue(isAround512);
 		}
 	};
 }

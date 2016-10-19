@@ -100,11 +100,16 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	DLOG("normalizing...");
 	{
-		Fp_t amplitude = max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
-		if (amplitude <= FLOAT2FP(0.0625)) {
+		if (512 < rawdata_min) {
 			return 1;
 		}
+		Fp_t amplitude = max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
 		int extraShift = GetSourceSignalShiftScale(amplitude);
+		if (4 <= extraShift) {
+			return 1;
+		}
+		pitchInfo->volume = rawdata_max - rawdata_min;
+
 		for (int i = 0; i < N2; i++) {
 			x[i].re = ScaleRawData(x[i].re, extraShift);
 			x[i].im = 0;
