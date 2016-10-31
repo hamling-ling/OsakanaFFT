@@ -13,7 +13,7 @@ public:
 	FugaDetector();
 	~FugaDetector();
 
-	bool Input(uint16_t value);
+	uint8_t Input(uint16_t value);
 
 private:
 	uint8_t _pos;

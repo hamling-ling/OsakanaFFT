@@ -29,7 +29,7 @@ FugaDetector::~FugaDetector()
 	_mds[1] = NULL;
 }
 
-bool FugaDetector::Input(uint16_t value)
+uint8_t FugaDetector::Input(uint16_t value)
 {
 	if (value == 0) {
 		return false;
@@ -41,10 +41,10 @@ bool FugaDetector::Input(uint16_t value)
 		_pos++;
 		if (_pos == MAX_MELODY_DETECTORS) {
 			_pos = 0;
-			return true;
+			return MAX_MELODY_DETECTORS;
 		}
-		return false;
+		return _pos;
 	}
 
-	return false;
+	return 0;
 }

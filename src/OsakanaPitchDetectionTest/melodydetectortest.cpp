@@ -22,24 +22,24 @@ namespace OsakanaPitchDetectionTest
 		{
 			FugaDetector fd;
 
-			bool result = false;
+			int result = 0;
 			result = fd.Input(67);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(74);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(70);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(69);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 1);
 
 			result = fd.Input(69);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(62);
-			Assert::IsTrue(result);
+			Assert::AreEqual(result, 2);
 		}
 
 		TEST_METHOD(TestRigntInputWithNoteOff)
