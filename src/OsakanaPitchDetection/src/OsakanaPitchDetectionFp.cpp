@@ -88,6 +88,7 @@ void PitchDetectorFp::Cleanup()
 
 int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 {
+	int ret = 1;
 	ResetMachineFp(_det);
 
 	// sampling from analog pin
@@ -209,9 +210,10 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		pitchInfo->freq = (uint16_t)freq;
 		pitchInfo->midiNote = kNoteTable8[idx8];
 		pitchInfo->noteStr = kNoteStrings[note];
+		ret = 0;
 	}
 
 	DLOG("finished");
-	return 0;
+	return ret;
 }
 
