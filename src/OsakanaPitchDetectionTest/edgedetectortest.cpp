@@ -76,6 +76,7 @@ namespace OsakanaPitchDetectionTest
 			result = vc.Input(31);
 			Assert::IsFalse(result);
 		}
+
 		TEST_METHOD(TestEdgeUp)
 		{
 			EdgeDetector ed;
@@ -224,6 +225,73 @@ namespace OsakanaPitchDetectionTest
 
 			note = ed.CurrentNote();
 			AreEqualNote(1, note);
+		}
+
+		TEST_METHOD(TestVolumeDecay)
+		{
+			EdgeDetector ed;
+			bool result = false;
+			uint16_t note = 0;
+
+			result = ed.Input(0, 0);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(0, 276);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(64, 247);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(64, 180);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(64, 144);
+			Assert::IsTrue(result);
+			note = ed.CurrentNote();
+			AreEqualNote(64, note);
+
+			result = ed.Input(64, 120);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(64, note);
+
+			result = ed.Input(64, 109);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(64, note);
+
+			result = ed.Input(64, 97);
+			Assert::IsTrue(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(64, 63);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(0, 0);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(0, 0);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
+
+			result = ed.Input(0, 0);
+			Assert::IsFalse(result);
+			note = ed.CurrentNote();
+			AreEqualNote(0, note);
 		}
 
 		private:
