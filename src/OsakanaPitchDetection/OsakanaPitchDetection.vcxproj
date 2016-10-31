@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EdgeDetector.h" />
+    <ClInclude Include="include\FugaDetector.h" />
+    <ClInclude Include="include\MelodyDetector.h" />
     <ClInclude Include="include\OsakanaPitchDetection.h" />
     <ClInclude Include="include\OsakanaPitchDetectionCommon.h" />
     <ClInclude Include="include\OsakanaPitchDetectionFp.h" />
@@ -33,6 +35,8 @@
   <ItemGroup>
     <ClCompile Include="src\ContinuityDetector.cpp" />
     <ClCompile Include="src\EdgeDetector.cpp" />
+    <ClCompile Include="src\FugaDetector.cpp" />
+    <ClCompile Include="src\MelodyDetector.cpp" />
     <ClCompile Include="src\OsakanaPitchDetection.cpp" />
     <ClCompile Include="src\OsakanaPitchDetectionFp.cpp" />
     <ClCompile Include="src\PeakDetectMachine.cpp" />
