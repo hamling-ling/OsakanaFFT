@@ -24,22 +24,22 @@ MelodyDetector::~MelodyDetector()
 {
 }
 
-bool MelodyDetector::Input(uint16_t value)
+int MelodyDetector::Input(uint16_t value)
 {
 	if (value == 0) {
-		return false;
+		return 0;
 	}
 
 	if (_melody[_pos] != value) {
 		_pos = 0;
-		return false;
+		return -1;
 	}
 
 	_pos++;
 	if (_pos == _melodyLength) {
 		_pos = 0;
-		return true;
+		return 1;
 	}
 
-	return false;
+	return 0;
 }

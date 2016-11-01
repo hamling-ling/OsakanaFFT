@@ -139,7 +139,6 @@ namespace OsakanaPitchDetectionTest
 			result = ed.Input(2, 1023);
 			Assert::IsTrue(result);
 
-
 			note = ed.CurrentNote();
 			AreEqualNote(2, note);
 		}

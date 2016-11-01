@@ -11,7 +11,12 @@ public:
 	MelodyDetector(uint16_t* melody, uint8_t melodyLen);
 	~MelodyDetector();
 
-	bool Input(uint16_t value);
+	/**
+	 *	@return -1:state backed to initial
+	 *	@return 0:state not changed
+	 *	@return 1:detected and state backed to initial
+	 */
+	int Input(uint16_t value);
 
 private:
 	uint8_t _melodyLength;

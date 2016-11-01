@@ -37,7 +37,17 @@ uint8_t FugaDetector::Input(uint16_t value)
 
 	MelodyDetector* md = _mds[_pos];
 
-	if (md->Input(value)) {
+	int result = md->Input(value);
+	if (-1 == result) {
+		_pos = 0;
+		return 0;
+	}
+
+	if (0 == result) {
+		return 0;
+	}
+
+	if (1 == result) {
 		_pos++;
 		if (_pos == MAX_MELODY_DETECTORS) {
 			_pos = 0;
