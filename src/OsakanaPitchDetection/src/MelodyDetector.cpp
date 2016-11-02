@@ -43,3 +43,8 @@ int MelodyDetector::Input(uint16_t value)
 
 	return 0;
 }
+
+void MelodyDetector::Reset()
+{
+	_pos = 0;
+}

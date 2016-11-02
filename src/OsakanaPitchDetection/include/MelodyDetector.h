@@ -17,6 +17,7 @@ public:
 	 *	@return 1:detected and state backed to initial
 	 */
 	int Input(uint16_t value);
+	void Reset();
 
 private:
 	uint8_t _melodyLength;

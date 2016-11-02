@@ -48,7 +48,10 @@
     <ClInclude Include="include\MelodyDetector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\FugaDetector.h">
+    <ClInclude Include="include\ResponsiveMelodyDetector.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MelodyCommandReceiver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,7 +80,10 @@
     <ClCompile Include="src\MelodyDetector.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\FugaDetector.cpp">
+    <ClCompile Include="src\ResponsiveMelodyDetector.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MelodyCommandReceiver.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

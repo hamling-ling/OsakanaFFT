@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../OsakanaPitchDetection/include/EdgeDetector.h"
-#include "../OsakanaPitchDetection/include/FugaDetector.h"
+#include "../OsakanaPitchDetection/include/MelodyCommandReceiver.h"
+#include "../OsakanaPitchDetection/include/ResponsiveMelodyDetector.h"
 #include "../OsakanaPitchDetection/src/ContinuityDetector.h"
 #include "../OsakanaPitchDetection/src/VolumeComparator.h"
 
@@ -9,18 +10,27 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace OsakanaPitchDetectionTest
 {
+	// fuga G D Bb A G Bb A G F# A D
+	static uint16_t s_mel0[] = { 67, 74, 70, 69 };// G D Bb A 
+	static uint16_t s_mel1[] = { 69, 62 };// A D
+
+	//  G F Bb C F D C F D Bb C G F
+	static uint16_t s_wag_mel0[] = { 67, 65, 70, 72 };// G F Bb C 
+	static uint16_t s_wag_mel1[] = { 67, 65 };// A D
+
+
 	TEST_CLASS(MelodyDetectionTest)
 	{
 	public:
 
 		TEST_METHOD(TestInstantiation)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 		}
 
 		TEST_METHOD(TestRigntInput)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 
 			int result = 0;
 			result = fd.Input(67);
@@ -44,7 +54,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestRigntInputWithNoteOff)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 
 			int result = 0;
 			result = fd.Input(67);
@@ -83,7 +93,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestWrongInputResetState)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 			uint16_t notes[] = { 67, 74, 70, 69, 69, 62 };
 
 			int result = 0;
@@ -106,7 +116,7 @@ namespace OsakanaPitchDetectionTest
 
 					if (j == i) {
 						result = fd.Input(3);// wrong input
-						Assert::AreEqual(result, 0);
+						Assert::AreEqual(result, -1);
 						break;
 					}
 				}
@@ -129,7 +139,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestResetStateAfterRigntInput)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 			uint16_t notes[] = { 67, 74, 70, 69, 69, 62 };
 
 			int result = 0;
@@ -154,7 +164,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestRepeatRightInput)
 		{
-			FugaDetector fd;
+			ResponsiveMelodyDetector fd(s_mel0, _countof(s_mel0), s_mel1, _countof(s_mel1));
 			uint16_t notes[] = { 67, 74, 70, 69, 69, 62 };
 
 			for (int i = 0; i < 2; i++) {
@@ -178,6 +188,176 @@ namespace OsakanaPitchDetectionTest
 
 				result = fd.Input(0);
 				Assert::AreEqual(result, 0);
+			}
+		}
+
+		TEST_METHOD(TestMelodyCommandReceiverInstantiation)
+		{
+			MelodyCommand_t commands[] = {
+				{s_mel0,		s_mel1,		_countof(s_mel0) ,		_countof(s_mel1)		},
+				{ s_wag_mel0,	s_wag_mel1, _countof(s_wag_mel0) ,	_countof(s_wag_mel1)	},
+			};
+			MelodyCommandReceiver mcr(commands, _countof(commands));
+		}
+
+		TEST_METHOD(TestMelodyCommandReceiverRightInput)
+		{
+			MelodyCommand_t commands[] = {
+				{ s_mel0,		s_mel1,		_countof(s_mel0) ,		_countof(s_mel1) },
+				{ s_wag_mel0,	s_wag_mel1, _countof(s_wag_mel0) ,	_countof(s_wag_mel1) },
+			};
+
+			MelodyCommandReceiver mcr(commands, _countof(commands));
+
+			MelodyCommandResponse_t resp;
+			for (int i = 0; i < _countof(s_mel0); i++) {
+				resp = mcr.Input(s_mel0[i]);
+				if (i + 1 < _countof(s_mel0)) {
+					Assert::IsTrue(resp.IsEmpty());
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 0);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+			}
+
+			for (int i = 0; i < _countof(s_mel1); i++) {
+				resp = mcr.Input(s_mel1[i]);
+				if (i + 1 < _countof(s_mel1)) {
+					Assert::AreEqual((int)resp.commandIdx, 0);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 0);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+				}
+			}
+		}
+
+		TEST_METHOD(TestMelodyCommandReceiverRightInput2)
+		{
+			MelodyCommand_t commands[] = {
+				{ s_mel0,		s_mel1,		_countof(s_mel0) ,		_countof(s_mel1) },
+				{ s_wag_mel0,	s_wag_mel1, _countof(s_wag_mel0) ,	_countof(s_wag_mel1) },
+			};
+
+			MelodyCommandReceiver mcr(commands, _countof(commands));
+
+			MelodyCommandResponse_t resp;
+			for (int i = 0; i < _countof(s_wag_mel0); i++) {
+				resp = mcr.Input(s_wag_mel0[i]);
+				if (i + 1 < _countof(s_wag_mel0)) {
+					Assert::IsTrue(resp.IsEmpty());
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+			}
+
+			for (int i = 0; i < _countof(s_wag_mel1); i++) {
+				resp = mcr.Input(s_wag_mel1[i]);
+				if (i + 1 < _countof(s_wag_mel1)) {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+				}
+			}
+		}
+
+		TEST_METHOD(TestMelodyCommandReceiverRightInputWithSilence)
+		{
+			MelodyCommand_t commands[] = {
+				{ s_mel0,		s_mel1,		_countof(s_mel0) ,		_countof(s_mel1) },
+				{ s_wag_mel0,	s_wag_mel1, _countof(s_wag_mel0) ,	_countof(s_wag_mel1) },
+			};
+
+			MelodyCommandReceiver mcr(commands, _countof(commands));
+
+			MelodyCommandResponse_t resp;
+			for (int i = 0; i < _countof(s_wag_mel0); i++) {
+				resp = mcr.Input(s_wag_mel0[i]);
+				mcr.Input(0);
+				if (i + 1 < _countof(s_wag_mel0)) {
+					Assert::IsTrue(resp.IsEmpty());
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+			}
+
+			for (int i = 0; i < _countof(s_wag_mel1); i++) {
+				resp = mcr.Input(s_wag_mel1[i]);
+				mcr.Input(0);
+				if (i + 1 < _countof(s_wag_mel1)) {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+				}
+				else {
+					Assert::AreEqual((int)resp.commandIdx, 1);
+					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+				}
+			}
+		}
+
+		TEST_METHOD(TestMelodyCommandReceiverResetWithWrongNote)
+		{
+			MelodyCommand_t commands[] = {
+				{ s_mel0,		s_mel1,		_countof(s_mel0) ,		_countof(s_mel1) },
+				{ s_wag_mel0,	s_wag_mel1, _countof(s_wag_mel0) ,	_countof(s_wag_mel1) },
+			};
+
+			MelodyCommandReceiver mcr(commands, _countof(commands));
+
+			MelodyCommandResponse_t resp;
+			for (int wrongNotePos = 0; wrongNotePos < _countof(s_wag_mel0); wrongNotePos++) {
+				for (int i = 0; i < _countof(s_wag_mel0); i++) {
+					resp = mcr.Input(s_wag_mel0[i]);
+					mcr.Input(0);
+					if (i + 1 < _countof(s_wag_mel0)) {
+						Assert::IsTrue(resp.IsEmpty());
+					}
+					else {
+						Assert::AreEqual((int)resp.commandIdx, 1);
+						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					}
+					
+					if(i == wrongNotePos) {
+						resp = mcr.Input(3);
+						Assert::IsTrue(resp.IsEmpty());
+						break;
+					}
+				}
+			}
+
+			for (int wrongNotePos = 0; wrongNotePos < _countof(s_wag_mel1); wrongNotePos++) {
+
+				for (int i = 0; i < _countof(s_wag_mel0); i++) {
+					mcr.Input(s_wag_mel0[i]);
+				}
+
+				for (int i = 0; i < _countof(s_wag_mel1); i++) {
+					resp = mcr.Input(s_wag_mel1[i]);
+					mcr.Input(0);
+					if (i + 1 < _countof(s_wag_mel1)) {
+						Assert::AreEqual((int)resp.commandIdx, 1);
+						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					}
+					else {
+						Assert::AreEqual((int)resp.commandIdx, 1);
+						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+					}
+
+					if (i == wrongNotePos) {
+						resp = mcr.Input(3);
+						Assert::IsTrue(resp.IsEmpty());
+						break;
+					}
+				}
 			}
 		}
 	};

@@ -13,7 +13,8 @@ public:
 	ResponsiveMelodyDetector(uint16_t* mel0, int mel0_len, uint16_t* mel1, int mel1_len);
 	~ResponsiveMelodyDetector();
 
-	uint8_t Input(uint16_t value);
+	int Input(uint16_t value);
+	void Reset();
 
 private:
 	uint8_t _pos;
