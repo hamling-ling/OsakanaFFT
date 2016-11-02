@@ -3,11 +3,11 @@
 
 #include <stdint.h>
 
-typedef uint8_t MelodyCommandState_t;
+typedef uint8_t MelodyCommandEvent_t;
 
-static const uint8_t kMelodyCommandStateBase = 0;
-static const uint8_t kMelodyCommandStateExcited = 1;
-static const uint8_t kMelodyCommandStateFired = 2;
+static const uint8_t kMelodyCommandEvtNone = 0;
+static const uint8_t kMelodyCommandEvtExcited = 1;
+static const uint8_t kMelodyCommandEvtFired = 2;
 
 typedef struct MelodyCommand_tag {
 	uint16_t* melody0;
@@ -19,10 +19,10 @@ typedef struct MelodyCommand_tag {
 typedef struct MelodyCommandResponse_tag {
 	
 	uint8_t commandIdx;
-	MelodyCommandState_t state;
+	MelodyCommandEvent_t evt;
 
 	bool IsEmpty() {
-		return (commandIdx == 0 && state == kMelodyCommandStateBase);
+		return (commandIdx == 0 && evt == kMelodyCommandEvtNone);
 	}
 } MelodyCommandResponse_t;
 
@@ -31,15 +31,17 @@ class ResponsiveMelodyDetector;
 class MelodyCommandReceiver
 {
 public:
+	MelodyCommandReceiver();
 	MelodyCommandReceiver(MelodyCommand_t* commands, int length);
 	~MelodyCommandReceiver();
 
+	bool Initialize(MelodyCommand_t* commands, int length);
 	MelodyCommandResponse_t Input(uint16_t value);
 
 private:
-	const int kCommandNum;
+	int _commandNum;
 	ResponsiveMelodyDetector** _commands;
-	MelodyCommandResponse_t _resp;
+	uint8_t _excitedIdx;
 	typedef MelodyCommandResponse_t (MelodyCommandReceiver::*InputFunc_t)(uint16_t);
 	InputFunc_t _inputFunc;
 

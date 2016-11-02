@@ -1,26 +1,49 @@
 #include "MelodyCommandReceiver.h"
 #include "ResponsiveMelodyDetector.h"
-#include <memory>
+#include <cstdlib>
+#include <cstring>
+
+static const MelodyCommandResponse_t kEmptyResp = { 0,0 };
 
 MelodyCommandReceiver::MelodyCommandReceiver(MelodyCommand_t* commands, int length)
 	:
-	kCommandNum(length)
+	_commandNum(length),
+	_commands(NULL)
 {
-	_commands = static_cast<ResponsiveMelodyDetector**>(malloc(sizeof(ResponsiveMelodyDetector*) * length));
-	for (int i = 0; i < kCommandNum; i++) {
-		MelodyCommand_t* cmd = &(commands[i]);
-		_commands[i] = new ResponsiveMelodyDetector(cmd->melody0, cmd->melody0_len, cmd->melody1, cmd->melody1_len);
-	}
-	ResetAllDetectors();
+	Initialize(commands, length);
+}
+
+MelodyCommandReceiver::MelodyCommandReceiver()
+	:
+	_commandNum(0)
+{
+	_commands = NULL;
 }
 
 MelodyCommandReceiver::~MelodyCommandReceiver()
 {
-	for (int i = 0; i < kCommandNum; i++) {
+	for (int i = 0; i < _commandNum; i++) {
 		delete _commands[i];
 	}
 	free(_commands);
 	_commands = NULL;
+}
+
+bool MelodyCommandReceiver::Initialize(MelodyCommand_t* commands, int length)
+{
+	if (_commands != NULL) {
+		return false;
+	}
+
+	_commandNum = length;
+	_commands = static_cast<ResponsiveMelodyDetector**>(malloc(sizeof(ResponsiveMelodyDetector*) * length));
+	for (int i = 0; i < _commandNum; i++) {
+		MelodyCommand_t* cmd = &(commands[i]);
+		_commands[i] = new ResponsiveMelodyDetector(cmd->melody0, cmd->melody0_len, cmd->melody1, cmd->melody1_len);
+	}
+	ResetAllDetectors();
+
+	return true;
 }
 
 MelodyCommandResponse_t MelodyCommandReceiver::Input(uint16_t value)
@@ -30,48 +53,52 @@ MelodyCommandResponse_t MelodyCommandReceiver::Input(uint16_t value)
 
 MelodyCommandResponse_t MelodyCommandReceiver::ExcitedStateInput(uint16_t value)
 {
-	ResponsiveMelodyDetector* det = _commands[_resp.commandIdx];
+	ResponsiveMelodyDetector* det = _commands[_excitedIdx];
 	int result = det->Input(value);
-	switch(result) {
+
+	MelodyCommandResponse_t resp = kEmptyResp;
+	switch (result) {
 	case 0:
 		break;
 	case -1:
 		ResetAllDetectors();
 		break;
 	case 2:
-		_resp.state = kMelodyCommandStateFired;
-		MelodyCommandResponse_t retResp = _resp;
+		resp.evt = kMelodyCommandEvtFired;
+		resp.commandIdx = _excitedIdx;
 		ResetAllDetectors();
-
-		return retResp;
+		break;
 	default:
 		break;
 	}
 
-	return _resp;
+	return resp;
 }
 
 MelodyCommandResponse_t MelodyCommandReceiver::BaseStateInput(uint16_t value)
 {
-	for (int i = 0; i < kCommandNum; i++) {
+	MelodyCommandResponse_t resp = kEmptyResp;
+
+	for (int i = 0; i < _commandNum; i++) {
 		ResponsiveMelodyDetector* det = _commands[i];
 		if (det->Input(value) == 1) {
-			_resp.commandIdx = i;
-			_resp.state = kMelodyCommandStateExcited;
+			resp.commandIdx = i;
+			resp.evt = kMelodyCommandEvtExcited;
 			_inputFunc = &MelodyCommandReceiver::ExcitedStateInput;
-			return _resp;
+			_excitedIdx = i;
+			return resp;
 		}
 	}
 
-	return _resp;
+	return resp;
 }
 
 void MelodyCommandReceiver::ResetAllDetectors()
 {
-	for (int i = 0; i < kCommandNum; i++) {
+	for (int i = 0; i < _commandNum; i++) {
 		ResponsiveMelodyDetector* det = _commands[i];
 		det->Reset();
 	}
-	memset(&_resp, 0, sizeof(_resp));
+	_excitedIdx = 0;
 	_inputFunc = &MelodyCommandReceiver::BaseStateInput;
 }

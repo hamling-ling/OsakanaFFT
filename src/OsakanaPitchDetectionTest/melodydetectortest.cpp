@@ -217,19 +217,18 @@ namespace OsakanaPitchDetectionTest
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 0);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtExcited);
 				}
 			}
 
 			for (int i = 0; i < _countof(s_mel1); i++) {
 				resp = mcr.Input(s_mel1[i]);
 				if (i + 1 < _countof(s_mel1)) {
-					Assert::AreEqual((int)resp.commandIdx, 0);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::IsTrue(resp.IsEmpty());
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 0);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtFired);
 				}
 			}
 		}
@@ -251,19 +250,18 @@ namespace OsakanaPitchDetectionTest
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtExcited);
 				}
 			}
 
 			for (int i = 0; i < _countof(s_wag_mel1); i++) {
 				resp = mcr.Input(s_wag_mel1[i]);
 				if (i + 1 < _countof(s_wag_mel1)) {
-					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::IsTrue(resp.IsEmpty());
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtFired);
 				}
 			}
 		}
@@ -286,7 +284,7 @@ namespace OsakanaPitchDetectionTest
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtExcited);
 				}
 			}
 
@@ -294,12 +292,11 @@ namespace OsakanaPitchDetectionTest
 				resp = mcr.Input(s_wag_mel1[i]);
 				mcr.Input(0);
 				if (i + 1 < _countof(s_wag_mel1)) {
-					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+					Assert::IsTrue(resp.IsEmpty());
 				}
 				else {
 					Assert::AreEqual((int)resp.commandIdx, 1);
-					Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+					Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtFired);
 				}
 			}
 		}
@@ -323,7 +320,7 @@ namespace OsakanaPitchDetectionTest
 					}
 					else {
 						Assert::AreEqual((int)resp.commandIdx, 1);
-						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+						Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtExcited);
 					}
 					
 					if(i == wrongNotePos) {
@@ -344,12 +341,11 @@ namespace OsakanaPitchDetectionTest
 					resp = mcr.Input(s_wag_mel1[i]);
 					mcr.Input(0);
 					if (i + 1 < _countof(s_wag_mel1)) {
-						Assert::AreEqual((int)resp.commandIdx, 1);
-						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateExcited);
+						Assert::IsTrue(resp.IsEmpty());
 					}
 					else {
 						Assert::AreEqual((int)resp.commandIdx, 1);
-						Assert::AreEqual((int)resp.state, (int)kMelodyCommandStateFired);
+						Assert::AreEqual((int)resp.evt, (int)kMelodyCommandEvtFired);
 					}
 
 					if (i == wrongNotePos) {
