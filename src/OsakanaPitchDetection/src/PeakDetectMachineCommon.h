@@ -73,6 +73,8 @@ static const uint8_t kNoteTable[] = {
 // x8 precision
 #include "NoteTable8.h"
 
+#include "FreqToNoteTable8Map.h"
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

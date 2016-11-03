@@ -54,6 +54,9 @@
     <ClInclude Include="include\MelodyCommandReceiver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\FreqToNoteTable8Map.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EdgeDetector.cpp">

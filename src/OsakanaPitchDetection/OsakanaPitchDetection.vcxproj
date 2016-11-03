@@ -27,6 +27,7 @@
     <ClInclude Include="include\OsakanaPitchDetectionFp.h" />
     <ClInclude Include="include\ResponsiveMelodyDetector.h" />
     <ClInclude Include="src\ContinuityDetector.h" />
+    <ClInclude Include="src\FreqToNoteTable8Map.h" />
     <ClInclude Include="src\NoteTable8.h" />
     <ClInclude Include="src\PeakDetectMachine.h" />
     <ClInclude Include="src\PeakDetectMachineCommon.h" />
