@@ -202,7 +202,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 		//int32_t idx = (idx1024 + 512) >> 10;
 		//uint8_t note = kNoteTable[idx] % 12;
-		int32_t idx8 = (idx1024 + 4) >> 7;
+		int32_t idx8 = (idx1024 + 64) >> 7; // 64 is for rounding
 		uint8_t note = kNoteTable8[idx8] % 12;
 
 		PrintResult(freq, kNoteStrings[note]);
