@@ -39,3 +39,10 @@ uint16_t EdgeDetector::CurrentNote()
 {
 	return _lastNotifiedVal;
 }
+
+void EdgeDetector::Reset()
+{
+	_vc->Input(0);
+	_cd->Reset();
+	_lastNotifiedVal = 0;;
+}

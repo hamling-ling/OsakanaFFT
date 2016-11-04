@@ -27,7 +27,7 @@ void PitchDiagnostic::Reset()
 
 DiagnoseResult_t PitchDiagnostic::diagnoseOnEdgeState(int8_t pitch, bool edge)
 {
-	if (!edge) {
+	if (edge) {
 		Reset();
 		return DiagnoseResultNone;
 	}
@@ -54,8 +54,9 @@ DiagnoseResult_t PitchDiagnostic::diagnoseOnEdgeState(int8_t pitch, bool edge)
 DiagnoseResult_t PitchDiagnostic::diagnoseOnNonEdgeState(int8_t pitch, bool edge)
 {
 	if (edge) {
-		_sum == pitch;
-		_func = &PitchDiagnostic::diagnoseOnNonEdgeState;
+		_sum = pitch;
+		_func = &PitchDiagnostic::diagnoseOnEdgeState;
+		_interval++;
 	}
 
 	return DiagnoseResultNone;

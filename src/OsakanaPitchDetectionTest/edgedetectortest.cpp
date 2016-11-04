@@ -293,6 +293,32 @@ namespace OsakanaPitchDetectionTest
 			AreEqualNote(0, note);
 		}
 
+		TEST_METHOD(TestEdgeReset)
+		{
+			EdgeDetector ed;
+			bool result = false;
+			uint16_t note = 0;
+
+			for (int i = 0; i < 2; i++) {
+				result = ed.Input(1, 1024);
+				Assert::IsFalse(result);
+
+				note = ed.CurrentNote();
+				AreEqualNote(0, note);
+
+				result = ed.Input(1, 1024);
+				Assert::IsFalse(result);
+
+				note = ed.CurrentNote();
+				AreEqualNote(0, note);
+
+				result = ed.Input(1, 1024);
+				Assert::IsTrue(result);
+
+				ed.Reset();
+			}
+		}
+
 		private:
 			void AreEqualNote(int expected, uint16_t note)
 			{

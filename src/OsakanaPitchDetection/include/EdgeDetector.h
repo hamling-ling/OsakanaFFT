@@ -21,6 +21,7 @@ public:
 	 */
 	bool Input(uint16_t value, uint16_t volume);
 	uint16_t CurrentNote();
+	void Reset();
 
 private:
 	uint16_t _lastNotifiedVal;

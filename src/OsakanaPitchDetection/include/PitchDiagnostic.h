@@ -17,6 +17,7 @@ public:
 	~PitchDiagnostic();
 	DiagnoseResult_t Diagnose(int8_t pitch, bool edge);
 	void Reset();
+
 private:
 	const uint16_t kInterval;
 	uint16_t _interval;
