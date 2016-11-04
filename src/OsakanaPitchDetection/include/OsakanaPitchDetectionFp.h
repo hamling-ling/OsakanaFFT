@@ -21,6 +21,8 @@ private:
 	OsakanaFpFftContext_t* _fft;
 	MachineContextFp_t* _det;
 	ReadFpDataFunc_t _func;
+
+	int8_t PitchDetectorFp::GetAccuracy(uint16_t note, uint16_t idx8);
 };
 
 #endif

@@ -25,10 +25,11 @@
     <ClInclude Include="include\OsakanaPitchDetection.h" />
     <ClInclude Include="include\OsakanaPitchDetectionCommon.h" />
     <ClInclude Include="include\OsakanaPitchDetectionFp.h" />
+    <ClInclude Include="include\PitchDiagnostic.h" />
     <ClInclude Include="include\ResponsiveMelodyDetector.h" />
     <ClInclude Include="src\ContinuityDetector.h" />
-    <ClInclude Include="src\FreqToNoteTable8Map.h" />
     <ClInclude Include="src\NoteTable8.h" />
+    <ClInclude Include="src\NoteTable8IndexRange.h" />
     <ClInclude Include="src\PeakDetectMachine.h" />
     <ClInclude Include="src\PeakDetectMachineCommon.h" />
     <ClInclude Include="src\PeakDetectMachineFp.h" />
@@ -43,6 +44,7 @@
     <ClCompile Include="src\OsakanaPitchDetectionFp.cpp" />
     <ClCompile Include="src\PeakDetectMachine.cpp" />
     <ClCompile Include="src\PeakDetectMachineFp.cpp" />
+    <ClCompile Include="src\PitchDiagnostic.cpp" />
     <ClCompile Include="src\ResponsiveMelodyDetector.cpp" />
     <ClCompile Include="src\VolumeComparator.cpp" />
   </ItemGroup>
