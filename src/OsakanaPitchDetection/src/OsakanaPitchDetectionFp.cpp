@@ -221,24 +221,26 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 int8_t PitchDetectorFp::GetAccuracy(uint16_t note, uint16_t idx8)
 {
-	const NoteTableIndexRange_t* range = &kNoteTable8IndexRange[note];
 	if (_countof(kNoteTable8IndexRange) <= note) {
 		return 0xFF;
 	}
 
-	uint16_t width = (range->min_idx - range->min_idx);
+	const NoteTableIndexRange_t* range = &kNoteTable8IndexRange[note];
+	uint16_t width = (range->max_idx - range->min_idx);
 	if (width < 4) {
 		return 0xFF;
 	}
 
-	uint16_t err = width >> 1;
-	uint16_t mid = (range->min_idx + range->min_idx) >> 1;
+	uint16_t err = width / 6;
+	uint16_t mid = (range->max_idx + range->min_idx) >> 1;
 	if (idx8 < mid - err) {
-		return - 1;
+		// smaller index -> higher pitch
+		return (int8_t)(1);
 	}
 
 	if (mid + err < idx8) {
-		return 1;
+		// larger index -> lower pitch
+		return (int8_t)(-1);
 	}
-	return 0;
+	return (int8_t)(0);
 }
