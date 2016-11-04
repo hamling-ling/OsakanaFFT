@@ -4,6 +4,7 @@
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
+#define _countof(x) (sizeof(x) / sizeof (x[0]))
 #else                               // anything else
 #include <algorithm>
 using namespace std;
