@@ -79,13 +79,13 @@ namespace OsakanaPitchDetectionTest
 			Assert::AreEqual(result, 1);
 
 			result = fd.Input(0);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(69);
 			Assert::AreEqual(result, 0);
 
 			result = fd.Input(0);
-			Assert::IsFalse(result);
+			Assert::AreEqual(result, 0);
 
 			result = fd.Input(62);
 			Assert::AreEqual(result, 2);

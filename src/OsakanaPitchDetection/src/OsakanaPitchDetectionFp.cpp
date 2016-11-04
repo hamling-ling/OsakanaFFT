@@ -222,13 +222,13 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 int8_t PitchDetectorFp::GetAccuracy(uint16_t note, uint16_t idx8)
 {
 	if (_countof(kNoteTable8IndexRange) <= note) {
-		return 0xFF;
+		return (int8_t)0xFF;
 	}
 
 	const NoteTableIndexRange_t* range = &kNoteTable8IndexRange[note];
 	uint16_t width = (range->max_idx - range->min_idx);
-	if (width < 4) {
-		return 0xFF;
+	if (width < (uint16_t)4) {
+		return (int8_t)0xFF;
 	}
 
 	uint16_t err = width / 6;

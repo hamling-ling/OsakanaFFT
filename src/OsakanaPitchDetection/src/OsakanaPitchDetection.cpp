@@ -123,7 +123,7 @@ int PitchDetector::DetectPitch(PitchInfo_t* pitchInfo)
 		DLOG("freq=%f Hz, note=%s\n", freq, kNoteStrings[midi % 12]);
 
 		pitchInfo->freq = (uint16_t)round(freq);
-		pitchInfo->midiNote = midi;
+		pitchInfo->midiNote = (uint8_t)midi;
 		pitchInfo->noteStr = kNoteStrings[midi % 12];
 	}
 

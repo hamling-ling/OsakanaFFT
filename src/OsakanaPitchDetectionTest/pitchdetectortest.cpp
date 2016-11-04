@@ -17,12 +17,12 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 float g_data[N] = { 0.0f };
 
 vector<pair<uint8_t, float> > g_expValues = {
-	{ 60,	261.6 },	{ 61,	277.2 },	{ 62,	293.7 },	{ 63,	311.1 },
-	{ 64,	329.6 },	{ 65,	349.2 },	{ 66,	370.0 },	{ 67,	392.0 },
-	{ 68,	415.3 },	{ 69,	440.0 },	{ 70,	466.2 },	{ 71,	493.9 },
-	{ 72,	523.3 },	{ 73,	554.4 },	{ 74,	587.3 },	{ 75,	622.3 },
-	{ 76,	659.3 },	{ 77,	698.5 },	{ 78,	740.0 },	{ 79,	784.0 },
-	{ 80,	830.6 },	{ 81,	880.0 },	{ 82,	932.3 },	{ 83,	987.8 }
+	{ 60,	261.6f },	{ 61,	277.2f },	{ 62,	293.7f },	{ 63,	311.1f },
+	{ 64,	329.6f },	{ 65,	349.2f },	{ 66,	370.0f },	{ 67,	392.0f },
+	{ 68,	415.3f },	{ 69,	440.0f },	{ 70,	466.2f },	{ 71,	493.9f },
+	{ 72,	523.3f },	{ 73,	554.4f },	{ 74,	587.3f },	{ 75,	622.3f },
+	{ 76,	659.3f },	{ 77,	698.5f },	{ 78,	740.0f },	{ 79,	784.0f },
+	{ 80,	830.6f },	{ 81,	880.0f },	{ 82,	932.3f },	{ 83,	987.8f }
 };
 
 static int readFpData(Fp_t* data, uint8_t stride, const int dataNum, Fp_t* rawdata_min, Fp_t* rawdata_max)
@@ -59,7 +59,7 @@ static int readData(float* data, uint8_t stride, const int dataNum)
 static void CreateSineData(float* x, float freq, float ampScale)
 {
 	// time of N samples
-	float tn = (T1024_1024 / 1024.0f) * (N / 1024.0);
+	float tn = (T1024_1024 / 1024.0f) * (N / 1024.0f);
 	// wave number in N
 	float wn = freq * tn;
 	for (int i = 0; i < N; i++) {
@@ -117,7 +117,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpFft)
 		{
-			testFpFftWithFreq(1.0, 261.6, 60);
+			testFpFftWithFreq(1.0f, 261.6f, 60);
 		}
 
 		TEST_METHOD(TestFpFftRangeScale1)
@@ -150,7 +150,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpFftRangeScaleTooSmall)
 		{
-			CreateSineData(g_data, 261.6, 0.03125);
+			CreateSineData(g_data, 261.6f, 0.03125f);
 
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
@@ -187,7 +187,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFft)
 		{
-			CreateSineData(g_data, 261.6, 1.0);
+			CreateSineData(g_data, 261.6f, 1.0f);
 			PitchDetector detector;
 			detector.Initialize(readData);
 
@@ -200,7 +200,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestVolume512)
 		{
-			CreateSineData(g_data, 261.6, 0.5);
+			CreateSineData(g_data, 261.6f, 0.5f);
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
@@ -216,7 +216,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestVolume1024)
 		{
-			CreateSineData(g_data, 261.6, 1.0);
+			CreateSineData(g_data, 261.6f, 1.0f);
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
@@ -232,7 +232,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpPitchDiagnostic)
 		{
-			CreateSineData(g_data, 261.6, 1.0);
+			CreateSineData(g_data, 261.6f, 1.0f);
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
@@ -248,8 +248,8 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpPitchDiagnoseLow)
 		{
-			float freq = sqrt(261.6*246.0) + 2.0;
-			CreateSineData(g_data, freq, 1.0);
+			float freq = sqrt(261.6f*246.0f) + 2.0f;
+			CreateSineData(g_data, freq, 1.0f);
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
@@ -265,7 +265,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpPitchDiagnoseHigh)
 		{
-			float freq = sqrt(261.6*277.2) - 2.0;
+			float freq = sqrt(261.6f*277.2f) - 2.0f;
 			CreateSineData(g_data, freq, 1.0);
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);

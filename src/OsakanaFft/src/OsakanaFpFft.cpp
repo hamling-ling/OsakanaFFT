@@ -89,12 +89,14 @@ int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N)
 
 	return 0;
 
+#if !defined(USE_HARDCORD_TABLE)
 exit_error:
 	CleanOsakanaFpFft(ctx);
 	ctx = NULL;
 	*pctx = NULL;
 
 	return ret;
+#endif
 }
 
 void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx)

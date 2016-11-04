@@ -15,7 +15,7 @@
 #define LOG_NEWLINE "\n"
 #endif
 
-#define _DEBUG
+//#define _DEBUG
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS
@@ -37,8 +37,8 @@
 #if 1	// GR-KURUMI with min,max
 #define N					256		// fft sampling num(last half is 0 pad)
 #define LOG2N				8		// log2(N)
-#define T1024_1024			(77.3946666667)	// adc speed(time to take 1024x1024 samples in sec)
-#define T_PER_SAMPLE		FLOAT2FP(7.38093058268e-05)	// factor to compute index to freq
+#define T1024_1024			(77.3946666667f)	// adc speed(time to take 1024x1024 samples in sec)
+#define T_PER_SAMPLE		FLOAT2FP(7.38093058268e-05f)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		(13548)			// rounded
 #define FREQ_PER_1024SAMPLE	13873589		// rounded 
 #endif
