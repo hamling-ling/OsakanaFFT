@@ -15,6 +15,11 @@ PitchDiagnostic::~PitchDiagnostic()
 
 DiagnoseResult_t PitchDiagnostic::Diagnose(int8_t pitch, bool edge)
 {
+	if (pitch == INT8_MIN) {
+		Reset();
+		return kDiagnoseResultNone;
+	}
+
 	return (this->*_func)(pitch, edge);
 }
 
@@ -29,26 +34,26 @@ DiagnoseResult_t PitchDiagnostic::diagnoseOnEdgeState(int8_t pitch, bool edge)
 {
 	if (edge) {
 		Reset();
-		return DiagnoseResultNone;
+		return kDiagnoseResultNone;
 	}
 
 	_sum += pitch;
 	_interval++;
 	if (kInterval <= _interval) {
 		uint16_t kIntervalHalf = (kInterval >> 1);
-		DiagnoseResult_t ret = DiagnoseResultGood;
+		DiagnoseResult_t ret = kDiagnoseResultGood;
 		if (kIntervalHalf < _sum) {
-			ret = DiagnoseResultHigh;
+			ret = kDiagnoseResultHigh;
 		}
 		else if (_sum < -kIntervalHalf) {
-			ret = DiagnoseResultLow;
+			ret = kDiagnoseResultLow;
 		}
 		// reset only interval. everthing else stay the same
 		_interval = 0;
 		return ret;
 	}
 
-	return DiagnoseResultNone;
+	return kDiagnoseResultNone;
 }
 
 DiagnoseResult_t PitchDiagnostic::diagnoseOnNonEdgeState(int8_t pitch, bool edge)
@@ -59,6 +64,6 @@ DiagnoseResult_t PitchDiagnostic::diagnoseOnNonEdgeState(int8_t pitch, bool edge
 		_interval++;
 	}
 
-	return DiagnoseResultNone;
+	return kDiagnoseResultNone;
 }
 

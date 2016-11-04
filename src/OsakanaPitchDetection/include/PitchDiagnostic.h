@@ -5,10 +5,10 @@
 
 typedef uint8_t DiagnoseResult_t;
 
-#define DiagnoseResultNone		0
-#define DiagnoseResultHigh		1
-#define DiagnoseResultLow		2
-#define DiagnoseResultGood		3
+#define kDiagnoseResultNone		0
+#define kDiagnoseResultHigh		1
+#define kDiagnoseResultLow		2
+#define kDiagnoseResultGood		3
 
 class PitchDiagnostic
 {
