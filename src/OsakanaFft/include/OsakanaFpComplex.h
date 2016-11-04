@@ -97,7 +97,7 @@ static inline char* fp_complex_str(const osk_fp_complex_t* a, char* buf, size_t 
 
 	Fp2CStr(a->re, buf_sub, sizeof(buf_sub));
 	StrNCat_S(buf, buf_size, buf_sub, strlen(buf_sub));
-	char* sep = ", ";
+	const char* sep = ", ";
 	StrNCat_S(buf, buf_size, sep, strlen(sep));
 
 	Fp2CStr(a->im, buf_sub, sizeof(buf_sub));

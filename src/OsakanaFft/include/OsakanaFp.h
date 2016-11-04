@@ -204,7 +204,7 @@ static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 
 	memset(buf, 0, buf_size);
 	if (a < 0) {
-		char* cat = "-";
+		const char* cat = "-";
 		StrNCpy_S(buf, buf_size, cat, strlen(cat));
 
 		// Fp ‚Å‚Í¬”•”•ª‚Í2‚Ì•â”•\Œ»‚È‚Ì‚ÅŒ³‚É–ß‚·
@@ -216,7 +216,7 @@ static inline char* Fp2CStr(Fp_t a, char* buf, const size_t buf_size)
 	snprintf(itoaBuf, sizeof(itoaBuf), "%d", mainPart);
 	StrNCat_S(buf, buf_size, itoaBuf, strlen(itoaBuf));
 
-	char* cat = ".";
+	const char* cat = ".";
 	StrNCat_S(buf, buf_size, cat, strlen(cat));
 
 	while (fractParts > 0) {
