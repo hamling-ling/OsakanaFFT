@@ -3,9 +3,7 @@
 PitchDiagnostic::PitchDiagnostic(uint16_t interval)
 	: kInterval(interval)
 {
-	_interval = 0;
-	_sum = 0;
-	_func = &PitchDiagnostic::diagnoseOnNonEdgeState;
+	Reset();
 }
 
 
@@ -13,26 +11,37 @@ PitchDiagnostic::~PitchDiagnostic()
 {
 }
 
-DiagnoseResult_t PitchDiagnostic::Diagnose(int8_t pitch, bool edge)
+DiagnoseResult_t PitchDiagnostic::Diagnose(int8_t pitch, uint8_t note)
 {
 	if (pitch == INT8_MIN) {
 		Reset();
 		return kDiagnoseResultNone;
 	}
 
-	return (this->*_func)(pitch, edge);
+	return (this->*_func)(pitch, note);
 }
 
 void PitchDiagnostic::Reset()
 {
 	_interval = 0;
 	_sum = 0;
-	_func = &PitchDiagnostic::diagnoseOnNonEdgeState;
+	_func = &PitchDiagnostic::diagnoseNoteOffState;
+	_note = 0;
 }
 
-DiagnoseResult_t PitchDiagnostic::diagnoseOnEdgeState(int8_t pitch, bool edge)
+DiagnoseResult_t PitchDiagnostic::diagnoseNoteOnState(int8_t pitch, uint8_t note)
 {
-	if (edge) {
+	if (note == 0) {
+		Reset();
+		return kDiagnoseResultNone;
+	}
+
+	if (note != _note) {
+		Reset();
+		return kDiagnoseResultNone;
+	}
+
+	if (pitch == INT8_MIN) {
 		Reset();
 		return kDiagnoseResultNone;
 	}
@@ -56,12 +65,17 @@ DiagnoseResult_t PitchDiagnostic::diagnoseOnEdgeState(int8_t pitch, bool edge)
 	return kDiagnoseResultNone;
 }
 
-DiagnoseResult_t PitchDiagnostic::diagnoseOnNonEdgeState(int8_t pitch, bool edge)
+DiagnoseResult_t PitchDiagnostic::diagnoseNoteOffState(int8_t pitch, uint8_t note)
 {
-	if (edge) {
+	if (note != 0) {
+		if (note == INT8_MIN) {
+			return kDiagnoseResultNone;
+		}
+
 		_sum = pitch;
-		_func = &PitchDiagnostic::diagnoseOnEdgeState;
+		_func = &PitchDiagnostic::diagnoseNoteOnState;
 		_interval++;
+		_note = note;
 	}
 
 	return kDiagnoseResultNone;

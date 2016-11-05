@@ -14,7 +14,7 @@ namespace OsakanaPitchDetectionTest
 	{
 	public:
 
-		typedef tuple<int8_t, bool, DiagnoseResult_t> param_t;
+		typedef tuple<int8_t, uint8_t, DiagnoseResult_t> param_t;
 
 		TEST_METHOD(TestPItchDiagnosticInstantiation)
 		{
@@ -24,9 +24,9 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticRightGood)
 		{
 			vector<param_t> params = {
-				{ (int8_t)0, true,  kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultGood },
+				{ (int8_t)0, 60,  kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultGood },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -35,9 +35,9 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticRightHigh)
 		{
 			vector<param_t> params = {
-				{ (int8_t)1, true,  kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultHigh },
+				{ (int8_t)1, 60,  kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultHigh },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -46,9 +46,9 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticRightLow)
 		{
 			vector<param_t> params = {
-				{ (int8_t)-1, true,  kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultLow },
+				{ (int8_t)-1, 60,  kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultLow },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -57,12 +57,12 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticKeepGood)
 		{
 			vector<param_t> params = {
-				{ (int8_t)0, true,  kDiagnoseResultNone},
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultGood },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultGood },
+				{ (int8_t)0, 60,  kDiagnoseResultNone},
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultGood },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultGood },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -71,12 +71,12 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticKeepHigh)
 		{
 			vector<param_t> params = {
-				{ (int8_t)1, true,  kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultHigh },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultHigh },
+				{ (int8_t)1, 60,  kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultHigh },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultHigh },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -85,12 +85,12 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticKeepLow)
 		{
 			vector<param_t> params = {
-				{ (int8_t)-1, true,  kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultLow },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultLow },
+				{ (int8_t)-1, 60,  kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultLow },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultLow },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -99,18 +99,19 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticEdgeResetGood)
 		{
 			vector<param_t> params = {
-				{ (int8_t)0, true,  kDiagnoseResultNone },
+				{ (int8_t)0, 60,  kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultGood },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 0,  kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 60,  kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 60, kDiagnoseResultGood },
 				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultGood },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, true,  kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, true,  kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultGood },
 			};
 
 			RunDiagnoseWithParam(3, params);
@@ -119,18 +120,18 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticEdgeResetHigh)
 		{
 			vector<param_t> params = {
-				{ (int8_t)1, true,  kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultHigh },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)0, true,  kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)1, true,  kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultNone },
-				{ (int8_t)1, false, kDiagnoseResultHigh },
+				{ (int8_t)1, 60,  kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultHigh },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 0,  kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)1, 60,  kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultNone },
+				{ (int8_t)1, 60, kDiagnoseResultHigh },
 				{ (int8_t)1, false, kDiagnoseResultNone },
 			};
 
@@ -140,18 +141,61 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestPitchDiagnosticEdgeResetLow)
 		{
 			vector<param_t> params = {
-				{ (int8_t)-1, true,  kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultLow },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)0, true,  kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)0, false, kDiagnoseResultNone },
-				{ (int8_t)-1, true,  kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultNone },
-				{ (int8_t)-1, false, kDiagnoseResultLow },
+				{ (int8_t)-1, 60,  kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultLow },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)0, 0,  kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)0, 0, kDiagnoseResultNone },
+				{ (int8_t)-1, 60,  kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultNone },
+				{ (int8_t)-1, 60, kDiagnoseResultLow },
+			};
+
+			RunDiagnoseWithParam(3, params);
+		}
+
+		TEST_METHOD(TestPitchDiagnosticInvalidPitchResetGood)
+		{
+			vector<param_t> params = {
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultGood },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)INT8_MIN, 60, kDiagnoseResultNone },
+				{ (int8_t)INT8_MIN, 60,	kDiagnoseResultNone },
+				{ (int8_t)INT8_MIN, 60,	kDiagnoseResultNone },
+				{ (int8_t)INT8_MIN,	60,	kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultGood },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+			};
+
+			RunDiagnoseWithParam(3, params);
+		}
+
+
+		TEST_METHOD(TestPitchDiagnosticNoteChangeResetGood)
+		{
+			vector<param_t> params = {
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultGood },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	61, kDiagnoseResultNone },
+				{ (int8_t)0,	61,	kDiagnoseResultNone },
+				{ (int8_t)0,	61,	kDiagnoseResultNone },
+				{ (int8_t)0,	61,	kDiagnoseResultGood },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultNone },
+				{ (int8_t)0,	60, kDiagnoseResultGood },
 			};
 
 			RunDiagnoseWithParam(3, params);
