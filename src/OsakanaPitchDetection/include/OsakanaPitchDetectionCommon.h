@@ -59,13 +59,24 @@
 // debug
 #define DEBUG_OUTPUT_NUM    128
 
-typedef struct PitchInfo_t {
+typedef struct PitchInfo_tag {
 	uint16_t freq;
 	uint8_t midiNote;
 	const char* noteStr;
-	uint16_t volume;// 0-1023
-	int8_t pitch;
+	uint16_t volume;	// 0-1023
+	int8_t pitch;		// INT8_MIN,-1,0,1
 } PitchInfo_t;
+
+inline PitchInfo_t MakePitchInfo() {
+	PitchInfo_t info;
+	info.freq = 0;
+	info.midiNote = 0;
+	info.noteStr = '\0';
+	info.volume = 0;
+	info.pitch = 0;
+
+	return info;
+}
 
 class BasePitchDetector
 {

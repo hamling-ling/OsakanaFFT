@@ -155,8 +155,7 @@ namespace OsakanaPitchDetectionTest
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
-			PitchInfo_t pitchInfo;
-			memset(&pitchInfo, 0, sizeof(pitchInfo));
+			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = detector.DetectPitch(&pitchInfo);
 
@@ -236,8 +235,7 @@ namespace OsakanaPitchDetectionTest
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
-			PitchInfo_t pitchInfo;
-			memset(&pitchInfo, 0, sizeof(pitchInfo));
+			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = detector.DetectPitch(&pitchInfo);
 
@@ -253,8 +251,7 @@ namespace OsakanaPitchDetectionTest
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
-			PitchInfo_t pitchInfo;
-			memset(&pitchInfo, 0, sizeof(pitchInfo));
+			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = detector.DetectPitch(&pitchInfo);
 
@@ -270,8 +267,7 @@ namespace OsakanaPitchDetectionTest
 			PitchDetectorFp detector;
 			detector.Initialize(readFpData);
 
-			PitchInfo_t pitchInfo;
-			memset(&pitchInfo, 0, sizeof(pitchInfo));
+			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = detector.DetectPitch(&pitchInfo);
 
