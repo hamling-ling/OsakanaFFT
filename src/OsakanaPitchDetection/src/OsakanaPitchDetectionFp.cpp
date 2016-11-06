@@ -43,16 +43,18 @@ static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
 	return (Fp_t)(rawData << (FPSHFT - 9 + extraShft));// div 512 then shift
 }
 
-static void PrintResult(uint16_t freq, const char* str)
+static void PrintResult(uint16_t freq, const char* str, int8_t pitch)
 {
 #if defined(BROKEN_SPRINTF)
 	LOG_PRINTF("freq=");
 	LOG_PRINTF(freq, DEC);
 	LOG_PRINTF(", note=");
 	LOG_PRINTF(str);
+	LOG_PRINTF(", pitch=");
+	LOG_PRINTF(pitch, DEC);
 	LOG_PRINTF(LOG_NEWLINE);
 #else
-	ILOG("freq=%u Hz, note=%s\n", freq, str);
+	ILOG("freq=%u Hz, note=%s, pitch=%d\n", freq, str, (int)pitch);
 #endif
 }
 
@@ -206,12 +208,12 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		int32_t idx8 = (idx1024 + 64) >> 7; // 64 is for rounding
 		uint8_t note = kNoteTable8[idx8] % 12;
 
-		PrintResult(freq, kNoteStrings[note]);
-
 		pitchInfo->freq = (uint16_t)freq;
 		pitchInfo->midiNote = kNoteTable8[idx8];
 		pitchInfo->noteStr = kNoteStrings[note];
 		pitchInfo->pitch = GetAccuracy(pitchInfo->midiNote, idx8);
+
+		PrintResult(freq, kNoteStrings[note], pitchInfo->pitch);
 
 		ret = 0;
 	}
