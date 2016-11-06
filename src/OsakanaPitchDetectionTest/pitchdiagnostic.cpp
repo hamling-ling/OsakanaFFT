@@ -179,7 +179,6 @@ namespace OsakanaPitchDetectionTest
 			RunDiagnoseWithParam(3, params);
 		}
 
-
 		TEST_METHOD(TestPitchDiagnosticNoteChangeResetGood)
 		{
 			vector<param_t> params = {
@@ -200,6 +199,30 @@ namespace OsakanaPitchDetectionTest
 
 			RunDiagnoseWithParam(3, params);
 		}
+		TEST_METHOD(TestPitchDiagnosticLongRunGood)
+		{
+			PitchDiagnostic pd(20);
+			DiagnoseResult_t result = kDiagnoseResultNone;
+
+			for (int i = 0; i < 100; i++) {
+				result = pd.Diagnose(0, 0);
+				Assert::AreEqual((int8_t)result, (int8_t)kDiagnoseResultNone);
+			}
+
+			for (int i = 0; i < 100; i++) {
+				result = pd.Diagnose(0, 64);
+				if (result != kDiagnoseResultGood && result != kDiagnoseResultNone) {
+					Assert::Fail(L"unexpected response");
+				}
+				if (i != 0 && i % 20 == 19) {
+					Assert::AreEqual((int8_t)result, (int8_t)kDiagnoseResultGood);
+				}
+				else {
+					Assert::AreEqual((int8_t)result, (int8_t)kDiagnoseResultNone);
+				}
+			}
+		}
+
 
 	private:
 

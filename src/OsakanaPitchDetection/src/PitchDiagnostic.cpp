@@ -49,7 +49,7 @@ DiagnoseResult_t PitchDiagnostic::diagnoseNoteOnState(int8_t pitch, uint8_t note
 	_sum += pitch;
 	_interval++;
 	if (kInterval <= _interval) {
-		uint16_t kIntervalHalf = (kInterval >> 1);
+		int kIntervalHalf = (int)(kInterval >> 1);
 		DiagnoseResult_t ret = kDiagnoseResultGood;
 		if (kIntervalHalf < _sum) {
 			ret = kDiagnoseResultHigh;
