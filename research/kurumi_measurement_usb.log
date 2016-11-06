@@ -1,0 +1,27 @@
+battery middle?
+
+// with core
+[Sun Nov 06 13:11:45.483 2016] 1024*8 times w/ start
+[Sun Nov 06 13:13:04.556 2016] 1024*8 times w/ 78890570
+[Sun Nov 06 13:13:04.556 2016] 1024*8 times w/ start
+[Sun Nov 06 13:14:23.630 2016] 1024*8 times w/ 78890529
+[Sun Nov 06 13:14:23.630 2016] 1024*8 times w/ start
+[Sun Nov 06 13:15:42.697 2016] 1024*8 times w/ 78889683
+[Sun Nov 06 13:15:42.697 2016] 1024*8 times w/ start
+[Sun Nov 06 13:17:11.032 2016] 1024*8 times w/ 78890294
+[Sun Nov 06 13:17:11.032 2016] 1024*8 times w/ start
+[Sun Nov 06 13:18:30.123 2016] 1024*8 times w/ 78890486
+[Sun Nov 06 13:18:30.124 2016] 1024*8 times w/ start
+[Sun Nov 06 13:19:49.214 2016] 1024*8 times w/ 78890040
+[Sun Nov 06 13:19:49.214 2016] 1024*8 times w/ start
+[Sun Nov 06 13:21:08.288 2016] 1024*8 times w/ 78890653
+[Sun Nov 06 13:21:08.288 2016] 1024*8 times w/ start
+[Sun Nov 06 13:22:27.375 2016] 1024*8 times w/ 78890452
+[Sun Nov 06 13:22:27.375 2016] 1024*8 times w/ start
+[Sun Nov 06 13:23:46.451 2016] 1024*8 times w/ 78890116
+[Sun Nov 06 13:23:46.451 2016] 1024*8 times w/ start
+[Sun Nov 06 13:25:05.540 2016] 1024*8 times w/ 78890411
+
+// no core
+
+
