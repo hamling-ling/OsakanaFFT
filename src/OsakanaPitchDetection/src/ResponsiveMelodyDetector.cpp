@@ -10,7 +10,7 @@
 
 using namespace std;
 
-ResponsiveMelodyDetector::ResponsiveMelodyDetector(uint16_t* mel0, int mel0_len, uint16_t* mel1, int mel1_len)
+ResponsiveMelodyDetector::ResponsiveMelodyDetector(const uint16_t* mel0, int mel0_len, const uint16_t* mel1, int mel1_len)
 	:
 	_pos(0)
 {

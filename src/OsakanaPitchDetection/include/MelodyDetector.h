@@ -8,7 +8,7 @@
 class MelodyDetector
 {
 public:
-	MelodyDetector(uint16_t* melody, uint8_t melodyLen);
+	MelodyDetector(const uint16_t* melody, uint8_t melodyLen);
 	~MelodyDetector();
 
 	/**

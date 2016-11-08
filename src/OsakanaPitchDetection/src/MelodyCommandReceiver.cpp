@@ -5,7 +5,7 @@
 
 static const MelodyCommandResponse_t kEmptyResp = { 0,0 };
 
-MelodyCommandReceiver::MelodyCommandReceiver(MelodyCommand_t* commands, int length)
+MelodyCommandReceiver::MelodyCommandReceiver(const MelodyCommand_t* commands, int length)
 	:
 	_commandNum(length),
 	_commands(NULL)
@@ -29,7 +29,7 @@ MelodyCommandReceiver::~MelodyCommandReceiver()
 	_commands = NULL;
 }
 
-bool MelodyCommandReceiver::Initialize(MelodyCommand_t* commands, int length)
+bool MelodyCommandReceiver::Initialize(const MelodyCommand_t* commands, int length)
 {
 	if (_commands != NULL) {
 		return false;
@@ -38,7 +38,7 @@ bool MelodyCommandReceiver::Initialize(MelodyCommand_t* commands, int length)
 	_commandNum = length;
 	_commands = static_cast<ResponsiveMelodyDetector**>(malloc(sizeof(ResponsiveMelodyDetector*) * length));
 	for (int i = 0; i < _commandNum; i++) {
-		MelodyCommand_t* cmd = &(commands[i]);
+		const MelodyCommand_t* cmd = &(commands[i]);
 		_commands[i] = new ResponsiveMelodyDetector(cmd->melody0, cmd->melody0_len, cmd->melody1, cmd->melody1_len);
 	}
 	ResetAllDetectors();

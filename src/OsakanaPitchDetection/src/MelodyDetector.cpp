@@ -11,7 +11,7 @@
 
 using namespace std;
 
-MelodyDetector::MelodyDetector(uint16_t* melody, uint8_t melodyLen)
+MelodyDetector::MelodyDetector(const uint16_t* melody, uint8_t melodyLen)
 	:
 	_melodyLength(melodyLen),
 	_pos(0)

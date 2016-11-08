@@ -3,11 +3,6 @@
 #include "../include/OsakanaPitchDetection.h"
 #include "PeakDetectMachine.h"
 
-#define LOG_NEWLINE "\n"
-#define LOG_PRINTF	printf
-#include "../../OsakanaFft/include/OsakanaFftDebug.h"
-
-
 osk_complex_t xf[N] = { { 0, 0 } };
 float xf2[N2] = { 0 };
 float _mf[N2] = { 0 };
@@ -57,7 +52,7 @@ int PitchDetector::DetectPitch(PitchInfo_t* pitchInfo)
 	DRAWDATAf(xf, DEBUG_OUTPUT_NUM);
 
 	DLOG("normalizing...");
-	for (int i = 0; i < N2; i++) { 
+	for (int i = 0; i < N2; i++) {
 		xf[i].re -= 512.0f;
 		xf[i].re /= 512.0f;
 		xf[i].im = 0.0f;
@@ -116,7 +111,7 @@ int PitchDetector::DetectPitch(PitchInfo_t* pitchInfo)
 		if (ParabolicInterp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
 			DLOG("delta %f\n", delta);
 		}
-		
+
 		float freq = FREQ_PER_SAMPLE / (keyMaximums[0].index + delta);
 		const float k = log10f(pow(2.0f, 1.0f / 12.0f));
 		uint16_t midi = (uint16_t)round(log10f(freq / 27.5f) / k) + 21;

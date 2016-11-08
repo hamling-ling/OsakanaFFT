@@ -10,7 +10,7 @@ class MelodyDetector;
 class ResponsiveMelodyDetector
 {
 public:
-	ResponsiveMelodyDetector(uint16_t* mel0, int mel0_len, uint16_t* mel1, int mel1_len);
+	ResponsiveMelodyDetector(const uint16_t* mel0, int mel0_len, const uint16_t* mel1, int mel1_len);
 	~ResponsiveMelodyDetector();
 
 	int Input(uint16_t value);
