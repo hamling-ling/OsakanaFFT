@@ -71,9 +71,18 @@ static const uint8_t kNoteTable[] = {
 // N=256
 // sampling rate = 0.07558072916669921875(GR-Kurumi with min, max)
 // x8 precision
+#if 0
 #include "NoteTable8.h"
-
 #include "NoteTable8IndexRange.h"
+#endif
+#if 0
+#include "NoteTable8_N512.h"
+#include "NoteTable8IndexRange_N512.h"
+#endif
+#if 1
+#include "NoteTable8_N1024.h"
+#include "NoteTable8IndexRange_N1024.h"
+#endif
 
 #ifdef __cplusplus
 }

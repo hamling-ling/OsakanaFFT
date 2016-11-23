@@ -184,6 +184,11 @@ namespace OsakanaPitchDetectionTest
 			}
 		}
 
+		TEST_METHOD(TestFpFftLow)
+		{
+			testFpFftWithFreq(1.0f, 65.4,36);
+		}
+
 		TEST_METHOD(TestFft)
 		{
 			CreateSineData(g_data, 261.6f, 1.0f);

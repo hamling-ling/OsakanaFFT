@@ -7,7 +7,19 @@
 #define USE_TWIDDLE_TABLE_N512
 #endif
 
-#if 1 // N=256, fixed Q1.14 fixed point
+#if 1 // N=1024, fixed Q1.14 fixed point
+#define _USE_Q1_14_FIXEDPOINT
+#define USE_BIT_REVERSE_N1024
+#define USE_TWIDDLE_TABLE_N1024
+#endif
+
+#if 0 // N=512, fixed Q1.14 fixed point
+#define _USE_Q1_14_FIXEDPOINT
+#define USE_BIT_REVERSE_N512
+#define USE_TWIDDLE_TABLE_N512
+#endif
+
+#if 0 // N=256, fixed Q1.14 fixed point
 #define _USE_Q1_14_FIXEDPOINT
 #define USE_BIT_REVERSE_N256
 #define USE_TWIDDLE_TABLE_N256

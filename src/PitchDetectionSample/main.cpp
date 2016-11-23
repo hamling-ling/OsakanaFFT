@@ -8,6 +8,8 @@
 #include "OsakanaPitchDetection.h"
 #include "OsakanaPitchDetectionFp.h"
 
+#define USE_DATFILE
+
 using namespace std;
 
 string g_filename;
@@ -115,7 +117,7 @@ int main(int argc, char* argv[])
 		DLOG("need to give file in command-line paremeter");
 		return 1;
 	}
-	
+#if defined(USE_DATFILE)
 #if 1
 	PitchDetectorFp detector;
 	detector.Initialize(readFpData);
@@ -130,17 +132,18 @@ int main(int argc, char* argv[])
 		detector.DetectPitch(&pitchInfo);
 		break;// for debug
 	}
-	detector.Cleanup();
-	
-	/*
-	CreateSineData(g_data, 261.6);
+#else
+
+	CreateSineData(g_data, 65.4);
 
 	PitchDetectorFp detector;
 	detector.Initialize(readGeneratedFpData);
 
 	PitchInfo_t pitchInfo;
 	int result = detector.DetectPitch(&pitchInfo);
-	*/
+#endif
+
+	detector.Cleanup();
 	return 0;
 }
 

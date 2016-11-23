@@ -100,7 +100,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	DLOG("sampled");
 
 	DLOG("raw data --");
-	DRAWDATA(x, 0);
+	DRAWDATA(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("normalizing...");
 	{
@@ -193,6 +193,9 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
 			//printf("nsdf=%s\n", debug_output_buf_);
 		}
+
+		// for debug!!!!
+		keyMaximums[0].index = 68;
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index

@@ -15,7 +15,7 @@
 #define LOG_NEWLINE "\n"
 #endif
 
-//#define _DEBUG
+#define _DEBUG
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS
@@ -34,14 +34,36 @@
 #define FREQ_PER_SAMPLE		(12988)			// 12987.659418105848 casted to int
 #define FREQ_PER_1024SAMPLE	13299363
 #endif
-#if 1	// GR-KURUMI with min,max
+
+#if 0	// GR-KURUMI with min,max, 256 points fft(128 points adc)
 #define N					256		// fft sampling num(last half is 0 pad)
 #define LOG2N				8		// log2(N)
 #define T1024_1024			(79.0809f)	// adc speed(time to take 1024x1024 samples in sec)
 #define T_PER_SAMPLE		FLOAT2FP(7.54174232483e-05f)	// factor to compute index to freq
 #define FREQ_PER_SAMPLE		(13260)			// rounded
-#define FREQ_PER_1024SAMPLE	13577764		// rounded 
+#define FREQ_PER_1024SAMPLE	13577764		// rounded
 #endif
+
+#if 0	// 256 points fft(128 points adc)
+#define N					256		// fft sampling num(last half is 0 pad)
+#define LOG2N				8		// log2(N)
+#endif
+
+#if 0	// 512 points fft(256 points adc)
+#define N					512		// fft sampling num(last half is 0 pad)
+#define LOG2N				9		// log2(N)
+#endif
+
+#if 1	// 1024 points fft(512 points adc)
+#define N					1024	// fft sampling num(last half is 0 pad)
+#define LOG2N				10		// log2(N)
+#endif
+
+// GR-KURUMI with min,max
+#define T1024_1024			(79.0809f)	// adc speed(time to take 1024x1024 samples in sec)
+#define T_PER_SAMPLE		FLOAT2FP(7.54174232483e-05f)	// factor to compute index to freq
+#define FREQ_PER_SAMPLE		(13260)			// rounded
+#define FREQ_PER_1024SAMPLE	13577764		// rounded
 
 #define N2					(N/2)	// sampling num of analog input
 #define N_ADC				N2
@@ -53,11 +75,19 @@
 // The power spectrum result is finally scaled by 1 >> (LOG2N*2-SC_PW)
 // Other values used with the scaled power spectrum also required to scaled.
 // Here the value is only x2 and it should be scaled by 1 >> (LOG2N*2-SC_PW)
+#if 1	// for N=1024
+#define SC_PW				(LOG2N-9)
+#endif
+#if 0	// for N=512
+#define SC_PW				(LOG2N-8)
+#endif
+#if 0	// for N=256
 #define SC_PW				(LOG2N-7)
+#endif
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
-#define DEBUG_OUTPUT_NUM    128
+#define DEBUG_OUTPUT_NUM    256
 
 typedef struct PitchInfo_tag {
 	uint16_t freq;
