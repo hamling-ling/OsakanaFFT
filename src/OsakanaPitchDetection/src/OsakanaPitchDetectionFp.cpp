@@ -183,7 +183,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(_det, FLOAT2FP(0.5f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(_det, FLOAT2FP(0.65f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
@@ -193,9 +193,6 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
 			//printf("nsdf=%s\n", debug_output_buf_);
 		}
-
-		// for debug!!!!
-		keyMaximums[0].index = 68;
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index

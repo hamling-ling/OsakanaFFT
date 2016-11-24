@@ -186,7 +186,7 @@ namespace OsakanaPitchDetectionTest
 
 		TEST_METHOD(TestFpFftLow)
 		{
-			testFpFftWithFreq(1.0f, 65.4,36);
+			testFpFftWithFreq(1.0f, 82.4, 40);
 		}
 
 		TEST_METHOD(TestFft)

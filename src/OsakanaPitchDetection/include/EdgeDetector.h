@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-#define HISTROY_LEN	3
-
 class ContinuityDetector;
 class VolumeComparator;
+
+#define VOLUME_THRESHOLD_OFF_TO_ON	512
+#define VOLUME_THRESHOLD_ON_TO_OFF	200
 
 class EdgeDetector
 {

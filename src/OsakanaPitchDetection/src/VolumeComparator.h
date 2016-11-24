@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define HISTROY_LEN	3
-
 typedef enum VolumeComparatorState_ {
 	VolumeComparatorStateActive,
 	VolumeComparatorStateInactive

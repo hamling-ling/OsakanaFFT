@@ -8,7 +8,7 @@ EdgeDetector::EdgeDetector()
 	:
 	_lastNotifiedVal(0),
 	_cd(new ContinuityDetector()),
-	_vc(new VolumeComparator(256, 128))
+	_vc(new VolumeComparator(VOLUME_THRESHOLD_OFF_TO_ON, VOLUME_THRESHOLD_ON_TO_OFF))
 {
 }
 
@@ -26,7 +26,7 @@ bool EdgeDetector::Input(uint16_t value,  uint16_t volume)
 	}
 
 	if (_cd->Input(value)) {
-		// 3 times continued value!
+		// HISTROY_LEN times continued value!
 		if (_lastNotifiedVal != value) {
 			_lastNotifiedVal = value;
 			return true;

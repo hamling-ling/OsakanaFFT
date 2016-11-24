@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define HISTROY_LEN	3
+#define HISTROY_LEN	1
 
 class ContinuityDetector
 {
