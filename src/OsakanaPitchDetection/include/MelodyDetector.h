@@ -16,10 +16,10 @@ public:
 	 *	@return 0:state not changed
 	 *	@return 1:detected and state backed to initial
 	 */
-	int Input(uint16_t value);
+	virtual int Input(uint16_t value);
 	void Reset();
 
-private:
+protected:
 	uint8_t _melodyLength;
 	uint8_t _pos;
 	uint16_t _melody[MAX_MELODY_LENGTH];

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EdgeDetector.h" />
+    <ClInclude Include="include\LooseMelodyDetector.h" />
     <ClInclude Include="include\MelodyCommandReceiver.h" />
     <ClInclude Include="include\MelodyDetector.h" />
     <ClInclude Include="include\OsakanaPitchDetection.h" />
@@ -30,6 +31,10 @@
     <ClInclude Include="src\ContinuityDetector.h" />
     <ClInclude Include="src\NoteTable8.h" />
     <ClInclude Include="src\NoteTable8IndexRange.h" />
+    <ClInclude Include="src\NoteTable8IndexRange_N1024.h" />
+    <ClInclude Include="src\NoteTable8IndexRange_N512.h" />
+    <ClInclude Include="src\NoteTable8_N1024.h" />
+    <ClInclude Include="src\NoteTable8_N512.h" />
     <ClInclude Include="src\PeakDetectMachine.h" />
     <ClInclude Include="src\PeakDetectMachineCommon.h" />
     <ClInclude Include="src\PeakDetectMachineFp.h" />
@@ -38,6 +43,7 @@
   <ItemGroup>
     <ClCompile Include="src\ContinuityDetector.cpp" />
     <ClCompile Include="src\EdgeDetector.cpp" />
+    <ClCompile Include="src\LooseMelodyDetector.cpp" />
     <ClCompile Include="src\MelodyCommandReceiver.cpp" />
     <ClCompile Include="src\MelodyDetector.cpp" />
     <ClCompile Include="src\OsakanaPitchDetection.cpp" />

@@ -194,7 +194,7 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestMelodyCommandReceiverInstantiation)
 		{
 			MelodyCommand_t commands[] = {
-				{s_fug_mel0,		s_fug_mel1,		_countof(s_fug_mel0) ,		_countof(s_fug_mel1)		},
+				{s_fug_mel0,	s_fug_mel1,	_countof(s_fug_mel0) ,	_countof(s_fug_mel1)		},
 				{ s_pic_mel0,	s_pic_mel1, _countof(s_pic_mel0) ,	_countof(s_pic_mel1)	},
 			};
 			MelodyCommandReceiver mcr(commands, _countof(commands));
@@ -203,7 +203,7 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestMelodyCommandReceiverRightInput)
 		{
 			MelodyCommand_t commands[] = {
-				{ s_fug_mel0,		s_fug_mel1,		_countof(s_fug_mel0) ,		_countof(s_fug_mel1) },
+				{ s_fug_mel0,	s_fug_mel1,	_countof(s_fug_mel0) ,	_countof(s_fug_mel1) },
 				{ s_pic_mel0,	s_pic_mel1, _countof(s_pic_mel0) ,	_countof(s_pic_mel1) },
 			};
 
@@ -236,7 +236,7 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestMelodyCommandReceiverRightInput2)
 		{
 			MelodyCommand_t commands[] = {
-				{ s_fug_mel0,		s_fug_mel1,		_countof(s_fug_mel0) ,		_countof(s_fug_mel1) },
+				{ s_fug_mel0,	s_fug_mel1,	_countof(s_fug_mel0) ,	_countof(s_fug_mel1) },
 				{ s_pic_mel0,	s_pic_mel1, _countof(s_pic_mel0) ,	_countof(s_pic_mel1) },
 			};
 
@@ -269,7 +269,7 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestMelodyCommandReceiverRightInputWithSilence)
 		{
 			MelodyCommand_t commands[] = {
-				{ s_fug_mel0,		s_fug_mel1,		_countof(s_fug_mel0) ,		_countof(s_fug_mel1) },
+				{ s_fug_mel0,	s_fug_mel1,	_countof(s_fug_mel0) ,	_countof(s_fug_mel1) },
 				{ s_pic_mel0,	s_pic_mel1, _countof(s_pic_mel0) ,	_countof(s_pic_mel1) },
 			};
 
@@ -304,7 +304,7 @@ namespace OsakanaPitchDetectionTest
 		TEST_METHOD(TestMelodyCommandReceiverResetWithWrongNote)
 		{
 			MelodyCommand_t commands[] = {
-				{ s_fug_mel0,		s_fug_mel1,		_countof(s_fug_mel0) ,		_countof(s_fug_mel1) },
+				{ s_fug_mel0,	s_fug_mel1,	_countof(s_fug_mel0) ,	_countof(s_fug_mel1) },
 				{ s_pic_mel0,	s_pic_mel1, _countof(s_pic_mel0) ,	_countof(s_pic_mel1) },
 			};
 
@@ -355,6 +355,30 @@ namespace OsakanaPitchDetectionTest
 					}
 				}
 			}
+		}
+
+		TEST_METHOD(TestRigntLooseInput)
+		{
+			ResponsiveMelodyDetector fd(s_fug_mel0, _countof(s_fug_mel0), s_fug_mel1, _countof(s_fug_mel1));
+
+			int result = 0;
+			result = fd.Input(67+12);
+			Assert::AreEqual(result, 0);
+
+			result = fd.Input(74+12);
+			Assert::AreEqual(result, 0);
+
+			result = fd.Input(70+12);
+			Assert::AreEqual(result, 0);
+
+			result = fd.Input(69+12);
+			Assert::AreEqual(result, 1);
+
+			result = fd.Input(69+12);
+			Assert::AreEqual(result, 0);
+
+			result = fd.Input(62-12);
+			Assert::AreEqual(result, 2);
 		}
 	};
 }

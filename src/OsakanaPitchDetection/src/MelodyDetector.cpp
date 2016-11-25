@@ -13,11 +13,11 @@ using namespace std;
 
 MelodyDetector::MelodyDetector(const uint16_t* melody, uint8_t melodyLen)
 	:
-	_melodyLength(melodyLen),
+	_melodyLength(min(melodyLen, (uint8_t)MAX_MELODY_LENGTH)),
 	_pos(0)
 {
 	memset(_melody, 0, sizeof(_melody));
-	memcpy(_melody, melody, sizeof(uint16_t) * min(melodyLen, (uint8_t)MAX_MELODY_LENGTH));
+	memcpy(_melody, melody, sizeof(uint16_t) * _melodyLength);
 }
 
 MelodyDetector::~MelodyDetector()
