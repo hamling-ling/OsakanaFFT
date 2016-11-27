@@ -196,7 +196,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index
-		int32_t idx1024 = keyMaximums[0].index << 10;
+		int32_t idx1024 = (int32_t)(keyMaximums[0].index) << 10;
 		// int expression of 1024*delta
 		int32_t delta1024 = (delta >> (FPSHFT - 10));
 		idx1024 += delta1024;

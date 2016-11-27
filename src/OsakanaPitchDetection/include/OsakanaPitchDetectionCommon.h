@@ -15,7 +15,7 @@
 #define LOG_NEWLINE "\n"
 #endif
 
-#define _DEBUG
+//#define _DEBUG
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS
@@ -87,7 +87,7 @@
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
-#define DEBUG_OUTPUT_NUM    256
+#define DEBUG_OUTPUT_NUM    512
 
 typedef struct PitchInfo_tag {
 	uint16_t freq;
