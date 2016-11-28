@@ -220,7 +220,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		Fp_t delta = 0;
 		uint16_t index = keyMaximums[0].index;
 		ParabolicInterpFp(_det, index, _nsdf, N2, &delta);
-		PRINTRAGRANGE(	keyMaximums[0].index, _nsdf[index + 0], _nsdf[index + 1], delta);
+		PRINTRAGRANGE(	index, keyMaximums[0].index, _nsdf[index + 0], _nsdf[index + 1], delta);
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index
