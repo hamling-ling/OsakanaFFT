@@ -16,7 +16,7 @@ extern "C" {
 	//struct _MachineContextFp_t;
 	typedef struct _MachineContextFp_t MachineContextFp_t;
 
-	MachineContextFp_t* CreatePeakDetectMachineContextFp();
+	MachineContextFp_t* CreatePeakDetectMachineContextFp(uint16_t dataNum);
 	void DestroyPeakDetectMachineContextFp(MachineContextFp_t* ctx);
 	void InputFp(MachineContextFp_t* ctx, Fp_t x);
 	void ResetMachineFp(MachineContextFp_t* ctx);

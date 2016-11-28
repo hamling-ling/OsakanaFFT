@@ -70,7 +70,7 @@ PitchDetectorFp::~PitchDetectorFp()
 
 int PitchDetectorFp::Initialize(void* readFunc)
 {
-	_det = CreatePeakDetectMachineContextFp();
+	_det = CreatePeakDetectMachineContextFp(N_NSDF);
 
 	if (InitOsakanaFpFft(&_fft, N, LOG2N) != 0) {
 		DLOG("InitOsakanaFpFft error");
@@ -161,7 +161,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	// curve analysis
 	InputFp(_det, _nsdf[0]);
 
-	for (int t = 1; t < N2; t++) {
+	for (int t = 1; t < N_NSDF; t++) {
 		//_m[t] = _m[t - 1] - x2[t - 1]
 		Fp_t m = m_old - x2_old;
 
@@ -183,7 +183,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(_det, FLOAT2FP(0.65f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(_det, FLOAT2FP(0.6f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {

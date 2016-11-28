@@ -20,7 +20,7 @@ PitchDetector::~PitchDetector()
 
 int PitchDetector::Initialize(void* readFunc)
 {
-	_det = CreatePeakDetectMachineContext();
+	_det = CreatePeakDetectMachineContext(N_NSDF);
 
 	if (InitOsakanaFft(&_fft, N, LOG2N) != 0) {
 		DLOG("InitOsakanaFpFft error");

@@ -56,12 +56,13 @@ typedef struct _MachineContext_t {
 // Public
 /////////////////////////////////////////////////////////////////////
 
-MachineContext_t* CreatePeakDetectMachineContext()
+MachineContext_t* CreatePeakDetectMachineContext(uint16_t dataNum)
 {
 	MachineContext_t* ctx = (MachineContext_t*)malloc(sizeof(MachineContext_t));
 	if (ctx == NULL) {
 		return NULL;
 	}
+	ctx->maxDataNum = dataNum;
 	ResetMachine(ctx);
 
 	return ctx;
@@ -83,9 +84,12 @@ void Input(MachineContext_t* ctx, float x)
 
 void ResetMachine(MachineContext_t* ctx)
 {
+	uint16_t maxDataNum = ctx->maxDataNum;
 	memset(ctx, 0, sizeof(MachineContext_t));
+
 	ctx->funcs = s_funcs;
 	ctx->detectors = s_eventDetectors;
+	ctx->maxDataNum = maxDataNum;
 }
 
 void GetKeyMaximums(MachineContext_t* ctx, float filter, PeakInfo_t* list, int listmaxlen, int *num)
@@ -183,7 +187,7 @@ static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContext_t* ctx,
 	if (ctx->lastInput.value < 0 && 0 <= x) {
 		return kEventPosCross;
 	}
-	else if(ctx->maxDataNum <= ctx->currentIndex+1){
+	else if (ctx->currentIndex + 1 < ctx->maxDataNum) {
 		return kEventNmlData;
 	}
 	else {
@@ -195,8 +199,11 @@ static PeakDetectMachineEvent_t WalkingOnBell_DetectEvent(MachineContext_t* ctx,
 	if (0 <= ctx->lastInput.value && x < 0) {
 		return kEventNegCross;
 	}
-	else {
+	else if (ctx->currentIndex + 1 < ctx->maxDataNum) {
 		return kEventNmlData;
+	}
+	else {
+		return kEventEndOfData;
 	}
 }
 
@@ -258,7 +265,9 @@ static void WalkingOnBell_NmlData(MachineContext_t* ctx, float x)
 
 static void WalkingOnBell_EndOfData(MachineContext_t* ctx, float x)
 {
+	PushLocalKeyMax(ctx);
 	UpdateValueHistory(ctx, x);
+	ChangeState(ctx, kStateEnd);
 }
 
 static void End_PosCross(MachineContext_t* ctx, float x)

@@ -15,7 +15,7 @@ extern "C" {
 	//struct _MachineContext_t;
 	typedef struct _MachineContext_t MachineContext_t;
 
-	MachineContext_t* CreatePeakDetectMachineContext();
+	MachineContext_t* CreatePeakDetectMachineContext(uint16_t dataNum);
 	void DestroyPeakDetectMachineContext(MachineContext_t* ctx);
 	void Input(MachineContext_t* ctx, float x);
 	void ResetMachine(MachineContext_t* ctx);
