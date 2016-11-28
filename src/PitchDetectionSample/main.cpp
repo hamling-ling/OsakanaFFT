@@ -134,8 +134,8 @@ int main(int argc, char* argv[])
 	}
 #else
 
-	CreateSineData(g_data, 65.4);// note = 36 for 65.4Hz
-
+	//CreateSineData(g_data, 65.4);// note = 36 for 65.4Hz
+	CreateSineData(g_data, 1568.0f);// note = 91 for 1568.0Hz
 	PitchDetectorFp detector;
 	detector.Initialize(readGeneratedFpData);
 

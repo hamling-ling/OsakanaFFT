@@ -39,15 +39,19 @@ int GetSourceSignalShiftScale(Fp_t amplitude)
 	if (amplitude > FLOAT2FP(0.5)) {
 		return 0;
 	}
-	else 	if (amplitude > FLOAT2FP(0.25)) {
+	else if (amplitude > FLOAT2FP(0.25)) {
 		return 1;
 	}
+#if defined(SCALE_0250)
 	else if (amplitude > FLOAT2FP(0.125)) {
 		return 2;
 	}
+#if defined(SCALE_1025)
 	else if (amplitude > FLOAT2FP(0.0625)) {
 		return 3;
 	}
+#endif
+#endif
 	return 4;
 }
 
@@ -180,10 +184,10 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	// following loop compute :
-	// _m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);// why 2?
-	// where [0] = x[0].re * 2
+	// _m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);
+	// where _m[0] = x[0].re * 2
 	// nsdf[t] = 2 * x[t].re / m[t]
-	Fp_t m_old = (x[0].re << 1);// why 2?
+	Fp_t m_old = (x[0].re << 1);
 	Fp_t x2_old = x2[0];
 	Fp_t* _nsdf = x2;// reuse memory
 

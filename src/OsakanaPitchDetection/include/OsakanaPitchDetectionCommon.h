@@ -90,6 +90,10 @@
 // debug
 #define DEBUG_OUTPUT_NUM    512
 
+// choose one of following for scalling threshold
+#define SCALE_CUTOFF_0250
+//#define SCALE_CUTOFF_0125
+
 typedef struct PitchInfo_tag {
 	uint16_t freq;
 	uint8_t midiNote;

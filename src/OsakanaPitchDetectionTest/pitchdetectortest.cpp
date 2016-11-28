@@ -25,6 +25,20 @@ vector<pair<uint8_t, float> > g_expValues = {
 	{ 80,	830.6f },	{ 81,	880.0f },	{ 82,	932.3f },	{ 83,	987.8f }
 };
 
+vector<pair<uint8_t, float> > g_expLowValues = {
+	{ 36,	65.4 },		{ 37,	69.3 },		{ 38,	73.4 },		{ 39,	77.8 },
+	{ 40,	82.4 },		{ 41,	87.3 },		{ 42,	92.5 },		{ 43,	98.0 },
+	{ 44,	103.8 },	{ 45,	110.0 },	{ 46,	116.5 },	{ 47,	123.5 },
+	{ 48,	130.8 },
+};
+
+vector<pair<uint8_t, float> > g_expHighValues = {
+	{ 84,	1046.5 },	{ 85,	1108.7 },	{ 86,	1174.7 },	{ 87,	1244.5 },
+	{ 88,	1318.5 },	/*{ 89,	1396.9 },	{ 90,	1480.0 },	{ 91,	1568.0 },
+	{ 92,	1661.2 },	{ 93,	1760.0 },	{ 94,	1864.7 },	{ 95,	1975.5 },
+	{ 96,	2093.0 },*/
+};
+
 static int readFpData(Fp_t* data, uint8_t stride, const int dataNum, Fp_t* rawdata_min, Fp_t* rawdata_max)
 {
 	*rawdata_min = 512;
@@ -139,21 +153,80 @@ namespace OsakanaPitchDetectionTest
 				testFpFftWithFreq(0.5, x.second, x.first);
 			}
 		}
-
+#if defined(SCALE_0250)
 		TEST_METHOD(TestFpFftRangeScale025)
 		{
 			for (auto x : g_expValues) {
 				testFpFftWithFreq(0.25, x.second, x.first);
 			}
 		}
-
+#endif
+#if defined(SCALE_1025)
 		TEST_METHOD(TestFpFftRangeScale0125)
 		{
 			for (auto x : g_expValues) {
 				testFpFftWithFreq(0.125, x.second, x.first);
 			}
 		}
+#endif
+		TEST_METHOD(TestFpFftLowRangeScale1)
+		{
+			for (auto x : g_expLowValues) {
+				testFpFftWithFreq(1.0, x.second, x.first);
+			}
+		}
 
+		TEST_METHOD(TestFpFftLowRangeScale05)
+		{
+			for (auto x : g_expLowValues) {
+				testFpFftWithFreq(0.5, x.second, x.first);
+			}
+		}
+#if defined(SCALE_0250)
+		TEST_METHOD(TestFpFftLowRangeScale025)
+		{
+			for (auto x : g_expLowValues) {
+				testFpFftWithFreq(0.25, x.second, x.first);
+			}
+		}
+#endif
+#if defined(SCALE_1025)
+		TEST_METHOD(TestFpFftLowRangeScale0125)
+		{
+			for (auto x : g_expLowValues) {
+				testFpFftWithFreq(0.125, x.second, x.first);
+			}
+		}
+#endif
+		TEST_METHOD(TestFpFftHightRangeScale1)
+		{
+			for (auto x : g_expHighValues) {
+				testFpFftWithFreq(1.0, x.second, x.first);
+			}
+		}
+
+		TEST_METHOD(TestFpFftHightRangeScale05)
+		{
+			for (auto x : g_expHighValues) {
+				testFpFftWithFreq(0.5, x.second, x.first);
+			}
+		}
+#if defined(SCALE_0250)
+		TEST_METHOD(TestFpFftHightRangeScale025)
+		{
+			for (auto x : g_expHighValues) {
+				testFpFftWithFreq(0.25, x.second, x.first);
+			}
+		}
+#endif
+#if defined(SCALE_1025)
+		TEST_METHOD(TestFpFftHightRangeScale0125)
+		{
+			for (auto x : g_expHighValues) {
+				testFpFftWithFreq(0.125, x.second, x.first);
+			}
+		}
+#endif
 		TEST_METHOD(TestFpFftRangeScaleTooSmall)
 		{
 			CreateSineData(g_data, 261.6f, 0.03125f);

@@ -5,8 +5,6 @@ PitchDiagnostic::PitchDiagnostic(uint16_t interval)
 {
 	Reset();
 }
-
-
 PitchDiagnostic::~PitchDiagnostic()
 {
 }
