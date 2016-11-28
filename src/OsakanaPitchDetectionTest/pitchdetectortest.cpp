@@ -84,6 +84,12 @@ namespace OsakanaPitchDetectionTest
 		Assert::AreEqual(result, 0);
 		Assert::AreEqual(pitchInfo.midiNote, (uint8_t)note);
 
+		bool isFreqInRange = false;
+		if (freq - 1.0f <= (float)pitchInfo.freq && (float)pitchInfo.freq <= freq + 1.0f) {
+			isFreqInRange = true;
+		}
+		Assert::IsTrue(freq);
+
 		stringstream ss;
 		ss << "freq=" << pitchInfo.freq << ", midiNote=" << (int)pitchInfo.midiNote << endl;
 		Logger::WriteMessage(ss.str().c_str());
