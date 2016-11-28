@@ -11,6 +11,20 @@ using namespace std;
 #endif
 #include <inttypes.h>
 
+#define DEBUG_RAGRANGE
+#define DEBUG_PITCH
+
+#if defined(DEBUG_RAGRANGE)
+#define PRINTRAGRANGE(...)	PrintRagrange(__VA_ARGS__)
+#else
+#define PRINTRAGRANGE(...)
+#endif
+#if defined(DEBUG_PITCH)
+#define PRINTRESULT(...)	PrintResult(__VA_ARGS__)
+#else
+#define PRINTRESULT(...)
+#endif
+
 osk_fp_complex_t x[N] = { { 0, 0 } };
 Fp_t x2[N2] = { 0 };
 
@@ -56,6 +70,24 @@ static void PrintResult(uint16_t freq, const char* str, int8_t pitch)
 #else
 	ILOG("freq=%u Hz, note=%s, pitch=%d\n", freq, str, (int)pitch);
 #endif
+}
+
+static void PrintRagrange(uint16_t index, Fp_t prev, Fp_t cent, Fp_t last, Fp_t delta)
+{
+	printf("index=%u, ", index);
+
+	char printbuf[64] = { '\0' };
+	Fp2CStr(prev, printbuf, sizeof(printbuf));
+	printf("[-1]=%s, ", printbuf);
+
+	Fp2CStr(cent, printbuf, sizeof(printbuf));
+	printf("[ 0]=%s, ", printbuf);
+
+	Fp2CStr(last, printbuf, sizeof(printbuf));
+	printf("[+1]=%s, ", printbuf);
+
+	Fp2CStr(delta, printbuf, sizeof(printbuf));
+	printf("delta %s\n", printbuf);
 }
 
 PitchDetectorFp::PitchDetectorFp()
@@ -186,17 +218,13 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	GetKeyMaximumsFp(_det, FLOAT2FP(0.6f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
-		if (ParabolicInterpFp(_det, keyMaximums[0].index, _nsdf, N2, &delta)) {
-			//char printbuf[64] = { '\0' };
-			//Fp2CStr(delta, printbuf, sizeof(printbuf));
-			//printf("delta %s\n", printbuf);
-			//Fp2CStr(keyMaximums[0].value, debug_output_buf_, sizeof(debug_output_buf_));
-			//printf("nsdf=%s\n", debug_output_buf_);
-		}
+		uint16_t index = keyMaximums[0].index;
+		ParabolicInterpFp(_det, index, _nsdf, N2, &delta);
+		PRINTRAGRANGE(	keyMaximums[0].index, _nsdf[index + 0], _nsdf[index + 1], delta);
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index
-		int32_t idx1024 = (int32_t)(keyMaximums[0].index) << 10;
+		int32_t idx1024 = (int32_t)(index) << 10;
 		// int expression of 1024*delta
 		int32_t delta1024 = (delta >> (FPSHFT - 10));
 		idx1024 += delta1024;
@@ -213,7 +241,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		pitchInfo->noteStr = kNoteStrings[note];
 		pitchInfo->pitch = GetAccuracy(pitchInfo->midiNote, idx8);
 
-		PrintResult(freq, kNoteStrings[note], pitchInfo->pitch);
+		PRINTRESULT(freq, kNoteStrings[note], pitchInfo->pitch);
 
 		ret = 0;
 	}
