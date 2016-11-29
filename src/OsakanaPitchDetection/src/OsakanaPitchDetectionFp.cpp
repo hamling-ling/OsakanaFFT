@@ -192,6 +192,9 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	Fp_t* _nsdf = x2;// reuse memory
 
 	Fp_t mt = m_old;
+	if (mt == 0) {
+		return 1;
+	}
 	_nsdf[0] = FpDiv(x[0].re, mt);
 	_nsdf[0] = _nsdf[0] << 1;
 	// curve analysis
@@ -207,6 +210,9 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 		// nsdf
 		Fp_t mt = m_old;
+		if (mt == 0) {
+			return 1;
+		}
 		_nsdf[t] = FpDiv(x[t].re, mt);
 		_nsdf[t] = _nsdf[t] << 1;
 
