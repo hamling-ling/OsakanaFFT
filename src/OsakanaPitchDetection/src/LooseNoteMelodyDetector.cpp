@@ -1,5 +1,6 @@
 
 #include "LooseNoteMelodyDetector.h"
+#include "LooseNoteDetector.h"
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
@@ -47,7 +48,7 @@ int LooseNoteMelodyDetector::Input(uint16_t value)
 {
 	LooseNoteDetectionResult_t result = _nd->Input(value);
 
-	int ret = -1;
+	int ret = 0;
 	switch (result) {
 		case kLooseNoteDetectionResultNone:
 			break;
@@ -58,6 +59,7 @@ int LooseNoteMelodyDetector::Input(uint16_t value)
 				_pos = 0;
 				ret = -1;
 			}
+			_nd->Reset(_melody[_pos]);
 			break;
 		case kLooseNoteDetectionResultDetected:
 		case kLooseNoteDetectionResultDetectedWithNextNote:
@@ -66,6 +68,7 @@ int LooseNoteMelodyDetector::Input(uint16_t value)
 				_pos = 0;
 				ret = 1;
 			}
+			_nd->Reset(_melody[_pos]);
 			break;
 	}
 

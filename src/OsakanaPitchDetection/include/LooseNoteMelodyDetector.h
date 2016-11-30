@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 #include "MelodyDetector.h"
-#include "LooseNoteDetector.h"
+
 
 typedef unsigned long(*LooseNoteMelodyDetectorMillsFunc_t)(void);
+
+class LooseNoteDetector;
 
 class LooseNoteMelodyDetector : public MelodyDetector
 {

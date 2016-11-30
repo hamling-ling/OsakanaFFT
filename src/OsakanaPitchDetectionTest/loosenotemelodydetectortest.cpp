@@ -3,10 +3,10 @@
 #include "../OsakanaPitchDetection/include/EdgeDetector.h"
 #include "../OsakanaPitchDetection/include/MelodyCommandReceiver.h"
 #include "../OsakanaPitchDetection/include/ResponsiveMelodyDetector.h"
+#include "../OsakanaPitchDetection/include/LooseNoteMelodyDetector.h"
 #include "../OsakanaPitchDetection/src/ContinuityDetector.h"
 #include "../OsakanaPitchDetection/src/VolumeComparator.h"
 #include "../OsakanaPitchDetection/src/LooseNoteDetector.h"
-#include "../OsakanaPitchDetection/src/LooseMelodyDetector.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -28,7 +28,7 @@ namespace OsakanaPitchDetectionTest
 	}
 
 
-	TEST_CLASS(LooseNoteMelodyDetectionTest)
+	TEST_CLASS(LooseNoteDetectionTest)
 	{
 	public:
 
@@ -177,6 +177,54 @@ namespace OsakanaPitchDetectionTest
 			g_now = 1500;
 			result = nd.Input(0);
 			Assert::AreEqual<int>(result, kLooseNoteDetectionResultDetected);
+		}
+	};
+
+	TEST_CLASS(LooseNoteMelodyDetectionTest)
+	{
+	public:
+
+		TEST_METHOD(TestLooseNoteMelodyRightInput)
+		{
+			LooseNoteMelodyDetector md(s_fug_mel1, _countof(s_fug_mel1));
+			md.SetDebugMillsFunc(mills);
+			int result = 0;
+
+			g_now = 0;
+			result = md.Input(s_fug_mel1[0]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(s_fug_mel1[0]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(s_fug_mel1[0]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(0);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(s_fug_mel1[1]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(s_fug_mel1[1]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(s_fug_mel1[1]);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(0);
+			Assert::AreEqual<int>(result, 0);
+
+			g_now += 1000;
+			result = md.Input(0);
+			Assert::AreEqual<int>(result, 1);
 		}
 	};
 }
