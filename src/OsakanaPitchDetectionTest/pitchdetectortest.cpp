@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -83,6 +85,27 @@ static void CreateSineData(float* x, float freq, float ampScale)
 	}
 }
 
+/**
+ *	val=[0,1]
+ */
+static void CreateSteadyData(float* x, float val)
+{
+	for (int i = 0; i < N; i++) {
+		x[i] = val;
+		x[i] += 1.0f;
+		x[i] *= 512.0f;
+	}
+}
+
+static void CreateRandomData(float* x, float scale)
+{
+	srand(time(NULL));
+
+	for (int i = 0; i < N; i++) {
+		x[i] = rand()%1024;
+	}
+
+}
 namespace OsakanaPitchDetectionTest
 {
 	void testFpFftWithFreq(float ampScale, float freq, uint8_t note)
@@ -358,6 +381,138 @@ namespace OsakanaPitchDetectionTest
 			Assert::AreEqual(result, 0);
 			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)60);
 			Assert::AreEqual(pitchInfo.pitch, (int8_t)1);
+		}
+
+		TEST_METHOD(TestFpNoneInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			CreateSteadyData(g_data, 0.0f);
+
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreNotEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual(pitchInfo.pitch, (int8_t)0);
+		}
+
+		TEST_METHOD(TestFpPositiveConstantInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			CreateSteadyData(g_data, 1.0f);
+
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreNotEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual(pitchInfo.pitch, (int8_t)0);
+		}
+
+		TEST_METHOD(TestFpNegativeConstantInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			CreateSteadyData(g_data, -1.0f);
+
+			int result = detector.DetectPitch(&pitchInfo);
+
+			Assert::AreNotEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual(pitchInfo.pitch, (int8_t)0);
+		}
+
+		TEST_METHOD(TestFpRandomInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			int result = 1;
+			for (int i = 0; i < 256; i++) {
+				CreateRandomData(g_data, 1.0);
+
+				int result = detector.DetectPitch(&pitchInfo);
+				if (result == 0) {
+					Assert::AreNotEqual(result, 0);
+					Assert::AreNotEqual(pitchInfo.midiNote, (uint8_t)0);
+					bool isValidPitch = false;
+					if (pitchInfo.pitch < -1 || 1 < pitchInfo.pitch) {
+						isValidPitch = true;
+					}
+					Assert::IsTrue(isValidPitch);
+				}
+			}
+		}
+
+		TEST_METHOD(TestFpRandomSmallInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			int result = 1;
+			for (int i = 0; i < 256; i++) {
+				CreateRandomData(g_data, 0.3);
+
+				int result = detector.DetectPitch(&pitchInfo);
+				if (result == 0) {
+					Assert::AreNotEqual(result, 0);
+					Assert::AreNotEqual(pitchInfo.midiNote, (uint8_t)0);
+					bool isValidPitch = false;
+					if (pitchInfo.pitch < -1 || 1 < pitchInfo.pitch) {
+						isValidPitch = true;
+					}
+					Assert::IsTrue(isValidPitch);
+				}
+			}
+		}
+
+		TEST_METHOD(TestFpPositivePulseInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			CreateSteadyData(g_data, 0.0f);
+			for (int i = 0; i < 5; i++) {
+				g_data[N_ADC / 4 + i] = 1023;
+			}
+
+			int result = detector.DetectPitch(&pitchInfo);
+			Assert::AreNotEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual(pitchInfo.pitch, (int8_t)0);
+		}
+
+		TEST_METHOD(TestFpNegativePulseInput)
+		{
+			PitchDetectorFp detector;
+			detector.Initialize(readFpData);
+
+			PitchInfo_t pitchInfo = MakePitchInfo();
+
+			CreateSteadyData(g_data, 1.0f);
+			for (int i = 0; i < 5; i++) {
+				g_data[N_ADC / 4 + i] = 0;
+			}
+
+			int result = detector.DetectPitch(&pitchInfo);
+			Assert::AreNotEqual(result, 0);
+			Assert::AreEqual(pitchInfo.midiNote, (uint8_t)0);
+			Assert::AreEqual(pitchInfo.pitch, (int8_t)0);
 		}
 	};
 }
