@@ -81,6 +81,9 @@
     <ClInclude Include="include\LooseNoteMelodyDetector.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\NoteTables.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EdgeDetector.cpp">

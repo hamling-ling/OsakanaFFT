@@ -1,5 +1,10 @@
 #include "ResponsiveMelodyDetector.h"
+
+#if defined(USE_LOOSE_NOTE)
+#include "LooseNoteMelodyDetector.h"
+#else
 #include "LooseMelodyDetector.h"
+#endif
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
@@ -14,8 +19,13 @@ ResponsiveMelodyDetector::ResponsiveMelodyDetector(const uint16_t* mel0, int mel
 	:
 	_pos(0)
 {
+#if defined(USE_LOOSE_NOTE)
+	_mds[0] = new LooseNoteMelodyDetector(mel0, mel0_len);
+	_mds[1] = new LooseNoteMelodyDetector(mel1, mel1_len);
+#else
 	_mds[0] = new LooseMelodyDetector(mel0, mel0_len);
 	_mds[1] = new LooseMelodyDetector(mel1, mel1_len);
+#endif
 }
 
 ResponsiveMelodyDetector::~ResponsiveMelodyDetector()

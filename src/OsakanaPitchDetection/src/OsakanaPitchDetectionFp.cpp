@@ -1,6 +1,7 @@
-
+#include "OsakanaFpFft.h"
 #include "../include/OsakanaPitchDetectionFp.h"
 #include "PeakDetectMachineFp.h"
+#include "NoteTables.h"
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
@@ -11,7 +12,7 @@ using namespace std;
 #endif
 #include <inttypes.h>
 
-#define DEBUG_RAGRANGE
+//#define DEBUG_RAGRANGE
 #define DEBUG_PITCH
 
 #if defined(DEBUG_RAGRANGE)
@@ -33,9 +34,6 @@ Fp_t rawdata_max = 0;
 
 int GetSourceSignalShiftScale(Fp_t amplitude)
 {
-	//Fp2CStr(amplitude, debug_output_buf_, sizeof(debug_output_buf_));
-	//printf("amp %s\n", debug_output_buf_);
-
 	if (amplitude > FLOAT2FP(0.5)) {
 		return 0;
 	}

@@ -1,9 +1,7 @@
 #ifndef _OSAKANAPITCHDETECTIONCOMMON_H_
 #define _OSAKANAPITCHDETECTIONCOMMON_H_
 
-#include "OsakanaFft.h"
 #include "OsakanaFp.h"
-#include "OsakanaFpFft.h"
 
 #if defined(ARDUINO_PLATFORM) || defined(RLDUINO78_VERSION) || defined(ARDUINO)      // arduino
 #include <Arduino.h>
@@ -15,7 +13,7 @@
 #define LOG_NEWLINE "\n"
 #endif
 
-#define _DEBUG
+//#define _DEBUG
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS

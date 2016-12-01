@@ -37,6 +37,7 @@
     <ClInclude Include="src\NoteTable8IndexRange_N512.h" />
     <ClInclude Include="src\NoteTable8_N1024.h" />
     <ClInclude Include="src\NoteTable8_N512.h" />
+    <ClInclude Include="src\NoteTables.h" />
     <ClInclude Include="src\PeakDetectMachine.h" />
     <ClInclude Include="src\PeakDetectMachineCommon.h" />
     <ClInclude Include="src\PeakDetectMachineFp.h" />

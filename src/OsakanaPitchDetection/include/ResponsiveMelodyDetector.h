@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#define USE_LOOSE_NOTE
 #define MAX_MELODY_DETECTORS 2
 
 class MelodyDetector;

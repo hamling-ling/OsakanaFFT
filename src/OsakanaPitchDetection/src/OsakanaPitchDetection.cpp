@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include "OsakanaFft.h"
 #include "../include/OsakanaPitchDetection.h"
 #include "PeakDetectMachine.h"
 
