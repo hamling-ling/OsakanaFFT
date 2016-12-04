@@ -26,6 +26,7 @@
 #else
 #define DCOMPLEXFp(cs, num)
 #define DFPSFp(fps, num)
+#define DFPFp(fp, num)
 #endif
 
 #endif
