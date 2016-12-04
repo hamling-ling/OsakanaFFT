@@ -161,8 +161,13 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 			x[i].im = 0;
 			x[N2 + i].re = 0;
 			x[N2 + i].im = 0;
+# if 0
 			x2[i] = FpMul(x[i].re, x[i].re);
 			x2[i] = x2[i] >> SC_X2;
+#else
+			// SC_X2 shift is too mutch. comment untill solved. this line doesn't affect very mutch
+			x2[i] = 0;
+#endif
 		}
 	}
 	DLOG("normalized");
