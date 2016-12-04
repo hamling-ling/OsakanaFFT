@@ -86,11 +86,13 @@
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
-#define DEBUG_OUTPUT_NUM    512
+#define DEBUG_OUTPUT_NUM	512
 
 // choose one of following for scalling threshold
 #define SCALE_CUTOFF_0250
 //#define SCALE_CUTOFF_0125
+
+#define NSDF_THRESHOLD		0.6f
 
 typedef struct PitchInfo_tag {
 	uint16_t freq;

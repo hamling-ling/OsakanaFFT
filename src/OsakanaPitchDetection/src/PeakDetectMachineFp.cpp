@@ -23,7 +23,7 @@ static void End_NegCross(MachineContextFp_t* ctx, Fp_t x);
 static void End_NmlData(MachineContextFp_t* ctx, Fp_t x);
 static void End_EndOfData(MachineContextFp_t* ctx, Fp_t x);
 
-typedef PeakDetectMachineEvent_t (*EventDetector_t)(MachineContextFp_t* ctx, Fp_t x);
+typedef PeakDetectMachineEvent_t(*EventDetector_t)(MachineContextFp_t* ctx, Fp_t x);
 typedef void(*StateFuncFp_t)(MachineContextFp_t* ctx, Fp_t x);
 
 static StateFuncFp_t s_funcs[kStateNum][kEventNum] = {
@@ -77,7 +77,7 @@ void InputFp(MachineContextFp_t* ctx, Fp_t x)
 {
 	EventDetector_t detector = ctx->detectors[ctx->state];
 	PeakDetectMachineEvent_t evt = detector(ctx, x);
-	
+
 	StateFuncFp_t stateFunc = ctx->funcs[ctx->state][(int)evt];
 	stateFunc(ctx, x);
 }
@@ -110,7 +110,7 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	int counter = 1;
 
 	if (ctx->globalKeyMax.value < th) {
-		counter = 0;
+		*num = 0;
 		return;
 	}
 
@@ -131,12 +131,46 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	*num = counter;
 }
 
- bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int sampleNum, Fp_t* x)
+void GetOrderedKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, int listmaxlen, int *num)
+{
+	if (ctx->keyMaxsNum == 0) {
+		*num = 0;
+		return;
+	}
+
+	if (listmaxlen <= 0) {
+		*num = 0;
+		return;
+	}
+
+	// threshold
+	Fp_t th = filter;
+	// elem num above threshold
+	int counter = 0;
+
+	if (ctx->globalKeyMax.value < th || FLOAT2FP(1.5) < ctx->globalKeyMax.value) {
+		*num = 0;
+		return;
+	}
+
+	// [0] is reserved for globalMax
+	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
+		Fp_t keyMax = ctx->keyMaxs[i].value;
+		if (keyMax < th) {
+			continue;
+		}
+
+		list[counter++] = ctx->keyMaxs[i];
+	}
+	*num = counter;
+}
+
+bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int sampleNum, Fp_t* x)
 {
 	if (0 == index || sampleNum <= index + 1) {
 		return false;
 	}
-	
+
 	//use Ragrange interpolation
 	// consider (-1,y0),(0,y1),(1,y2)
 	// at x = (y0-y2)/(2*(y0+y2)-4*y1), y'=0
@@ -187,7 +221,7 @@ static PeakDetectMachineEvent_t SearchingBell_DetectEvent(MachineContextFp_t* ct
 	if (ctx->lastInput.value < 0 && 0 <= x) {
 		return kEventPosCross;
 	}
-	else if(ctx->currentIndex+1 < ctx->maxDataNum){
+	else if (ctx->currentIndex + 1 < ctx->maxDataNum) {
 		return kEventNmlData;
 	}
 	else {

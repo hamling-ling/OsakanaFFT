@@ -439,7 +439,7 @@ namespace OsakanaPitchDetectionTest
 			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = 1;
-			for (int i = 0; i < 256; i++) {
+			for (int i = 0; i < 64; i++) {
 				CreateRandomData(g_data, 1.0);
 
 				int result = detector.DetectPitch(&pitchInfo);
@@ -463,7 +463,7 @@ namespace OsakanaPitchDetectionTest
 			PitchInfo_t pitchInfo = MakePitchInfo();
 
 			int result = 1;
-			for (int i = 0; i < 256; i++) {
+			for (int i = 0; i < 64; i++) {
 				CreateRandomData(g_data, 0.3);
 
 				int result = detector.DetectPitch(&pitchInfo);

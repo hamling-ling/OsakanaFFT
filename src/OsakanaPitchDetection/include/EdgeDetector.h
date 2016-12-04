@@ -3,11 +3,15 @@
 
 #include <stdint.h>
 
+#if defined(USE_CONTINUITY_DETECTOR)
 class ContinuityDetector;
+#endif
+
 class VolumeComparator;
 
-#define VOLUME_THRESHOLD_OFF_TO_ON	512
-#define VOLUME_THRESHOLD_ON_TO_OFF	200
+// threshold of rawdata_max - rawdata_min
+#define VOLUME_THRESHOLD_OFF_TO_ON	180
+#define VOLUME_THRESHOLD_ON_TO_OFF	64
 
 class EdgeDetector
 {
@@ -26,8 +30,10 @@ public:
 
 private:
 	uint16_t _lastNotifiedVal;
-	ContinuityDetector* _cd;
 	VolumeComparator* _vc;
+#if defined(USE_CONTINUITY_DETECTOR)
+	ContinuityDetector* _cd;
+#endif
 };
 
 #endif

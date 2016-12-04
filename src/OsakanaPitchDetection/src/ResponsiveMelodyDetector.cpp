@@ -38,9 +38,11 @@ ResponsiveMelodyDetector::~ResponsiveMelodyDetector()
 
 int ResponsiveMelodyDetector::Input(uint16_t value)
 {
+#if !defined(USE_LOOSE_NOTE)
 	if (value == 0) {
 		return false;
 	}
+#endif
 
 	MelodyDetector* md = _mds[_pos];
 

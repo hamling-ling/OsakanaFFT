@@ -32,6 +32,9 @@ Fp_t x2[N2] = { 0 };
 Fp_t rawdata_min = 512;
 Fp_t rawdata_max = 0;
 
+/**
+*  amplitude=abs([-1.0,1.0])=[0,1.0]
+*/
 int GetSourceSignalShiftScale(Fp_t amplitude)
 {
 	if (amplitude > FLOAT2FP(0.5)) {
@@ -40,11 +43,11 @@ int GetSourceSignalShiftScale(Fp_t amplitude)
 	else if (amplitude > FLOAT2FP(0.25)) {
 		return 1;
 	}
-#if defined(SCALE_0250)
+#if defined(SCALE_CUTOFF_0250)
 	else if (amplitude > FLOAT2FP(0.125)) {
 		return 2;
 	}
-#if defined(SCALE_1025)
+#if defined(SCALE_CUTOFF_0125)
 	else if (amplitude > FLOAT2FP(0.0625)) {
 		return 3;
 	}
@@ -53,13 +56,16 @@ int GetSourceSignalShiftScale(Fp_t amplitude)
 	return 4;
 }
 
+/**
+*  [0,1024] to [-1.0,1.0]
+*/
 static inline Fp_t ScaleRawData(Fp_t rawData, int extraShft = 0) {
 	rawData = rawData & 0x00003FF;
 	rawData -= 512;// center to 0 and make it signed
 	return (Fp_t)(rawData << (FPSHFT - 9 + extraShft));// div 512 then shift
 }
 
-static void PrintResult(uint16_t freq, const char* str, int8_t pitch)
+static void PrintResult(uint16_t freq, const char* str, int8_t pitch, uint16_t vol)
 {
 #if defined(BROKEN_SPRINTF)
 	LOG_PRINTF("freq=");
@@ -68,6 +74,8 @@ static void PrintResult(uint16_t freq, const char* str, int8_t pitch)
 	LOG_PRINTF(str);
 	LOG_PRINTF(", pitch=");
 	LOG_PRINTF(pitch, DEC);
+	LOG_PRINTF(", vol=");
+	LOG_PRINTF(vol, DEC);
 	LOG_PRINTF(LOG_NEWLINE);
 #else
 	ILOG("freq=%u Hz, note=%s, pitch=%d\n", freq, str, (int)pitch);
@@ -138,7 +146,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	DLOG("normalizing...");
 	{
-		if (512 < rawdata_min) {
+		if (500 < rawdata_min || rawdata_max < 524) {
 			return 1;
 		}
 		Fp_t amplitude = max(abs(ScaleRawData(rawdata_max)), abs(ScaleRawData(rawdata_min)));
@@ -160,17 +168,15 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	DLOG("normalized");
 
 	DLOG("-- normalized input signal");
-	DCOMPLEXFp(x, 256);
+	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- fft/N");
-	OsakanaFpFft(_fft, x, 1); // 1 means scaling. (this x) = (nromal x) >> LOG2N
+	// 1 means 1/N scaling. resulting x = (nonscaled fft's x) >> LOG2N
+	OsakanaFpFft(_fft, x, 1);
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
-		//Fp_t re = FpMul(x[i].re, x[i].re) + 
-		//		  FpMul(x[i].im, x[i].im); // (this x) = (normal x) >> LOG2N*2
-		//x[i].re = (Fp_t)(re << (SC_PW)); // x = x >> (LOG2N*2-SC_PW)
 		FpW_t re = (FpW_t)x[i].re * (FpW_t)x[i].re + (FpW_t)x[i].im * (FpW_t)x[i].im;
 		x[i].re = (Fp_t)(re >> (FPSHFT - SC_PW));
 		x[i].im = 0;
@@ -178,14 +184,15 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
-	OsakanaFpIfft(_fft, x, 1);// 1 means not *N scaling
+	// 0 means * N scaling, 1 means no scalling.
+	OsakanaFpIfft(_fft, x, 1);
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
-	// following loop compute :
-	// _m[t] = _m[t - 1] + 2 * (- x2[t - 1] + x2[t]);
-	// where _m[0] = x[0].re * 2
-	// nsdf[t] = 2 * x[t].re / m[t]
-	Fp_t m_old = (x[0].re << 1);
+	// compute m[] incrementally
+	// _m[t] = _m[t - 1] - x2[t - 1] + x2[N2+t]);
+	// where _m[0] = 2 * x[0].re.
+	// the 2 comes from x[i]^2+x[i+t]^2=x[0]^2 for i=0
+	Fp_t m_old = x[0].re << 1;
 	Fp_t x2_old = x2[0];
 	Fp_t* _nsdf = x2;// reuse memory
 
@@ -193,13 +200,16 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	if (mt == 0) {
 		return 1;
 	}
-	_nsdf[0] = FpDiv(x[0].re, mt);
-	_nsdf[0] = _nsdf[0] << 1;
+
+	DLOG("-- m");
+	DFPFp(mt);
+	_nsdf[0] = FpDivLeftShift(x[0].re, mt, 1);
+
 	// curve analysis
 	InputFp(_det, _nsdf[0]);
 
 	for (int t = 1; t < N_NSDF; t++) {
-		//_m[t] = _m[t - 1] - x2[t - 1]
+		//cmputing _m[t] = _m[t - 1] - x2[t - 1] + x2[N2+t]
 		Fp_t m = m_old - x2_old;
 
 		// prepare for next loop
@@ -211,8 +221,8 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		if (mt == 0) {
 			return 1;
 		}
-		_nsdf[t] = FpDiv(x[t].re, mt);
-		_nsdf[t] = _nsdf[t] << 1;
+		DFPFp(mt);
+		_nsdf[t] = FpDivLeftShift(x[t].re, mt, 1);
 
 		// curve analysis
 		InputFp(_det, _nsdf[t]);
@@ -223,12 +233,12 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetKeyMaximumsFp(_det, FLOAT2FP(0.6f), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetOrderedKeyMaximumsFp(_det, FLOAT2FP(NSDF_THRESHOLD), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		uint16_t index = keyMaximums[0].index;
 		ParabolicInterpFp(_det, index, _nsdf, N2, &delta);
-		PRINTRAGRANGE(	index, keyMaximums[0].index, _nsdf[index + 0], _nsdf[index + 1], delta);
+		PRINTRAGRANGE( index, keyMaximums[0].index, _nsdf[index + 0], _nsdf[index + 1], delta);
 
 		// want freq = FREQ_PER_SAMPLE / (index+delta)
 		// idx1024=1024*index
@@ -244,12 +254,16 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		int32_t idx8 = (idx1024 + 64) >> 7; // 64 is for rounding
 		uint8_t note = kNoteTable8[idx8] % 12;
 
+		if (2048 < freq) {
+			// should be wrong input
+			return 1;
+		}
 		pitchInfo->freq = (uint16_t)freq;
 		pitchInfo->midiNote = kNoteTable8[idx8];
 		pitchInfo->noteStr = kNoteStrings[note];
 		pitchInfo->pitch = GetAccuracy(pitchInfo->midiNote, idx8);
 
-		PRINTRESULT(freq, kNoteStrings[note], pitchInfo->pitch);
+		PRINTRESULT(freq, kNoteStrings[note], pitchInfo->pitch, pitchInfo->volume);
 
 		ret = 0;
 	}

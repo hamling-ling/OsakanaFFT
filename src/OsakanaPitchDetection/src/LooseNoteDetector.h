@@ -14,7 +14,9 @@ typedef enum LooseNoteDetectionResult_tag {
 typedef enum LooseNoteDetectorState_tag {
 	// initial state. waiting for note input
 	kLooseNoteDetectorStateInitial,
-	// intermediate state after initial state. waiting for note input
+	// takes this state when 1st input is silent, become this state
+	kLooseNoteDetectorStateInitialSilent,
+	// takes this st1st when 1st input is not silent and not expected note. waiting for note input
 	kLooseNoteDetectorStateInitialIntermediate,
 	// detecting state. waiting for note end or current note reaches long enough
 	kLooseNoteDetectorStateDetecting,
@@ -39,6 +41,7 @@ public:
 protected:
 	uint16_t _note;// [0,12]
 	const uint16_t _minInterval;
+	const uint16_t _minInitialSilentInterval;
 	const uint16_t _minNoiseInterval;
 	MillsFunc_t _millsFunc;
 	LooseNoteDetectorState_t _state;
@@ -51,6 +54,7 @@ protected:
 	static const LooseDetectorInputFunc_t _stateFuncs[];
 
 	LooseNoteDetectionResult_t inputForInitial(uint16_t value);
+	LooseNoteDetectionResult_t inputForInitialSilent(uint16_t value);
 	LooseNoteDetectionResult_t inputForInitialIntermediate(uint16_t value);
 	LooseNoteDetectionResult_t inputForDetecting(uint16_t value);
 	LooseNoteDetectionResult_t inputForIntermediate(uint16_t value);

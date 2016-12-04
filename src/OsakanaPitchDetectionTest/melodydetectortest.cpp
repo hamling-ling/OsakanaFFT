@@ -18,7 +18,7 @@ namespace OsakanaPitchDetectionTest
 	static uint16_t s_pic_mel0[] = { 67, 65, 70, 72 };// G F Bb C 
 	static uint16_t s_pic_mel1[] = { 67, 65 };// A D
 
-
+#if !defined(USE_LOOSE_NOTE)
 	TEST_CLASS(MelodyDetectionTest)
 	{
 	public:
@@ -381,4 +381,5 @@ namespace OsakanaPitchDetectionTest
 			Assert::AreEqual(result, 2);
 		}
 	};
+#endif
 }

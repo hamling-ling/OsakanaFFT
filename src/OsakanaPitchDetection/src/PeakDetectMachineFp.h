@@ -21,6 +21,7 @@ extern "C" {
 	void InputFp(MachineContextFp_t* ctx, Fp_t x);
 	void ResetMachineFp(MachineContextFp_t* ctx);
 	void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, int listmaxlen, int *num);
+	void GetOrderedKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, int listmaxlen, int *num);
 	bool ParabolicInterpFp(MachineContextFp_t* ctx, int index, Fp_t* xs, int sampleNum, Fp_t* x);
 
 #ifdef __cplusplus

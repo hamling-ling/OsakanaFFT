@@ -54,11 +54,8 @@ int LooseNoteMelodyDetector::Input(uint16_t value)
 			break;
 		case kLooseNoteDetectionResultInvalid:
 		case kLooseNoteDetectionResultInvalidWithNextNote:
-			_pos++;
-			if (_pos == _melodyLength) {
-				_pos = 0;
-				ret = -1;
-			}
+			_pos = 0;
+			ret = -1;
 			_nd->Reset(_melody[_pos]);
 			break;
 		case kLooseNoteDetectionResultDetected:
