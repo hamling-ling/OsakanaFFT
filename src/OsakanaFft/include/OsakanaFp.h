@@ -100,9 +100,33 @@ static inline Fp_t FpMul(Fp_t a, Fp_t b)
 	return fp;
 }
 
+static inline Fp_t FpMulLeftShift(Fp_t a, Fp_t b, int shift)
+{
+	Fp_t fp = ((FpW_t)a * (FpW_t)b) >> (FPSHFT+shift);
+	return fp;
+}
+
+static inline Fp_t FpMulRight(Fp_t a, Fp_t b, int shift)
+{
+	Fp_t fp = ((FpW_t)a * (FpW_t)b) >> (FPSHFT- shift);
+	return fp;
+}
+
 static inline Fp_t FpDiv(Fp_t a, Fp_t b)
 {
 	Fp_t fp = ((FpW_t)a << FPSHFT) / (FpW_t)b;
+	return fp;
+}
+
+static inline Fp_t FpDivRightShift(Fp_t a, Fp_t b, int shift)
+{
+	Fp_t fp = ((FpW_t)a << (FPSHFT - shift)) / (FpW_t)b;
+	return fp;
+}
+
+static inline Fp_t FpDivLeftShift(Fp_t a, Fp_t b, int shift)
+{
+	Fp_t fp = ((FpW_t)a << (FPSHFT + shift)) / (FpW_t)b;
 	return fp;
 }
 
@@ -117,6 +141,16 @@ static inline Fp_t FpRShift(Fp_t a, int n)
 }
 
 static inline Fp_t FpLShift(Fp_t a, int n)
+{
+	return (a << n);
+}
+
+static inline Fp_t FpWRShift(Fp_t a, int n)
+{
+	return (a >> n);
+
+}
+static inline FpW_t FpWLShift(FpW_t a, int n)
 {
 	return (a << n);
 }

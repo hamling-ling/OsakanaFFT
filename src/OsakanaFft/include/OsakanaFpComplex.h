@@ -12,12 +12,30 @@ typedef struct {
 	Fp_t im;
 } osk_fp_complex_t;
 
+typedef struct {
+	FpW_t re;
+	FpW_t im;
+} osk_fpw_complex_t;
+
 static inline osk_fp_complex_t FpMakeComplex(Fp_t re, Fp_t im)
 {
 	osk_fp_complex_t complex;
 	complex.re = re;
 	complex.im = im;
 	return complex;
+}
+
+static inline osk_fp_complex_t FpMakeComplexFromFpW(const osk_fpw_complex_t* x)
+{
+	return FpMakeComplex((Fp_t)x->re, (Fp_t)x->im);
+}
+
+static inline osk_fpw_complex_t FpWMakeComplexFromFp(const osk_fp_complex_t* x)
+{
+	osk_fpw_complex_t complex;
+	complex.re = (FpW_t)(x->re);
+	complex.im = (FpW_t)(x->im);
+	return complex;;
 }
 
 static inline osk_fp_complex_t fp_complex_add(const osk_fp_complex_t* a, const osk_fp_complex_t* b)
@@ -28,6 +46,14 @@ static inline osk_fp_complex_t fp_complex_add(const osk_fp_complex_t* a, const o
 	return x;
 }
 
+static inline osk_fpw_complex_t fpw_complex_add(const osk_fpw_complex_t* a, const osk_fpw_complex_t* b)
+{
+	osk_fpw_complex_t x;
+	x.re = a->re + b->re;
+	x.im = a->im + b->im;
+	return x;
+
+}
 static inline osk_fp_complex_t fp_complex_sub(const osk_fp_complex_t* a, const osk_fp_complex_t* b)
 {
 	osk_fp_complex_t x;
@@ -36,20 +62,52 @@ static inline osk_fp_complex_t fp_complex_sub(const osk_fp_complex_t* a, const o
 	return x;
 }
 
+static inline osk_fpw_complex_t fpw_complex_sub(const osk_fpw_complex_t* a, const osk_fpw_complex_t* b)
+{
+	osk_fpw_complex_t x;
+	x.re = a->re - b->re;
+	x.im = a->im - b->im;
+	return x;
+
+}
 static inline osk_fp_complex_t fp_complex_mult(const osk_fp_complex_t* a, const osk_fp_complex_t* b)
 {
 	osk_fp_complex_t x;
-	//x.re = a->re * b->re - a->im * b->im;
-	//x.re = FpMul(a->re, b->re) - FpMul(a->im, b->im);
 	FpW_t re_w = (FpW_t)a->re * (FpW_t)b->re;
 	re_w -= (FpW_t)a->im * (FpW_t)b->im;
 	x.re = (Fp_t)(re_w >> FPSHFT);
 
-	//x.im = a->re * b->im + a->im * b->re;
-	//x.im = FpMul(a->re, b->im) + FpMul(a->im, b->re);
 	FpW_t im_w = (FpW_t)a->re  * (FpW_t)b->im;
 	im_w += (FpW_t)a->im * (FpW_t)b->re;
 	x.im = (Fp_t)(im_w >> FPSHFT);
+
+	return x;
+}
+
+static inline osk_fp_complex_t fp_complex_mult_left_shift(const osk_fp_complex_t* a, const osk_fp_complex_t* b, int shift)
+{
+	osk_fp_complex_t x;
+	FpW_t re_w = (FpW_t)a->re * (FpW_t)b->re;
+	re_w -= (FpW_t)a->im * (FpW_t)b->im;
+	x.re = (Fp_t)(re_w >> (FPSHFT-shift));
+
+	FpW_t im_w = (FpW_t)a->re  * (FpW_t)b->im;
+	im_w += (FpW_t)a->im * (FpW_t)b->re;
+	x.im = (Fp_t)(im_w >> (FPSHFT-shift));
+
+	return x;
+}
+
+static inline osk_fpw_complex_t fpw_complex_mult_left_shift(const osk_fpw_complex_t* a, const osk_fpw_complex_t* b, int shift)
+{
+	osk_fpw_complex_t x;
+	FpW_t re_w = a->re * b->re;
+	re_w -= a->im * b->im;
+	x.re = (re_w >> (FPSHFT - shift));
+
+	FpW_t im_w = a->re  * b->im;
+	im_w += a->im * b->re;
+	x.im = (im_w >> (FPSHFT - shift));
 
 	return x;
 }
@@ -83,6 +141,15 @@ static inline osk_fp_complex_t fp_complex_l_shift(const osk_fp_complex_t* a, int
 	x.im = FpLShift(a->im, n);
 	return x;
 }
+
+static inline osk_fpw_complex_t fpw_complex_l_shift(const osk_fpw_complex_t* a, int n)
+{
+	osk_fpw_complex_t x;
+	x.re = FpWLShift(a->re, n);
+	x.im = FpWLShift(a->im, n);
+	return x;
+}
+
 
 static inline void fp_complex_swap(osk_fp_complex_t* a, osk_fp_complex_t* b)
 {

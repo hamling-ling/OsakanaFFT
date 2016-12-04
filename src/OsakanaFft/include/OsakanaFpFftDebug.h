@@ -18,6 +18,11 @@
 									DLOG("%s", debug_output_buf_); \
 								} \
 							}
+#define DFPFp(fp, num)		{ \
+								char debug_output_buf_[64] = { 0 }; \
+								Fp2CStr(fp, debug_output_buf_, sizeof(debug_output_buf_)); \
+								DLOG("%s", debug_output_buf_); \
+							}
 #else
 #define DCOMPLEXFp(cs, num)
 #define DFPSFp(fps, num)

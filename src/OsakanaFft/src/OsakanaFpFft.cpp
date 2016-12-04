@@ -1,7 +1,6 @@
 #include "OsakanaFftConfig.h"
 #include <assert.h>
 #include "OsakanaFpFft.h"
-#include "OsakanaFftUtil.h"
 
 #define USE_HARDCORD_TABLE
 
@@ -125,6 +124,21 @@ static inline void fp_butterfly(osk_fp_complex_t* r, const osk_fp_complex_t* tf,
 	r[idx_b] = fp_complex_sub(&up, &dntf);
 }
 
+static inline void fp_butterfly_left_shift(osk_fp_complex_t* r, const osk_fp_complex_t* tf, int idx_a, int idx_b, int shift)
+{
+	osk_fpw_complex_t tfw = FpWMakeComplexFromFp(tf);
+	osk_fpw_complex_t up = FpWMakeComplexFromFp(&r[idx_a]);
+	osk_fpw_complex_t dn = FpWMakeComplexFromFp(&r[idx_b]);
+	
+	up = fpw_complex_l_shift(&up, shift);
+	osk_fpw_complex_t dntf = fpw_complex_mult_left_shift(&dn, &tfw, shift);
+	osk_fpw_complex_t add = fpw_complex_add(&up, &dntf);
+	osk_fpw_complex_t sub = fpw_complex_sub(&up, &dntf);
+	
+	r[idx_a] = FpMakeComplexFromFpW(&add);
+	r[idx_b] = FpMakeComplexFromFpW(&sub);
+}
+
 void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale)
 {
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
@@ -163,6 +177,7 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sca
 
 void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale)
 {
+	int left_shift = 1 - scale;
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
 		fp_complex_swap(&x[pair->first], &x[pair->second]);
@@ -182,11 +197,7 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sc
 				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 
-				fp_butterfly(&x[0], &tf, idx_a, idx_b);
-
-				// div f[idx_a] by 2 instead of div by N end of func
-				x[idx_a] = fp_complex_l_shift(&x[idx_a], 1 - scale);
-				x[idx_b] = fp_complex_l_shift(&x[idx_b], 1 - scale);
+				fp_butterfly_left_shift(&x[0], &tf, idx_a, idx_b, left_shift);
 
 				idx_a++;
 				idx_b++;
