@@ -1,5 +1,4 @@
 #include "VolumeComparator.h"
-#include <string.h>
 
 VolumeComparator::VolumeComparator(uint16_t off2OnThreshold, uint16_t on2offThreshold)
 	:
