@@ -30,6 +30,11 @@
 #define USE_TWIDDLE_TABLE_N256
 #endif
 
+#if 0 // N=512, fixed Q15.16 fixed point
+#define USE_BIT_REVERSE_N512
+#define USE_TWIDDLE_TABLE_N512
+#endif
+
 #if 0 // N=1024, floating point
 
 #endif
