@@ -52,6 +52,23 @@ typedef struct _MachineContextFp_t {
 	EventDetector_t* detectors;
 } MachineContextFp_t;
 
+template<class T>
+void swapFp(T *a, T *b)
+{
+	T tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+static inline Fp_t scaledThreshold(int index, Fp_t filter)
+{
+	Fp_t th = index * (INT2FP(-1) >> 10);
+	th += INT2FP(1);
+	th = FpMul(th, filter);
+
+	return th;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Public
 /////////////////////////////////////////////////////////////////////
@@ -109,7 +126,7 @@ void GetKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, 
 	// elem num above threshold
 	int counter = 1;
 
-	if (ctx->globalKeyMax.value < th) {
+	if (ctx->globalKeyMax.value < th || FLOAT2FP(1.5) < ctx->globalKeyMax.value) {
 		*num = 0;
 		return;
 	}
@@ -162,6 +179,68 @@ void GetOrderedKeyMaximumsFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t*
 
 		list[counter++] = ctx->keyMaxs[i];
 	}
+	*num = counter;
+}
+
+// experimental
+void GetKeyMaximumsScaledThresholdFp(MachineContextFp_t* ctx, Fp_t filter, PeakInfoFp_t* list, int listmaxlen, int *num)
+{
+	if (ctx->keyMaxsNum == 0) {
+		*num = 0;
+		return;
+	}
+
+	if (listmaxlen <= 0) {
+		*num = 0;
+		return;
+	}
+
+	// threshold
+	Fp_t th = filter;
+	// elem num above threshold
+	int counter = 0;
+
+	th = scaledThreshold(ctx->globalKeyMax.index, filter);
+	if (ctx->globalKeyMax.value < th) {
+		*num = 0;
+		return;
+	}
+	if (FLOAT2FP(1.1) < ctx->globalKeyMax.value) {
+		*num = 0;
+		return;
+	}
+
+	Fp_t ths[4] = { 0 };
+	Fp_t th_global = FpMul(ctx->globalKeyMax.value, FLOAT2FP(0.9));
+	// [0] is reserved for globalMax
+	for (int i = 0; i < ctx->keyMaxsNum && counter < listmaxlen; i++) {
+
+		Fp_t keyMax = ctx->keyMaxs[i].value;
+		/*if (keyMax < th_global) {
+			continue;
+		}*/
+
+		th = scaledThreshold(ctx->keyMaxs[i].index, filter);
+		keyMax = ctx->keyMaxs[i].value;
+		if (keyMax < th) {
+			continue;
+		}
+		ths[counter] = th;
+		list[counter] = ctx->keyMaxs[i];
+
+		// largest one goes to [0]
+		Fp_t delta_0 = list[0].value - ths[0];
+		Fp_t delta_i = list[counter].value - ths[counter];
+		if (delta_0 < delta_i) {
+			swapFp<PeakInfoFp_t>(&list[counter], &list[0]);
+			swapFp<Fp_t>(&ths[counter], &ths[0]);
+		}
+
+		counter++;
+	}
+
+
+
 	*num = counter;
 }
 
