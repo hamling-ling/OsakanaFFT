@@ -8,7 +8,7 @@
 #include "OsakanaPitchDetection.h"
 #include "OsakanaPitchDetectionFp.h"
 
-//#define USE_DATFILE
+#define USE_DATFILE
 
 using namespace std;
 
@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
 
 	//CreateSineData(g_data, 65.4);// note = 36 for 65.4Hz
 	CreateSineData(g_data, 261.6);// note=60
+	//CreateSineData(g_data, 87.3);
 	//CreateSineData(g_data, 1568.0f);// note = 91 for 1568.0Hz
 	//CreateSineData(g_data, sqrt(261.6f*246.0f) + 2.0f); // 60
 	//CreateSineData(g_data, sqrt(261.6f*277.2f) - 2.0f);
