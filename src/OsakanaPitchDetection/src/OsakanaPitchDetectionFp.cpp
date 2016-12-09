@@ -165,7 +165,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 			x2[i] = FpMul(x[i].re, x[i].re);
 			x2[i] = x2[i] >> SC_X2;
 #else
-			// SC_X2 shift is too mutch. comment untill solved. this line doesn't affect very mutch
+			// SC_X2 right shift is too small to ignore.
 			x2[i] = 0;
 #endif
 		}
@@ -184,6 +184,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	for (int i = 0; i < N; i++) {
 		FpW_t re = (FpW_t)x[i].re * (FpW_t)x[i].re + (FpW_t)x[i].im * (FpW_t)x[i].im;
 		x[i].re = (Fp_t)(re >> (FPSHFT - SC_PW));
+		//x[i].re = (Fp_t)(re >> (FPSHFT - 5));
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
@@ -201,33 +202,32 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	Fp_t x2_old = x2[0];
 	Fp_t* _nsdf = x2;// reuse memory
 
-	Fp_t mt = m_old;
-	if (mt == 0) {
+	Fp_t m = m_old;
+	if (m == 0) {
 		return 1;
 	}
 
 	DLOG("-- m");
-	DFPFp(mt);
-	_nsdf[0] = FpDivLeftShift(x[0].re, mt, 1);
+	DFPFp(m);
+	_nsdf[0] = FpDivLeftShift(x[0].re, m, 1);
 
 	// curve analysis
 	InputFp(_det, _nsdf[0]);
 
 	for (int t = 1; t < N_NSDF; t++) {
 		//cmputing _m[t] = _m[t - 1] - x2[t - 1] + x2[N2+t]
-		Fp_t m = m_old - x2_old;
+		m = m_old - x2_old;
 
 		// prepare for next loop
 		x2_old = x2[t];
 		m_old = m;
 
 		// nsdf
-		Fp_t mt = m_old;
-		if (mt == 0) {
+		if (m == 0) {
 			return 1;
 		}
-		DFPFp(mt);
-		_nsdf[t] = FpDivLeftShift(x[t].re, mt, 1);
+		DFPFp(m);
+		_nsdf[t] = FpDivLeftShift(x[t].re, m, 1);
 
 		// curve analysis
 		InputFp(_det, _nsdf[t]);
@@ -238,7 +238,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	PeakInfoFp_t keyMaximums[4] = { 0 };
 	int keyMaxLen = 0;
-	GetOrderedKeyMaximumsFp(_det, FLOAT2FP(NSDF_THRESHOLD), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
+	GetKeyMaximumsFp(_det, FLOAT2FP(NSDF_THRESHOLD), keyMaximums, sizeof(keyMaximums) / sizeof(PeakInfoFp_t), &keyMaxLen);
 	if (0 < keyMaxLen) {
 		Fp_t delta = 0;
 		uint16_t index = keyMaximums[0].index;
