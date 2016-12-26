@@ -23,8 +23,15 @@ typedef int16_t		Fp_t;
 typedef uint16_t	FpFract_t;
 typedef int32_t		FpW_t;
 typedef uint32_t	FpWU_t;
-typedef uint16_t	FpFract_t;
 typedef uint16_t	FpU_t;
+#elif defined(_USE_Q1_30_FIXEDPOINT)
+#define FPSHFT		30
+#define FPSHFT_2	15
+typedef int32_t		Fp_t;
+typedef uint32_t	FpFract_t;
+typedef int64_t		FpW_t;
+typedef uint64_t	FpWU_t;
+typedef uint32_t	FpU_t;
 #else // otherwise Q15.16
 #define FPSHFT		16
 #define FPSHFT_2	8

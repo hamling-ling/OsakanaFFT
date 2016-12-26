@@ -209,16 +209,12 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int sc
 	}
 
 }
-#if 0
 
-void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* f, osk_fp_complex_t* F, int scale)
+void OsakanaFpFftScales(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int* scales)
 {
-	memcpy(F, f, sizeof(osk_fp_complex_t) * ctx->N);
-
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
-		F[pair->first] = f[pair->second];
-		F[pair->second] = f[pair->first];
+		fp_complex_swap(&x[pair->first], &x[pair->second]);
 	}
 
 	int dj = 2;
@@ -226,18 +222,21 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* f, osk_fp_
 	int tw_idx_shift = ctx->log2N - 1;
 
 	for (int i = 0; i < ctx->log2N; i++) {
+
+		int scale = scales[i];
+
 		for (int j = 0; j < ctx->N; j += dj) {
 			int idx_a = j;
 			int idx_b = j + bnum;
 			for (int k = 0; k < bnum; k++) {
 
+				x[idx_a] = fp_complex_r_shift(&x[idx_a], scale);
+				x[idx_b] = fp_complex_r_shift(&x[idx_b], scale);
+
 				int tw_idx = k << tw_idx_shift;
 				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 
-				fp_butterfly(&F[0], &tf, idx_a, idx_b);
-
-				F[idx_a] = fp_complex_r_shift(&F[idx_a], scale);
-				F[idx_b] = fp_complex_r_shift(&F[idx_b], scale);
+				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				idx_a++;
 				idx_b++;
@@ -250,14 +249,11 @@ void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* f, osk_fp_
 }
 
 
-void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* F, osk_fp_complex_t* f, int scale)
+void OsakanaFpIfftScales(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int* scales)
 {
-	memcpy(f, F, sizeof(osk_fp_complex_t) * ctx->N);
-
 	for (int i = 0; i < ctx->bitReverseIndexTableLen; i++) {
 		const osk_bitreverse_idx_pair_t* pair = &ctx->bitReverseIndexTable[i];
-		f[pair->first] = F[pair->second];
-		f[pair->second] = F[pair->first];
+		fp_complex_swap(&x[pair->first], &x[pair->second]);
 	}
 
 	int dj = 2;
@@ -266,20 +262,21 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* F, osk_fp
 
 	for (int i = 0; i < ctx->log2N; i++) {
 
+		int right_shift = scales[i];
+
 		for (int j = 0; j < ctx->N; j += dj) {
 			int idx_a = j;
 			int idx_b = j + bnum;
 			for (int k = 0; k < bnum; k++) {
+
+				x[idx_a] = fp_complex_r_shift(&x[idx_a], right_shift);
+				x[idx_b] = fp_complex_r_shift(&x[idx_b], right_shift);
 
 				int tw_idx = k << tw_idx_shift;
 				osk_fp_complex_t tf = ctx->twiddles[tw_idx];
 				tf.im = -tf.im;
 
-				fp_butterfly(&f[0], &tf, idx_a, idx_b);
-
-				// div f[idx_a] by 2 instead of div by N end of func
-				f[idx_a] = fp_complex_l_shift(&f[idx_a], 1 - scale);
-				f[idx_b] = fp_complex_l_shift(&f[idx_b], 1 - scale);
+				fp_butterfly(&x[0], &tf, idx_a, idx_b);
 
 				idx_a++;
 				idx_b++;
@@ -289,6 +286,6 @@ void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* F, osk_fp
 		bnum = bnum << 1;
 		tw_idx_shift--;
 	}
+
 }
-#endif
 

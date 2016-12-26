@@ -8,7 +8,7 @@
 #include "OsakanaPitchDetection.h"
 #include "OsakanaPitchDetectionFp.h"
 
-#define USE_DATFILE
+//#define USE_DATFILE
 
 using namespace std;
 

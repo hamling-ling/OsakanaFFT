@@ -43,7 +43,7 @@
 #define FREQ_PER_1024SAMPLE	13577764		// rounded
 #endif
 
-#if 0	// 256 points fft(128 points adc)
+#if 1	// 256 points fft(128 points adc)
 #define N					256		// fft sampling num(last half is 0 pad)
 #define LOG2N				8		// log2(N)
 #endif
@@ -53,7 +53,7 @@
 #define LOG2N				9		// log2(N)
 #endif
 
-#if 1	// 1024 points fft(512 points adc)
+#if 0	// 1024 points fft(512 points adc)
 #define N					1024	// fft sampling num(last half is 0 pad)
 #define LOG2N				10		// log2(N)
 #endif
@@ -75,19 +75,17 @@
 // The power spectrum result is finally scaled by 1 >> (LOG2N*2-SC_PW)
 // Other values used with the scaled power spectrum also required to scaled.
 // Here the value is only x2 and it should be scaled by 1 >> (LOG2N*2-SC_PW)
-#if 1	// for N=1024
+#if N == 1024	// for N=1024
 #define SC_PW				(LOG2N-9)
-#endif
-#if 0	// for N=512
+#elif N == 512	// for N=512
 #define SC_PW				(LOG2N-8)
-#endif
-#if 0	// for N=256
+#else			// for N=256
 #define SC_PW				(LOG2N-7)
 #endif
 #define SC_X2				(LOG2N*2-SC_PW)
 
 // debug
-#define DEBUG_OUTPUT_NUM	512
+#define DEBUG_OUTPUT_NUM	N
 
 // choose one of following for scalling threshold
 #define SCALE_CUTOFF_0250

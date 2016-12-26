@@ -12,7 +12,9 @@ typedef struct _OsakanaFpFftContext_t OsakanaFpFftContext_t;
 int InitOsakanaFpFft(OsakanaFpFftContext_t** pctx, int N, int log2N);
 void CleanOsakanaFpFft(OsakanaFpFftContext_t* ctx);
 void OsakanaFpFft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale);
+void OsakanaFpFftScales(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int* scales);
 void OsakanaFpIfft(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int scale);
+void OsakanaFpIfftScales(const OsakanaFpFftContext_t* ctx, osk_fp_complex_t* x, int* scales);
 
 #ifdef __cplusplus
 }

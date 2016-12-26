@@ -177,21 +177,29 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 
 	DLOG("-- fft/N");
 	// 1 means 1/N scaling. resulting x = (nonscaled fft's x) >> LOG2N
-	OsakanaFpFft(_fft, x, 1);
+	//OsakanaFpFft(_fft, x, 1);
+	{
+		int scales[LOG2N] = { 1,1,1,1,1,1,1,0 };
+		OsakanaFpFftScales(_fft, x, scales);
+	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- power spectrum");
 	for (int i = 0; i < N; i++) {
 		FpW_t re = (FpW_t)x[i].re * (FpW_t)x[i].re + (FpW_t)x[i].im * (FpW_t)x[i].im;
 		x[i].re = (Fp_t)(re >> (FPSHFT - SC_PW));
-		//x[i].re = (Fp_t)(re >> (FPSHFT - 5));
 		x[i].im = 0;
 	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	DLOG("-- IFFT");
 	// 0 means * N scaling, 1 means no scalling.
-	OsakanaFpIfft(_fft, x, 1);
+	//OsakanaFpIfft(_fft, x, 1);
+	// 1 means right shift
+	{
+		int scales[LOG2N] = { 0,0,0,0,0,0,1,1 };
+		OsakanaFpIfftScales(_fft, x, scales);
+	}
 	DCOMPLEXFp(x, DEBUG_OUTPUT_NUM);
 
 	// compute m[] incrementally
@@ -208,7 +216,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 	}
 
 	DLOG("-- m");
-	DFPFp(m);
+	//DFPFp(m);
 	_nsdf[0] = FpDivLeftShift(x[0].re, m, 1);
 
 	// curve analysis
@@ -226,7 +234,7 @@ int PitchDetectorFp::DetectPitch(PitchInfo_t* pitchInfo)
 		if (m == 0) {
 			return 1;
 		}
-		DFPFp(m);
+		//DFPFp(m);
 		_nsdf[t] = FpDivLeftShift(x[t].re, m, 1);
 
 		// curve analysis
