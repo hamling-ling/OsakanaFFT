@@ -14,6 +14,7 @@
 #endif
 
 //#define _DEBUG
+#define _RELEASE
 #include "OsakanaFpFftDebug.h"
 
 #if 0	//GR-CITRUS
@@ -65,7 +66,7 @@
 
 #define N2					(N/2)	// sampling num of analog input
 #define N_ADC				N2
-#define N_NSDF				(N2/2)
+#define N_NSDF				(N2)
 
 // To avoid overflow
 // FFT result scaled to 1/N (bit shift used by 1>>LOG2N)
