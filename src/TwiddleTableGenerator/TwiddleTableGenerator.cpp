@@ -106,6 +106,16 @@ void PrintTable3()
 	cout << "#include \"OsakanaFp.h\"" << endl;
 	cout << "#include \"OsakanaFpComplex.h\"" << endl << endl;
 
+	cout << endl;
+	cout << "#if defined(USE_FPW_TWIDDLE_TABLE)" << endl;
+	cout << "#define CVT_TO_FP(x)\tFLOAT2FPW(x)" << endl;
+	cout << "#define COMPLEX_TYPE\tosk_fpw_complex_t" << endl;
+	cout << "#else" << endl;
+	cout << "#define CVT_TO_FP(x)\tFLOAT2FP(x)" << endl;
+	cout << "#define COMPLEX_TYPE\tosk_fp_complex_t" << endl;
+	cout << "#endif" << endl;
+	cout << endl;
+
 	cout << "//#define USE_TWIDDLE_TABLE_N2" << endl;
 	cout << "//#define USE_TWIDDLE_TABLE_N4" << endl;
 	cout << "//#define USE_TWIDDLE_TABLE_N8" << endl;
@@ -123,14 +133,14 @@ void PrintTable3()
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		
-		cout << "static const osk_fp_complex_t W";
+		cout << "static const COMPLEX_TYPE W";
 		cout << setw(4) << std::setfill('0') << N;
 		cout << "[] = {" << endl;
 		for (int i = 0; i < N / 2; i++) {
 
 			osk_complex_t tf = twiddle(i, N);
 			cout << "\t{ ";
-			cout << "FLOAT2FP( " << tf.re << "f),\tFLOAT2FP( " << tf.im << "f) }";
+			cout << "CVT_TO_FP( " << tf.re << "f),\tCVT_TO_FP( " << tf.im << "f) }";
 			if (i + 1 < N / 2) {
 				cout << ",";
 			}
@@ -140,7 +150,7 @@ void PrintTable3()
 		cout << "#endif" << endl << endl;
 	}
 
-	cout << "static const osk_fp_complex_t* s_twiddlesFp[] = {" << endl;
+	cout << "static const COMPLEX_TYPE* s_twiddlesFp[] = {" << endl;
 	for (int N = 2; N <= N_MAX; N = N << 1) {
 		cout << "#if defined(USE_TWIDDLE_TABLE_N" << N << ")" << endl;
 		cout << "\tW";
