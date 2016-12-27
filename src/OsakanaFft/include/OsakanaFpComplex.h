@@ -159,7 +159,7 @@ static inline void fp_complex_swap(osk_fp_complex_t* a, osk_fp_complex_t* b)
 
 static inline char* fp_complex_str(const osk_fp_complex_t* a, char* buf, size_t buf_size)
 {
-	char buf_sub[32] = { '\0' };
+	char buf_sub[48] = { '\0' };
 	memset(buf, 0, buf_size);
 
 	Fp2CStr(a->re, buf_sub, sizeof(buf_sub));
