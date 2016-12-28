@@ -9,6 +9,7 @@
 #include "OsakanaPitchDetectionFp.h"
 
 //#define USE_DATFILE
+#define USE_FP
 
 using namespace std;
 
@@ -118,7 +119,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 #if defined(USE_DATFILE)
-#if 1
+#if defined(USE_FP)
 	PitchDetectorFp detector;
 	detector.Initialize(readFpData);
 #else
@@ -128,10 +129,7 @@ int main(int argc, char* argv[])
 	g_filename = argv[1];
 
 	PitchInfo_t pitchInfo;
-	while (1) {
-		detector.DetectPitch(&pitchInfo);
-		break;// for debug
-	}
+	detector.DetectPitch(&pitchInfo);
 #else
 
 	//CreateSineData(g_data, 65.4);// note = 36 for 65.4Hz
@@ -141,8 +139,13 @@ int main(int argc, char* argv[])
 	//CreateSineData(g_data, sqrt(261.6f*246.0f) + 2.0f); // 60
 	//CreateSineData(g_data, sqrt(261.6f*277.2f) - 2.0f);
 
+#if defined(USE_FP)
 	PitchDetectorFp detector;
 	detector.Initialize(readGeneratedFpData);
+#else
+	PitchDetector detector;
+	detector.Initialize(readGeneratedData);
+#endif
 
 	PitchInfo_t pitchInfo;
 	pitchInfo = MakePitchInfo();
