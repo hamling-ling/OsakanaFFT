@@ -1,6 +1,3 @@
-#if defined(_WIN32)
-#include "stdafx.h"
-#endif
 #include "math.h"
 #include "OsakanaFft.h"
 #include "OsakanaFpFft.h"
