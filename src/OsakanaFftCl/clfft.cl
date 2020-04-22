@@ -1,4 +1,9 @@
+#define M_PI           (3.14159265358979323846f)
+#define M_2PI          (2.0f*3.14159265358979323846f)
 
+/**
+    Compute bit-reverse permutation
+ */
 unsigned int reverse(unsigned int width, unsigned int x)
 {
     x = (x & 0x55555555) <<  1 | (x >>  1) & 0x55555555; 
@@ -9,9 +14,19 @@ unsigned int reverse(unsigned int width, unsigned int x)
     return x;
 }
 
-unsigned int func(unsigned int x)
+/**
+    Compute Twiddle factor for n
+    W^n_N = exp(-i2pin/N)
+    = cos(2 pi n/N) - isin(2 pi n/N)
+ */
+float2 twiddle(int n, int Nin)
 {
-    return x;
+	const float theta = (M_2PI * n / Nin);
+	float2 ret;
+	ret.x = cos(theta);
+	ret.y = -sin(theta);
+
+	return ret;
 }
 
 __kernel void clfft(
@@ -21,6 +36,7 @@ __kernel void clfft(
     __global float2* output,
     __local  float2* locbuf)
 {
+    const int N = halfN << 1;
     // 0, 1, 2, 3, ...
     unsigned const int global_idx   = get_global_id(0);
 
@@ -34,7 +50,12 @@ __kernel void clfft(
     const int rdx2x1 = reverse(log2N, idx2x1);
 
     if (global_idx < halfN) {
-        output[idx2x0].x = sample[rdx2x0].x;
-        output[idx2x1].x = sample[rdx2x1].x;
+        // for debug, return bit reverse order
+        //output[idx2x0].x = sample[rdx2x0].x;
+        //output[idx2x1].x = sample[rdx2x1].x;
+
+        // for debug, return twittle factors
+        output[idx2x0] = twiddle(idx2x0, N);
+        output[idx2x1] = twiddle(idx2x1, N);
     }
 }
