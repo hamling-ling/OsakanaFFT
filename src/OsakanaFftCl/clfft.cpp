@@ -25,17 +25,6 @@ extern double wtime();   // Returns time since some fixed past point (wtime.c)
 
 using namespace std;
 
-void reverse(unsigned int x, unsigned int width)
-{
-    cout << x;
-    x = (x & 0x55555555) <<  1 | (x >>  1) & 0x55555555; 
-    x = (x & 0x33333333) <<  2 | (x >>  2) & 0x33333333; 
-    x = (x & 0x0F0F0F0F) <<  4 | (x >>  4) & 0x0F0F0F0F; 
-    x = (x << 24) | ((x & 0xFF00) << 8) | ((x >> 8) & 0xFF00) | (x >> 24); 
-    x = x >> (32-width);
-    cout <<  " -> " << x << endl;
-}
-
 int main(int argc, char *argv[])
 {
     int         N          = SAMPLE_SIZE_N;  // Real data sampling size
@@ -48,15 +37,11 @@ int main(int argc, char *argv[])
     std::vector<float> h_output( N * 2, 0);   // N complex samples as an output
 
 	for ( int i = 0; i < h_sample.size(); i+=2) {
-		//h_sample[i]   = (float)sin(3.5 * i * 2.0 * M_PI / N);
-        //h_sample[i+1] = 0.0f;
-        h_sample[i]   = (float)i/2;
-        h_sample[i+1] = (float)(0);
+		h_sample[i]   = (float)sin(3.5 * i * M_PI / N);
+        h_sample[i+1] = 0.0f;
+        cout << "orig[" << i/2 << "].re = " << h_sample[i] << ", im = " << h_sample[i+1] << endl;
 	}
 
-    for(int i = 0; i < N; i++) {
-        reverse(i, log2N);
-    }
     try
     {
         cl_uint deviceIndex = 0;
@@ -68,8 +53,8 @@ int main(int argc, char *argv[])
         // Check device index in range
         if ( deviceIndex >= numDevices)
         {
-          std::cout << "Invalid device index (try '--list')\n";
-          return EXIT_FAILURE;
+            std::cout << "Invalid device index (try '--list')\n";
+            return EXIT_FAILURE;
         }
 
         cl::Device device = devices[deviceIndex];
@@ -95,10 +80,10 @@ int main(int argc, char *argv[])
 
         start_time = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
 
-        cl::NDRange global(N/2);
+        cl::NDRange global(N);
         cl::LocalSpaceArg localmem = cl::Local(sizeof(float) * N);
         clfft( cl::EnqueueArgs( queue, global),
-               N/2, log2N, d_sample, d_output, localmem);
+               N, log2N, d_sample, d_output, localmem);
 
         queue.finish();
 
