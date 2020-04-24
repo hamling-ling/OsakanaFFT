@@ -25,8 +25,8 @@
 #else
 #define CL_PATH         "clfft.cl"
 #endif
-#define SAMPLE_SIZE_N   8       // Sample Size
-#define LOG2N           3       // log2(SAMPLE_SIZE_N)
+#define SAMPLE_SIZE_N   1024       // Sample Size
+#define LOG2N           10       // log2(SAMPLE_SIZE_N)
 #define TOL             (0.001) // Tolerance used in floating point comparisons
 
 //------------------------------------------------------------------------------
@@ -79,12 +79,11 @@ int main(int argc, char *argv[])
         cl::Context      context( chosen_device);
         cl::CommandQueue queue( context, device);
 
-        // setup device global memory and write into global memory
-        cl::Buffer d_sample = cl::Buffer( context, h_sample.begin(), h_sample.end(), true);
+
 
         // Create the compute program from the source buffer
         cl::Program program = cl::Program(context, util::loadProgram(CL_PATH), true);
-        // Create the compute kernel from the program for bit-reverse ordering
+
         cl::NDRange global(N);
         // order bit reversealy
         std::vector<float> h_x( N * 2, 0);   // N complex samples as an output
@@ -92,42 +91,39 @@ int main(int argc, char *argv[])
                                             CL_MEM_READ_WRITE,
                                             sizeof(h_x[0]) * h_x.size()
                                             );
+        // Create the compute kernel from the program for bit-reverse ordering
         cl::make_kernel<int, cl::Buffer, cl::Buffer> bitrevese( program, "bitrevese");
-        // compute bit-reverse ordering
-        bitrevese(cl::EnqueueArgs( queue, global),
-                  log2N,
-                  d_sample,
-                  d_x
-                  );
-
-        // debug
-        cl::copy(queue, d_x, h_x.begin(), h_x.end());
-        cout << "bit reversed --" << endl;
-        for( int i = 0; i < h_x.size(); i+=2) {
-            cout << "[" << i/2 << "].re = " << h_x[i] << ", im = " << h_x[i+1] << endl;
-        }
-
         // Create the compute kernel from the program for fft
         cl::make_kernel<int, int, int, cl::Buffer> clfft( program, "clfft");
+
         start_time = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-        for( int stage = 0; stage < log2N; stage++) {
-            cout << "stage " << stage << endl;
-            // compute fft
-            clfft(cl::EnqueueArgs( queue, global),
-                  N,
-                  log2N,
-                  stage,
-                  d_x
-                  );
-            queue.finish();
+        for(int i = 0; i < 10000; i++) {
+            // setup device global memory and write into global memory
+            cl::Buffer d_sample = cl::Buffer( context, h_sample.begin(), h_sample.end(), true);
+
+            // compute bit-reverse ordering
+            bitrevese(cl::EnqueueArgs( queue, global),
+                    log2N,
+                    d_sample,
+                    d_x
+                    );
+
+            for( int stage = 0; stage < log2N; stage++) {
+                //cout << "stage " << stage << endl;
+                // compute fft
+                clfft(cl::EnqueueArgs( queue, global),
+                    N,
+                    log2N,
+                    stage,
+                    d_x
+                    );
+                queue.finish();
+            }
+
+            cl::copy(queue, d_x, h_x.begin(), h_x.end());
         }
         run_time   = static_cast<double>( timer.getTimeMilliseconds()) / 1000.0 - start_time;
-
-        cl::copy(queue, d_x, h_x.begin(), h_x.end());
-        cout << "output --" << endl;
-        for( int i = 0; i < h_x.size(); i+=2) {
-            cout << "[" << i/2 << "].re = " << h_x[i] << ", im = " << h_x[i+1] << endl;
-        }
+        cout << run_time << " sec" << endl;
     } catch (cl::Error err) {
         std::cout << "Exception\n";
         std::cerr << "ERROR: "

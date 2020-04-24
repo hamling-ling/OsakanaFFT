@@ -35,17 +35,10 @@ void testFft()
 		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
 	}
 
-	OsakanaFft(ctx, &x[0]);
-	cout << "--" << endl;
-	for (int i = 0; i < N && i < 10; i++) {
-		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
+	for(int i = 0; i < 10000; i++) {
+		OsakanaFft(ctx, &x[0]);
 	}
 
-	OsakanaIfft(ctx, &x[0]);
-	cout << "--" << endl;
-	for (int i = 0; i < N && i < 10; i++) {
-		cout << complex_str(&x[i], buf, sizeof(buf)) << endl;
-	}
 
 	CleanOsakanaFft(ctx);
 }

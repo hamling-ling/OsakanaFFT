@@ -107,14 +107,14 @@ __kernel void clfft(
         float2 upbak = up;
         float2 dnbak = dn;
         butterfly(&tf, &up, &dn);
-        printf("gid=%d, st=%d, tf=%f+%fi\n", gid, stage, tf.x, tf.y);
-        printf("gid=%d, st=%d, [%d]x[%d] %f, %f => %f, %f\n",
-               gid, stage, idx_up, idx_dn,
-               upbak.x, dnbak.x, up.x, dn.x);
+        //printf("gid=%d, st=%d, tf=%f+%fi\n", gid, stage, tf.x, tf.y);
+        //printf("gid=%d, st=%d, [%d]x[%d] %f, %f => %f, %f\n",
+        //       gid, stage, idx_up, idx_dn,
+        //       upbak.x, dnbak.x, up.x, dn.x);
         x[idx_up] = up;
         x[idx_dn] = dn;
-        printf("gid=%d, st=%d, [%d]=%f, [%d]=%f\n",
-               gid, stage, idx_up, idx_dn,
-               up.x, dn.x);
+        //printf("gid=%d, st=%d, [%d]=%f, [%d]=%f\n",
+        //       gid, stage, idx_up, idx_dn,
+        //       up.x, dn.x);
     }
 }
