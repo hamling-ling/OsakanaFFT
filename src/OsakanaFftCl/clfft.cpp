@@ -5,7 +5,12 @@
 #include <vector>
 
 #define __CL_ENABLE_EXCEPTIONS
+#if defined(__APPLE__)
+// place cl.hpp to local directory for Mac OS
+#include "cl.hpp"
+#else
 #include <CL/cl.hpp>
+#endif
 
 #include "util.hpp"
 #include "err_code.h"
@@ -14,8 +19,14 @@
 //------------------------------------------------------------------------------
 //  Constants
 //------------------------------------------------------------------------------
-#define SAMPLE_SIZE_N   16      // Sample Size
-#define LOG2N           4       // log2(SAMPLE_SIZE_N)
+#if defined(__APPLE__)
+// my personal debug setting. need to change later
+#define CL_PATH         "/Users/nobu/Documents/OpenClFftDebug/OpenClFftDebug/clfft.cl"
+#else
+#define CL_PATH         "clfft.cl"
+#endif
+#define SAMPLE_SIZE_N   8       // Sample Size
+#define LOG2N           3       // log2(SAMPLE_SIZE_N)
 #define TOL             (0.001) // Tolerance used in floating point comparisons
 
 //------------------------------------------------------------------------------
@@ -34,7 +45,6 @@ int main(int argc, char *argv[])
     util::Timer timer;                       // timing
 
     std::vector<float> h_sample( N * 2, 0);   // N complex samples as an input
-    std::vector<float> h_output( N * 2, 0);   // N complex samples as an output
 
 	for ( int i = 0; i < h_sample.size(); i+=2) {
 		h_sample[i]   = (float)sin(3.5 * i * M_PI / N);
@@ -71,29 +81,53 @@ int main(int argc, char *argv[])
 
         // setup device global memory and write into global memory
         cl::Buffer d_sample = cl::Buffer( context, h_sample.begin(), h_sample.end(), true);
-        cl::Buffer d_output = cl::Buffer( context, CL_MEM_WRITE_ONLY, sizeof(h_output[0]) * h_output.size());
 
         // Create the compute program from the source buffer
-        cl::Program program = cl::Program(context, util::loadProgram( "clfft.cl"), true);
-        // Create the compute kernel from the program
-        cl::make_kernel<int, int, cl::Buffer, cl::Buffer, cl::LocalSpaceArg> clfft( program, "clfft");
-
-        start_time = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-
+        cl::Program program = cl::Program(context, util::loadProgram(CL_PATH), true);
+        // Create the compute kernel from the program for bit-reverse ordering
         cl::NDRange global(N);
-        cl::LocalSpaceArg localmem = cl::Local(sizeof(float) * N);
-        clfft( cl::EnqueueArgs( queue, global),
-               N, log2N, d_sample, d_output, localmem);
+        // order bit reversealy
+        std::vector<float> h_x( N * 2, 0);   // N complex samples as an output
+        cl::Buffer         d_x = cl::Buffer(context,
+                                            CL_MEM_READ_WRITE,
+                                            sizeof(h_x[0]) * h_x.size()
+                                            );
+        cl::make_kernel<int, cl::Buffer, cl::Buffer> bitrevese( program, "bitrevese");
+        // compute bit-reverse ordering
+        bitrevese(cl::EnqueueArgs( queue, global),
+                  log2N,
+                  d_sample,
+                  d_x
+                  );
 
-        queue.finish();
-
-        run_time  = static_cast<double>( timer.getTimeMilliseconds()) / 1000.0 - start_time;
-
-        cl::copy(queue, d_output, h_output.begin(), h_output.end());
-        for( int i = 0; i < h_output.size(); i+=2) {
-            cout << "[" << i/2 << "].re = " << h_output[i] << ", im = " << h_output[i+1] << endl;
+        // debug
+        cl::copy(queue, d_x, h_x.begin(), h_x.end());
+        cout << "bit reversed --" << endl;
+        for( int i = 0; i < h_x.size(); i+=2) {
+            cout << "[" << i/2 << "].re = " << h_x[i] << ", im = " << h_x[i+1] << endl;
         }
 
+        // Create the compute kernel from the program for fft
+        cl::make_kernel<int, int, int, cl::Buffer> clfft( program, "clfft");
+        start_time = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
+        for( int stage = 0; stage < log2N; stage++) {
+            cout << "stage " << stage << endl;
+            // compute fft
+            clfft(cl::EnqueueArgs( queue, global),
+                  N,
+                  log2N,
+                  stage,
+                  d_x
+                  );
+            queue.finish();
+        }
+        run_time   = static_cast<double>( timer.getTimeMilliseconds()) / 1000.0 - start_time;
+
+        cl::copy(queue, d_x, h_x.begin(), h_x.end());
+        cout << "output --" << endl;
+        for( int i = 0; i < h_x.size(); i+=2) {
+            cout << "[" << i/2 << "].re = " << h_x[i] << ", im = " << h_x[i+1] << endl;
+        }
     } catch (cl::Error err) {
         std::cout << "Exception\n";
         std::cerr << "ERROR: "
