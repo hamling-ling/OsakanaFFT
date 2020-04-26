@@ -140,27 +140,50 @@ __kernel void clfft_multi_stages(
     __global float2* x,
     __local  float2* locbuf)
 {
-    const int idx_up   = get_global_id(0);
+    const int group_id    = get_group_id(0);
+    const int local_size  = get_local_size(0);
+    const int local_id    = get_local_id(0);
 
+    event_t evt_copy_in = async_work_group_copy(locbuf,
+                                                x + group_id * local_size,
+                                                local_size,
+                                                0);
+
+    const int global_id   = get_global_id(0);
+    const int global_size = get_global_size(0);
+
+    const int idx_up   = global_id;
     const int stage_end = stage_start + stage_num;
+
+    wait_group_events(1, &evt_copy_in);
+
     for(int stage = stage_start; stage < stage_end; stage++) {
 
-        int       idx_dn   = 0;
-        float2    tf;
-        bool proceed = get_butterly_vals(log2N, stage, idx_up, &idx_dn, &tf);
+        int    idx_dn  = 0;
+        float2 tf;
+        bool   proceed = get_butterly_vals(log2N, stage, idx_up, &idx_dn, &tf);
 
         barrier(CLK_LOCAL_MEM_FENCE);
-        float2 up = x[idx_up];
-        float2 dn = x[idx_dn];
-        float2 upbak = up;
-        float2 dnbak = dn;
+
+        const int idx_up_loc = idx_up % local_size;
+        const int idx_dn_loc = idx_dn % local_size;
+
+        float2 up = locbuf[idx_up_loc];
+        float2 dn = locbuf[idx_dn_loc];
+
         butterfly(&tf, &up, &dn);
 
         barrier(CLK_LOCAL_MEM_FENCE);
         if(proceed) {
-            //printf("st=%d, x[%d]=%f, x[%d]=%f\n", stage, idx_up, up.x, idx_dn, dn.x);
-            x[idx_up] = up;
-            x[idx_dn] = dn;
+            locbuf[idx_up_loc] = up;
+            locbuf[idx_dn_loc] = dn;
         }
     }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+    event_t evt_copy_out = async_work_group_copy(x + local_size * group_id,
+                                                 locbuf,
+                                                 local_size,
+                                                 0);
+    wait_group_events(1, &evt_copy_out);
 }
