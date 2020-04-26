@@ -27,6 +27,7 @@
 #endif
 #define SAMPLE_SIZE_N   8       // Sample Size
 #define LOG2N           3       // log2(SAMPLE_SIZE_N)
+#define WORK_GROUP_SIZE 4       // Workgroup size
 #define TOL             (0.001) // Tolerance used in floating point comparisons
 
 //------------------------------------------------------------------------------
@@ -44,13 +45,12 @@ int main(int argc, char *argv[])
     double      run_time   = 0.0;            // Timing data
     util::Timer timer;                       // timing
 
-    std::vector<float> h_sample( N * 2, 0);   // N complex samples as an input
+    std::vector<float> h_sample( N , 0);   // N complex samples as an input
 
-	for ( int i = 0; i < h_sample.size(); i+=2) {
-		h_sample[i]   = (float)sin(3.5 * i * M_PI / N);
-        h_sample[i+1] = 0.0f;
-        cout << "orig[" << i/2 << "].re = " << h_sample[i] << ", im = " << h_sample[i+1] << endl;
-	}
+    for ( int i = 0; i < h_sample.size(); i++) {
+        h_sample[i]   = (float)sin(3.5 * i * 2.0 * M_PI / N);
+        cout << "orig[" << i << "].re = " << h_sample[i] << endl;
+    }
 
     try
     {
@@ -108,17 +108,39 @@ int main(int argc, char *argv[])
         }
 
         // Create the compute kernel from the program for fft
-        cl::make_kernel<int, int, int, cl::Buffer> clfft( program, "clfft");
+        cl::make_kernel<int, int, int, int, cl::Buffer, cl::LocalSpaceArg> clfft_multi( program, "clfft_multi_stages");
+        cl::make_kernel<int, int, int, cl::Buffer> clfft_single( program, "clfft_single_stage");
+
+        cl::NDRange local(WORK_GROUP_SIZE);
         start_time = static_cast<double>(timer.getTimeMilliseconds()) / 1000.0;
-        for( int stage = 0; stage < log2N; stage++) {
-            cout << "stage " << stage << endl;
-            // compute fft
-            clfft(cl::EnqueueArgs( queue, global),
-                  N,
-                  log2N,
-                  stage,
-                  d_x
-                  );
+        {
+            cout << "stage 0,1" << endl;
+            cl::LocalSpaceArg localmem = cl::Local(sizeof(float) * 2 * WORK_GROUP_SIZE);
+            clfft_multi(cl::EnqueueArgs( queue, global, local),
+                        N,
+                        log2N,
+                        0,
+                        2,
+                        d_x,
+                        localmem
+                        );
+            queue.finish();
+
+            cout << "stage 2" << endl;
+            clfft_single(cl::EnqueueArgs( queue, global),
+                         N,
+                         log2N,
+                         2,
+                         d_x
+                         );
+            queue.finish();
+            cout << "stage 3" << endl;
+            clfft_single(cl::EnqueueArgs( queue, global),
+                         N,
+                         log2N,
+                         3,
+                         d_x
+                         );
             queue.finish();
         }
         run_time   = static_cast<double>( timer.getTimeMilliseconds()) / 1000.0 - start_time;
